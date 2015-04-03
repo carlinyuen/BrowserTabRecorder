@@ -4,6 +4,14 @@ var MANIFEST = chrome.runtime.getManifest();     // Manifest reference
 console.log('Initializing Bug-Filer v' + MANIFEST.version, 
         chrome.i18n.getMessage('@@ui_locale'));
 
+// Variables
+var videoRecorder = AudioRecorder()
+    , audioRecorder = VideoRecorder()
+    , videoURL = null
+    , audioURL = null
+    , screenshotURL = null
+;
+
 
 //////////////////////////////////////////////////////////
 // ACTIONS
@@ -27,8 +35,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 
         case "captureVideoStop":
             sendResponse({ captureVideoStop: true });
-            displayRecordingState(false);
-            // TODO
+            stopVideoCapture(sender.id);
             break;
 
         case "captureTabScreenshot":
@@ -125,35 +132,50 @@ function captureTabScreenshot(tabId)
     }, 
     function (dataSourceURL) 
     {
-        // Get source
-        var src = dataSourceURL;
-        console.log("source:", src);
+        console.log("source:", dataSourceURL);
+
+        // Store if exists
+        if (dataSourceURL) {
+            screenshotURL = dataSourceURL;
+        }
     });
+}
+
+// Stop video capture
+function stopVideoCapture(tabId)
+{
+    console.log("stopVideoCapture");
+    
+    displayRecordingState(false);
+    videoRecorder.stop();
+    audioRecorder.stop();
 }
 
 // Capture video
 function captureVideo(tabId)
 {
+    console.log("captureVideo");
+
+    // Capture audio at the same time, can record both
     chrome.tabCapture.capture({
-            audio: false,
-            video: {
-                mandatory: {
-                    maxWidth: 1920,
-                    maxHeight: 1080
-                },
-                optional: [ 
-                    { sourceId: streamId }
-                ]
-            }
+            audio: true,
+            video: true
         }, 
         function (localMediaStream) 
         {
             // Set browser action to show we are recording
             displayRecordingState(true);
 
-            // Get source
-            var src = window.URL.createObjectURL(localMediaStream);
-            console.log("source:", src);
+            // Create video recorder and start recording
+            videoRecorder.init(localMediaStream);
+            videoRecorder.start();
+            // */
+
+            /*
+            // Create audio recording and start recording
+            audioRecorder.init(localMediaStream);
+            audioRecorder.start();
+            // */
         });
 }
 
@@ -489,5 +511,12 @@ function VideoRecorder()
         video.src = url;
         downloadLink.href = url;
     }
+
+    // Exposing functions
+    return {
+        init: init,
+        start: start,
+        stop: stop
+    };
 }
 
