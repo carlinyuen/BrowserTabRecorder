@@ -134,7 +134,7 @@ function captureTabScreenshot(tabId)
 // Capture video
 function captureVideo(tabId)
 {
-    chrome.desktopCapture.chooseDesktopMedia(["screen", "window", "tab"], 
+    chrome.desktopCapture.chooseDesktopMedia(["screen", "window"], 
         function (streamId) 
         {
             // Set browser action to show we are recording

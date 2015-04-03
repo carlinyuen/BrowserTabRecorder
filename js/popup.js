@@ -11,6 +11,10 @@ $(function()
 		event.preventDefault();
 	});
 
+    // Check to see if already recording
+    chrome.browserAction.getBadgeText({}, function(text) {
+        displayRecordVideoButtonPressed(text && text.length);
+    });
 
     // Listen for events
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
@@ -62,12 +66,18 @@ $(function()
             {
                 console.log(response);
 
-                if (response["captureVideoStart"]) {
-                    $('#videoButton').text('Stop Recording');
-                } else {
-                    $('#videoButton').text('Record Video');
-                }
+                displayRecordVideoButtonPressed(response["captureVideoStart"]);
             });
+    }
+
+    // Change video recording button text / css based on state
+    function displayRecordVideoButtonPressed(show)
+    {
+        if (show) {
+            $('#videoButton').text('Stop Recording');
+        } else {
+            $('#videoButton').text('Record Video');
+        }
     }
 
     // Create a new bug by using url parameters

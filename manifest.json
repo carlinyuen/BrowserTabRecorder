@@ -30,7 +30,5 @@
 		, "unlimitedStorage"
         , "tabCapture"
         , "desktopCapture"
-        , "audioCapture"
-        , "videoCapture"
 	]
 }
