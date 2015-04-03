@@ -10,6 +10,7 @@ var videoRecorder = VideoRecorder()
     , videoURL = null
     , audioURL = null
     , screenshotURL = null
+    , popupConnection = null          
 ;
 
 
@@ -20,39 +21,40 @@ var videoRecorder = VideoRecorder()
 chrome.extension.onConnect.addListener(function(port) 
 {
     console.log("Connected to port:", port);
+    popupConnection = port;
 
     port.onMessage.addListener(function(message) 
     {
 	    console.log("message:", message);
 
-
-        switch (request.request)
+        switch (message.request)
         {
             case "getClipboardData":
-                sendResponse({ paste: pasteFromClipboard() });
+                port.postMessage({ 
+                    request: "pasteFromClipboard", 
+                    data: pasteFromClipboard() 
+                });
                 break;
 
             case "captureVideoStart":
-                sendResponse({ request: "captureVideoStarted" });
-                captureVideo(sender.id);
+                port.postMessage({ request: "captureVideoStarted" });
+                captureVideo();
                 break;
 
             case "captureVideoStop":
-                sendResponse({ request: "captureVideoStopped" });
-                stopVideoCapture(sender.id);
+                port.postMessage({ request: "captureVideoStopped" });
+                stopVideoCapture();
                 break;
 
             case "captureTabScreenshot":
-                sendResponse({ captureTabScreenshot: true });
-                captureTabScreenshot(sender.id);
+                port.postMessage({ captureTabScreenshot: true });
+                captureTabScreenshot();
                 break;
 
             default:
                 console.log("Unknown request received:", request);
                 break;
         }
-
-        port.postMessage("Hi Popup.js");
     });
 });
 
@@ -132,7 +134,7 @@ function pasteFromClipboard()
 }
 
 // Capture screenshot from the current active tab
-function captureTabScreenshot(tabId)
+function captureTabScreenshot()
 {
     chrome.tabs.captureVisibleTab(null, {
         format: "png"
@@ -149,7 +151,7 @@ function captureTabScreenshot(tabId)
 }
 
 // Stop video capture
-function stopVideoCapture(tabId)
+function stopVideoCapture()
 {
     console.log("stopVideoCapture");
     
@@ -159,42 +161,43 @@ function stopVideoCapture(tabId)
 }
 
 // Capture video
-function captureVideo(tabId)
+function captureVideo()
 {
     console.log("captureVideo");
 
     // Capture audio at the same time, can record both
     chrome.tabCapture.capture({
             audio: true,
-            video: true
+            video: true,
+            videoConstraints: {
+                mandatory: {
+                    chromeMediaSource: 'tab'
+                }
+            }
         }, 
         function (localMediaStream) 
         {
             // Set browser action to show we are recording
             displayRecordingState(true);
 
-            /*
             // Create video recorder and start recording
             videoRecorder.init(localMediaStream);
-            videoRecorder.start();
-            // */
 
+            /*
             // Create audio recording and start recording
             audioRecorder.init(localMediaStream);
             audioRecorder.start();
 
-            chrome.tabs.sendMessage(tabId, {
+            popupConnection.postMessage({
                 request: "audio",
                 data: localMediaStream
-            }, {}, function (response) {
-                // Do nothing
             });
-            // */
+            */
         });
 }
 
 // Capture gif from the current active tab
-function captureTabGif(tabId)
+function captureTabGif()
 {
     // TODO
 }
@@ -435,6 +438,7 @@ function VideoRecorder()
             return;
         }
 
+        document.querySelector('body').appendChild(video);
         video.autoplay = true;
         video.src = window.URL.createObjectURL(localMediaStream);
         video.onloadedmetadata = function() 
@@ -445,6 +449,8 @@ function VideoRecorder()
             canvas.height = video.height;
             videoLoaded = true;
             console.log('video loaded');
+
+            start();
         };
     };
 

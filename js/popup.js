@@ -18,15 +18,14 @@ $(function()
 
     // Setup consistent connection with background.js
     var port = chrome.extension.connect({name: "Popup"});
-    port.onMessage.addListener(function(request, sender, sendResponse)
+    port.onMessage.addListener(function(message)
     {
-        console.log(request);
-        console.log(sender);
+        console.log("message:", message);
 
-        switch (request.request)
+        switch (message.request)
         {
             case "audio":
-                playAudio(request.data);
+                playAudio(message.data);
                 break;
             
             case "video":
@@ -44,7 +43,7 @@ $(function()
                 break;
             
             default:
-                console.log("Unknown request received:", request);
+                console.log("Unknown request received:", message.request);
                 break;
         }
     });
