@@ -1,0 +1,259 @@
+
+/* General UI */
+body, html {
+	height: 100%;
+	width: 100%;
+	background: white;
+	color: #222;
+	font: normal 9pt/16px Verdana;
+	margin: 0;
+	padding: 0;
+}
+
+#content {
+	width: 500px;
+	margin: 0 auto;
+	padding: 16px;
+}
+
+h1 {
+	font: bold 16pt/16px Arial, Verdana;
+	vertical-align: middle;
+	margin: 0;
+}
+h1 img {
+	vertical-align: middle;
+    margin-top: -8px;
+}
+h2 {
+    font: bold 12pt/16px Arial, Verdana;
+    clear: both;
+    color: #888;
+}
+
+p {
+	margin-top: 0;
+	text-align: center;
+	clear: both;
+}
+
+#tipsList {
+	padding-left: 24px;
+	display: none;
+}
+#tipsList li {
+	margin: 8px 0;
+}
+#cursorTrackerHTML {
+    margin: 0;
+    display: inline-block;
+    font-weight: bold;
+}
+
+
+/* Forms */
+
+form {
+	margin: 24px 12px 0;
+}
+
+table {
+	width: 100%;
+    counter-reset: rowNumber;
+	font: normal 9pt/9px Verdana;
+    margin-left: 12px;
+}
+table tr {
+    counter-increment: rowNumber;
+    opacity: 0.66;
+}
+table tr.saved {
+  opacity: 1.0;
+}
+table tr td {
+	padding: 0 2px 24px 2px;
+	vertical-align: top;
+    position: relative;
+}
+table tr td:first-child {   /* Shortcut field */
+    width: 100px;
+}
+table tr td:last-child {    /* Delete "X" button */
+    width: 16px;
+}
+table tr td:first-child::before { /* Row numbering */
+    content: counter(rowNumber);
+    min-width: 1em;
+    margin: 0;
+    padding: 9px 0;
+    color: #bbb;
+    position: absolute;
+    right: 108px;
+    text-align: right;
+}
+table tr td a {
+    opacity: 0.5;
+}
+table tr td a:hover {
+    opacity: 1.0;
+}
+table tr td img {
+    width: 12px;
+    height: 12px;
+    position: absolute;
+    top: 7px;
+    left: 4px;
+}
+
+input, textarea {
+	font: normal 10pt/auto Verdana;
+	color: #444;
+	padding: 6px;
+	height: 2.45em;
+	width: 100%;
+	background: #f8fbff;
+	overflow: auto;
+    resize: none;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+}
+input.error, textarea.error {
+	background: #f99;
+}
+
+fieldset {
+	border: none;
+	margin: 0 0 8px;
+	padding: 0;
+}
+.backToTop {
+	color: #888;
+	font: normal 9pt/9pt Verdana;
+}
+
+h1 span {
+	margin: 10px 16px 0 0;
+}
+h1 span a, h1 span a img {
+	font: normal 8pt/8pt Verdana;
+	outline: none;
+}
+
+label, button {
+	padding: 6px 8px;
+    margin-bottom: 4px;
+	font: bold 9pt/9pt Verdana;
+	color: #444;
+}
+
+button.icon {
+	position: relative;
+	padding-left: 24px;
+}
+button img {
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+}
+
+.label, #restore.disabled, #totalQuota, #countQuota {
+	color: #999;
+	font: italic 8pt/8pt Verdana;
+	display: inline-block;
+	margin: 0;
+}
+.label {
+    margin: 0 4px;
+}
+#restore {
+	color: #66f;
+}
+
+#demo {
+    width: 100%;
+    height: 172px;
+    border: 1px solid #DDD;
+    border-radius: 4px;
+    margin: 8px 0;
+}
+
+.timeout {
+    overflow: hidden;
+    display: block;
+    padding: 0 8px 0 0;
+    margin-bottom: 8px;
+}
+#timeout {
+    width: 100%;
+}
+
+.crouton {
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 8px 12px;
+	text-align: center;
+	font: bold 13px/16px Verdana;
+	color: #fff;
+	background-color: #bbb;
+	display: none;
+}
+.crouton.red { background-color: #c66; }
+.crouton.green { background-color: #6c6; }
+.crouton.orange { background-color: #e90; }
+
+.popup {
+	z-index: 2;
+	position: fixed;
+	top: 20%;
+	left: 50%;
+	margin: 36px 0 36px -160px;
+	padding: 16px;
+	width: 320px;
+	font: normal 13px/18px Verdana;
+	color: #444;
+	background: #fff;
+	box-shadow: 0px 4px 12px #444;
+	border-radius: 3px;
+	overflow: auto;
+	max-height: 80%;
+}
+.popup.port {
+	top: 5%;
+}
+.popup h2 {
+	margin: 4px 0 6px;
+}
+.popup p {
+	text-align: left;
+	overflow: auto;
+	width: 100%;
+}
+.popup textarea {
+	margin-bottom: 8px;
+	min-height: 256px;
+}
+.modal {
+	position: fixed;
+	bottom: 0;
+	top: 0;
+	left: 0;
+	right: 0;
+	background-color: #000;
+	z-index: 1;
+	opacity: 0.33;
+}
+
+.fR { float: right; }
+.fL { float: left; }
+.tR { text-align: right; }
+.tL { text-align: left; }
+.tC { text-align: center; }
+
+.error {
+	color: #d22;
+}

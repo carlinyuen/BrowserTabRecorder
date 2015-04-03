@@ -1,0 +1,32 @@
+{
+	"EXTENSION_NAME": {
+		"message": "Bug Filer"
+		, "description": "Extension name for the Chrome webstore."
+	}
+
+	,"EXTENSION_SHORTNAME": {
+		"message": "BFF"
+		, "description": "Extension short name for the Chrome webstore (< 12 chars)."
+	}
+
+	, "EXTENSION_TITLE": {
+		"message": "Bug Filer"
+		, "description": "Extension short title."
+	}
+
+	, "EXTENSION_DESCRIPTION": {
+		"message": "File bugs super easy."
+		, "description": "Extension description for the chrome webstore."
+	}
+
+	, "BROWSER_ACTION_TITLE": {
+		"message": "Bug Filer Actions"
+		, "description": "Title for browser action tooltip"
+	}
+
+	, "TEMPLATE": {
+		"message": "template"
+		, "description": "Template"
+	}
+
+}

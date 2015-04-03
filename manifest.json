@@ -1,0 +1,34 @@
+{
+	"name": "__MSG_EXTENSION_NAME__"
+	, "short_name": "__MSG_EXTENSION_SHORTNAME__"
+	, "version": "1.0.0"
+	, "manifest_version": 2
+	, "description": "__MSG_EXTENSION_DESCRIPTION__"
+	, "icons": {
+		"16": "images/icon16.png"
+		, "48": "images/icon48.png"
+		, "128": "images/icon64.png"
+	}
+	, "default_locale": "en"
+	, "background": {
+		"scripts": [
+            "js/third_party/whammy.min.js"
+			, "js/background.js"
+		]
+	}
+    , "browser_action": {
+        "default_icon": {
+			"19": "images/icon24.png"
+			, "38": "images/icon48.png"
+        }
+        , "default_title": "__MSG_BROWSER_ACTION_TITLE__"
+        , "default_popup": "popup.html"
+    }
+	, "options_page": "options.html"
+	, "permissions": [
+        "activeTab"
+		, "unlimitedStorage"
+        , "tabCapture"
+        , "desktopCapture"
+	]
+}

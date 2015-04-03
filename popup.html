@@ -1,0 +1,42 @@
+<html>
+	<head>
+		<title>Bug-Filer : Popup</title>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="css/popup.css" />
+	</head>
+
+	<body>
+
+		<div id="content">
+
+            <h1><img src="images/icon24.png" alt="" /> Bug-Filer</h1>
+
+            <form id="bugForm">
+
+                <button id="screenshotButton" type="button">Take Screenshot</button><br />
+                <button id="videoButton" type="button">Record Video</button><br />
+
+                <hr />
+
+                <label for="bugTitle">Title</label><br />
+                <input id="bugTitle" type="text" /><br />
+                <br />
+
+                <label for="bugDescription">Description</label><br />
+                <textarea id="bugDescription">
+                </textarea><br />
+
+                <hr />
+
+                <button id="createButton" type="button">Create Bug</button>
+
+            </form>
+		</div>
+
+	</body>
+
+	<script src="js/third_party/jquery-2.1.0.min.js"></script>
+	<script src="js/popup.js"></script>
+
+</html>
+
