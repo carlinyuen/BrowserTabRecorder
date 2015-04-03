@@ -5,8 +5,8 @@ console.log('Initializing Bug-Filer v' + MANIFEST.version,
         chrome.i18n.getMessage('@@ui_locale'));
 
 // Variables
-var videoRecorder = AudioRecorder()
-    , audioRecorder = VideoRecorder()
+var videoRecorder = VideoRecorder()
+    , audioRecorder = AudioRecorder()
     , videoURL = null
     , audioURL = null
     , screenshotURL = null
@@ -17,36 +17,43 @@ var videoRecorder = AudioRecorder()
 // ACTIONS
 
 // Listen for events
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
+chrome.extension.onConnect.addListener(function(port) 
 {
-	console.log(request);
-	console.log(sender);
+    console.log("Connected to port:", port);
 
-	switch (request.request)
-	{
-		case "getClipboardData":
-			sendResponse({ paste: pasteFromClipboard() });
-			break;
+    port.onMessage.addListener(function(message) 
+    {
+	    console.log("message:", message);
 
-        case "captureVideoStart":
-            sendResponse({ captureVideoStart: true });
-            captureVideo(sender.id);
-            break;
 
-        case "captureVideoStop":
-            sendResponse({ captureVideoStop: true });
-            stopVideoCapture(sender.id);
-            break;
+        switch (request.request)
+        {
+            case "getClipboardData":
+                sendResponse({ paste: pasteFromClipboard() });
+                break;
 
-        case "captureTabScreenshot":
-            sendResponse({ captureTabScreenshot: true });
-            captureTabScreenshot(sender.id);
-            break;
+            case "captureVideoStart":
+                sendResponse({ request: "captureVideoStarted" });
+                captureVideo(sender.id);
+                break;
 
-		default:
-			console.log("Unknown request received:", request);
-			break;
-	}
+            case "captureVideoStop":
+                sendResponse({ request: "captureVideoStopped" });
+                stopVideoCapture(sender.id);
+                break;
+
+            case "captureTabScreenshot":
+                sendResponse({ captureTabScreenshot: true });
+                captureTabScreenshot(sender.id);
+                break;
+
+            default:
+                console.log("Unknown request received:", request);
+                break;
+        }
+
+        port.postMessage("Hi Popup.js");
+    });
 });
 
 // On first install or upgrade
@@ -147,8 +154,8 @@ function stopVideoCapture(tabId)
     console.log("stopVideoCapture");
     
     displayRecordingState(false);
-    videoRecorder.stop();
     audioRecorder.stop();
+    //videoRecorder.stop();
 }
 
 // Capture video
@@ -166,15 +173,22 @@ function captureVideo(tabId)
             // Set browser action to show we are recording
             displayRecordingState(true);
 
+            /*
             // Create video recorder and start recording
             videoRecorder.init(localMediaStream);
             videoRecorder.start();
             // */
 
-            /*
             // Create audio recording and start recording
             audioRecorder.init(localMediaStream);
             audioRecorder.start();
+
+            chrome.tabs.sendMessage(tabId, {
+                request: "audio",
+                data: localMediaStream
+            }, {}, function (response) {
+                // Do nothing
+            });
             // */
         });
 }
@@ -280,7 +294,7 @@ function AudioRecorder()
             leftchannel.push (new Float32Array (left));
             rightchannel.push (new Float32Array (right));
             recordingLength += bufferSize;
-            console.log('recording');
+            console.log('recording audio');
         }
 
         // we connect the recorder
@@ -416,8 +430,13 @@ function VideoRecorder()
     //  call is required
     function init(localMediaStream) 
     {
+        if (!localMediaStream) {
+            console.log('ERROR: localMediaStream not defined!');
+            return;
+        }
+
         video.autoplay = true;
-        video.src = window.URL.createObjectURL(stream);
+        video.src = window.URL.createObjectURL(localMediaStream);
         video.onloadedmetadata = function() 
         {
             video.width = video.clientWidth;
@@ -448,6 +467,8 @@ function VideoRecorder()
             // Read back canvas as webp.
             var url = canvas.toDataURL('image/webp', 1); // image/jpeg is way faster :(
             frames.push(url);
+
+            console.log('recording video');
         };
 
         rafId = requestAnimationFrame(drawVideoFrame_);

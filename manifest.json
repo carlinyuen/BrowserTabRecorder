@@ -12,7 +12,7 @@
 	, "default_locale": "en"
 	, "background": {
 		"scripts": [
-            "js/third_party/whammy.min.js"
+            "js/third_party/whammy2.min.js"
 			, "js/background.js"
 		]
 	}

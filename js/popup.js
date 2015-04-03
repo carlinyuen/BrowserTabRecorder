@@ -16,8 +16,9 @@ $(function()
         displayRecordVideoButtonPressed(text && text.length);
     });
 
-    // Listen for events
-    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
+    // Setup consistent connection with background.js
+    var port = chrome.extension.connect({name: "Popup"});
+    port.onMessage.addListener(function(request, sender, sendResponse)
     {
         console.log(request);
         console.log(sender);
@@ -25,9 +26,18 @@ $(function()
         switch (request.request)
         {
             case "audio":
+                playAudio(request.data);
                 break;
             
             case "video":
+                break;
+
+            case "captureVideoStarted":
+                displayRecordVideoButtonPressed(true);
+                break;
+            
+            case "captureVideoStopped":
+                displayRecordVideoButtonPressed(false);
                 break;
             
             case "screenshot":
@@ -42,14 +52,19 @@ $(function()
 
     //////////////////////////////////////////////////////////
     // FUNCTIONS
-    
+   
+    // Play audio
+    function playAudio(stream) 
+    {
+        var audio = new Audio(window.URL.createObjectURL(stream)); 
+        audio.play();
+    }
+
+
     // Take screenshot of active tab
     function takeScreenshot()
     {
-        chrome.runtime.sendMessage({request: "captureTabScreenshot"}, 
-            function(response) {
-                console.log(response);
-            });
+        port.postMessage({request: "captureTabScreenshot"});
     }
     
     // Initiate video capture
@@ -61,13 +76,7 @@ $(function()
             request = "captureVideoStop";
         }
 
-        chrome.runtime.sendMessage({request: request}, 
-            function(response) 
-            {
-                console.log(response);
-
-                displayRecordVideoButtonPressed(response["captureVideoStart"]);
-            });
+        port.postMessage({request: request});
     }
 
     // Change video recording button text / css based on state
