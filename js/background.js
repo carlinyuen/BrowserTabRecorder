@@ -354,7 +354,7 @@ function AudioRecorder()
         var blob = new Blob ( [ view ], { type : 'audio/wav' } );
 
         // let's save it locally
-        var url = (window.URL || window.webkitURL).createObjectURL(blob);
+        var url = window.URL.createObjectURL(blob);
         var link = window.document.createElement('a');
         link.href = url;
         link.download = 'output.wav';
@@ -405,5 +405,120 @@ function AudioRecorder()
         start: start,
         stop: stop
     };
+}
+
+// Video recording object that will record from a LocalMediaStream received 
+//  from getUserMedia(), and then collate frames into a .webm video (no audio).
+//  Source: https://html5-demos.appspot.com/static/getusermedia/record-user-webm.html
+function VideoRecorder()
+{
+    // Variables
+    var video = document.createElement('video'); // offscreen video.
+    var canvas = document.createElement('canvas'); // offscreen canvas.
+    var rafId = null;
+    var startTime = null;
+    var endTime = null;
+    var frames = [];
+    var videoLoaded = false;
+
+    // Setup the video recorder, LocalMediaStream parameter from a getUserMedia()
+    //  call is required
+    function init(localMediaStream) 
+    {
+        video.autoplay = true;
+        video.src = window.URL.createObjectURL(stream);
+        video.onloadedmetadata = function() 
+        {
+            video.width = video.clientWidth;
+            video.height = video.clientHeight;
+            canvas.width = video.width;
+            canvas.height = video.height;
+            videoLoaded = true;
+            console.log('video loaded');
+        };
+    };
+
+    // Start recording
+    function start() 
+    {
+        var ctx = canvas.getContext('2d');
+        var CANVAS_HEIGHT = canvas.height;
+        var CANVAS_WIDTH = canvas.width;
+
+        frames = []; // clear existing frames;
+        startTime = Date.now();
+
+        function drawVideoFrame_(time) 
+        {
+            rafId = requestAnimationFrame(drawVideoFrame_);
+
+            ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            // Read back canvas as webp.
+            var url = canvas.toDataURL('image/webp', 1); // image/jpeg is way faster :(
+            frames.push(url);
+        };
+
+        rafId = requestAnimationFrame(drawVideoFrame_);
+    };
+
+    // Stop video recording
+    function stop() 
+    {
+        cancelAnimationFrame(rafId);
+        endTime = Date.now();
+
+        console.log('frames captured: ' + frames.length + ' => ' +
+                ((endTime - startTime) / 1000) + 's video');
+
+        // our final binary blob
+        var blob = Whammy.fromImageArray(frames, 1000 / 60);
+
+        // let's save it locally
+        var url = window.URL.createObjectURL(blob);
+        var link = window.document.createElement('a');
+        link.href = url;
+        link.download = 'output.webm';
+        var click = document.createEvent("Event");
+        click.initEvent("click", true, true);
+        link.dispatchEvent(click);
+    };
+
+    // Embed video into preview element
+    function embedVideoPreview() 
+    {
+        var url = null;
+        var video = $('#video-preview video') || null;
+        var downloadLink = $('#video-preview a[download]') || null;
+
+        if (!video) 
+        {
+            video = document.createElement('video');
+            video.autoplay = true;
+            video.controls = true;
+            video.loop = true;
+            //video.style.position = 'absolute';
+            //video.style.top = '70px';
+            //video.style.left = '10px';
+            video.style.width = canvas.width + 'px';
+            video.style.height = canvas.height + 'px';
+            $('#video-preview').appendChild(video);
+
+            downloadLink = document.createElement('a');
+            downloadLink.download = 'capture.webm';
+            downloadLink.textContent = '[ download video ]';
+            downloadLink.title = 'Download your .webm video';
+            var p = document.createElement('p');
+            p.appendChild(downloadLink);
+
+            $('#video-preview').appendChild(p);
+
+        } else {
+            window.URL.revokeObjectURL(video.src);
+        }
+
+        video.src = url;
+        downloadLink.href = url;
+    }
 }
 
