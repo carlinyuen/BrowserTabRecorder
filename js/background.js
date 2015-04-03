@@ -27,6 +27,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 
         case "captureVideoStop":
             sendResponse({ captureVideoStop: true });
+            displayRecordingState(false);
             // TODO
             break;
 
@@ -41,7 +42,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 	}
 });
 
-// On first install or upgrade, make sure to inject into all tabs
+// On first install or upgrade
 chrome.runtime.onInstalled.addListener(function(details)
 {
 	console.log("onInstalled: " + details.reason);
@@ -51,15 +52,6 @@ chrome.runtime.onInstalled.addListener(function(details)
     {
         // Open up options page
         chrome.tabs.create({url: "options.html"});
-
-	    // Inject script into all open tabs
-		chrome.tabs.query({}, function(tabs)
-		{
-			console.log("Executing on tabs: ", tabs);
-			for (var i = 0, l = tabs.length; i < l; ++i) {
-				injectScript(tabs[i]);
-			}
-		});
 	}
 
 	// If upgrading to new version number
@@ -106,24 +98,6 @@ function runTests()
 //////////////////////////////////////////////////////////
 // FUNCTIONS
 
-// Execute our content script into the given tab
-function injectScript(tab)
-{
-	// Insanity check
-	if (!tab || !tab.id) {
-		console.log("Injecting into invalid tab:", tab);
-		return;
-	}
-
-	// Loop through content scripts and execute in order
-    var contentScripts = MANIFEST.content_scripts[0].js;
-    for (var i = 0, l = contentScripts.length; i < l; ++i) {
-        chrome.tabs.executeScript(tab.id, {
-            file: contentScripts[i]
-        });
-    }
-}
-
 // Get paste contents from clipboard
 function pasteFromClipboard()
 {
@@ -166,6 +140,7 @@ function captureVideo(tabId)
             // Set browser action to show we are recording
             displayRecordingState(true);
 
+            /*
             navigator.getUserMedia({
                     audio: true,
                     video: {
@@ -185,6 +160,7 @@ function captureVideo(tabId)
                 function (error) {
                     console.log('error:', error);
                 });
+            */
         });
 }
 
