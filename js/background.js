@@ -134,33 +134,26 @@ function captureTabScreenshot(tabId)
 // Capture video
 function captureVideo(tabId)
 {
-    chrome.desktopCapture.chooseDesktopMedia(["screen", "window"], 
-        function (streamId) 
+    chrome.tabCapture.capture({
+            audio: false,
+            video: {
+                mandatory: {
+                    maxWidth: 1920,
+                    maxHeight: 1080
+                },
+                optional: [ 
+                    { sourceId: streamId }
+                ]
+            }
+        }, 
+        function (localMediaStream) 
         {
             // Set browser action to show we are recording
             displayRecordingState(true);
 
-            /*
-            navigator.getUserMedia({
-                    audio: true,
-                    video: {
-                        optional: [ 
-                            { sourceId: streamId }
-                        ]
-                    }
-                }, 
-                function (localMediaStream) 
-                {
-                    // Get source
-                    var src = window.URL.createObjectURL(localMediaStream);
-                    console.log("source:", src);
-
-                    
-                },
-                function (error) {
-                    console.log('error:', error);
-                });
-            */
+            // Get source
+            var src = window.URL.createObjectURL(localMediaStream);
+            console.log("source:", src);
         });
 }
 
