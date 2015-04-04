@@ -31,9 +31,7 @@ $(function()
 
         switch (message.request)
         {
-            default:
-                console.log("Unknown request received:", message.request);
-                break;
+            default: break;
         }
     });
 
@@ -69,7 +67,7 @@ $(function()
         // Collect all data
         var params = {
             title: $('#bugTitle').val(), 
-            notes: $('#bugDescription').val(),
+            description: $('#bugDescription').val(),
         };
         console.log('createBug:', params);
 

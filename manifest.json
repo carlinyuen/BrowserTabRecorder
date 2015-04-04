@@ -11,10 +11,7 @@
 	}
 	, "default_locale": "en"
 	, "background": {
-		"scripts": [
-            "js/third_party/whammy.min.js"
-			, "js/background.js"
-		]
+		"scripts": [ "js/background.js" ]
 	}
     , "browser_action": {
         "default_icon": {

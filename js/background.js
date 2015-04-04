@@ -5,13 +5,7 @@ console.log('Initializing Bug-Filer v' + MANIFEST.version,
         chrome.i18n.getMessage('@@ui_locale'));
 
 // Variables
-var videoRecorder = VideoRecorder()
-    , audioRecorder = AudioRecorder()
-    , videoURL = null
-    , audioURL = null
-    , screenshotURL = null
-    , popupConnection = null          
-;
+var popupConnection = null;
 
 
 //////////////////////////////////////////////////////////
@@ -29,26 +23,16 @@ chrome.extension.onConnect.addListener(function(port)
 
         switch (message.request)
         {
-            case "getClipboardData":
-                port.postMessage({ 
-                    request: "pasteFromClipboard", 
-                    data: pasteFromClipboard() 
-                });
-                break;
-
-            case "captureVideoStart":
-                port.postMessage({ request: "captureVideoStarted" });
+            case "captureTabVideo":
                 captureVideo();
                 break;
 
-            case "captureVideoStop":
-                port.postMessage({ request: "captureVideoStopped" });
-                stopVideoCapture();
+            case "captureTabScreenshot":
+                captureTabScreenshot();
                 break;
 
-            case "captureTabScreenshot":
-                port.postMessage({ captureTabScreenshot: true });
-                captureTabScreenshot();
+            case "emailAutofill":
+                // TODO
                 break;
 
             default:
@@ -64,27 +48,19 @@ chrome.runtime.onInstalled.addListener(function(details)
 	console.log("onInstalled: " + details.reason);
 
     // On first install
-	if (details.reason == "install") 
-    {
-        // Open up options page
-        chrome.tabs.create({url: "options.html"});
+	if (details.reason == "install") {
+        chrome.tabs.create({url: "options.html"});  // Open up options page
 	}
 
 	// If upgrading to new version number
     else if (details.reason == "update" && details.previousVersion != MANIFEST.version) {
-        // TODO
+        // Do nothing?
 	}
-    else    // All other - reloaded extension
-    {
-        // Run testing if need be
+
+    // All other - probably reloaded extension
+    else {
         //runTests();
     }
-});
-
-// Show options page when browser action is clicked
-//  Source: http://adamfeuer.com/notes/2013/01/26/chrome-extension-making-browser-action-icon-open-options-page/
-chrome.browserAction.onClicked.addListener(function(tab) {
-   openOrFocusOptionsPage();
 });
 
 
@@ -113,25 +89,6 @@ function runTests()
 
 //////////////////////////////////////////////////////////
 // FUNCTIONS
-
-// Get paste contents from clipboard
-function pasteFromClipboard()
-{
-    // Create element to paste content into
-	document.querySelector('body').innerHTML += '<textarea id="clipboard"></textarea>';
-	var clipboard = document.getElementById('clipboard');
-    clipboard.select();
-
-    // Execute paste
-	var result;
-    if (document.execCommand('paste', true)) {
-        result = clipboard.value;
-    }
-
-    // Cleanup and return value
-	clipboard.parentNode.removeChild(clipboard);
-    return result;
-}
 
 // Capture screenshot from the current active tab
 function captureTabScreenshot()
@@ -216,24 +173,6 @@ function displayRecordingState(show)
         chrome.browserAction.setBadgeText({ text: "" });
         chrome.browserAction.setBadgeBackgroundColor({ color: [0,0,0,0] });
     }
-}
-
-// Opens or focuses on the options page if open
-function openOrFocusOptionsPage()
-{
-    // Get the url for the extension options page
-    var optionsUrl = chrome.extension.getURL('options.html'); 
-    chrome.tabs.query({ 'url': optionsUrl }, function(tabs) 
-    {
-        if (tabs.length)    // If options tab is already open, focus on it
-        {
-            console.log("options page found:", tabs[0].id);
-            chrome.tabs.update(tabs[0].id, {"selected": true});
-        } 
-        else {  // Open the options page otherwise
-            chrome.tabs.create({url: optionsUrl});
-        }
-    });
 }
 
 
