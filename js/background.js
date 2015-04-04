@@ -163,18 +163,6 @@ function captureTabGif()
     // TODO
 }
 
-// Turn on or off browser action badge to show recording state
-function displayRecordingState(show)
-{
-    if (show) {
-        chrome.browserAction.setBadgeText({ text: "REC" });
-        chrome.browserAction.setBadgeBackgroundColor({ color: "#F00" });
-    } else {
-        chrome.browserAction.setBadgeText({ text: "" });
-        chrome.browserAction.setBadgeBackgroundColor({ color: [0,0,0,0] });
-    }
-}
-
 
 // Audio recording object that will record from a LocalMediaStream into a
 //  .wav file that the user can download / save to hdd if desired.

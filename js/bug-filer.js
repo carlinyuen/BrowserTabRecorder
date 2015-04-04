@@ -28,6 +28,10 @@ $(function()
         , recording = false
     ;
 
+
+    /////////////////////////////////////////
+    // ACTIONS
+
     // Listener
     $(document).mousemove(function (event) {
         console.log('mousemove');
@@ -60,11 +64,354 @@ $(function()
     });
 
 
-    // Functions
+    /////////////////////////////////////////
+    // FUNCTIONS
 
     // Create thumbnail from recording source (image / video)
     function createThumbnail(sourceURL)
     {
         // TODO
     }
+
+
+    /////////////////////////////////////////
+    // "CLASSES"
+    
+    // Audio recording object that will record from a LocalMediaStream into a
+    //  .wav file that the user can download / save to hdd if desired.
+    //  Source: http://typedarray.org/from-microphone-to-wav-with-getusermedia-and-web-audio/
+    function AudioRecorder()
+    {
+        // variables
+        var leftchannel = [];
+        var rightchannel = [];
+        var recorder = null;
+        var recording = false;
+        var recordingLength = 0;
+        var volume = null;
+        var audioInput = null;
+        var sampleRate = null;
+        var audioContext = null;
+        var context = null;
+        var outputString;
+
+        // Setup the audio recorder, LocalMediaStream parameter from a getUserMedia()
+        //  call is required
+        function init(localMediaStream)
+        {
+            if (!localMediaStream) {
+                console.log('ERROR: localMediaStream not defined!');
+                return;
+            }
+
+            // creates the audio context
+            context = new window.AudioContext();
+
+            // we query the context sample rate (varies depending on platforms)
+            sampleRate = context.sampleRate;
+
+            console.log('succcess');
+
+            // creates a gain node
+            volume = context.createGain();
+
+            // creates an audio node from the microphone incoming stream
+            audioInput = context.createMediaStreamSource(localMediaStream);
+
+            // connect the stream to the gain node
+            audioInput.connect(volume);
+
+            /* From the spec: This value controls how frequently the audioprocess event is 
+               dispatched and how many sample-frames need to be processed each call. 
+               Lower values for buffer size will result in a lower (better) latency. 
+               Higher values will be necessary to avoid audio breakup and glitches */
+            var bufferSize = 2048;
+            recorder = context.createScriptProcessor(bufferSize, 2, 2);
+
+            recorder.onaudioprocess = function(e) 
+            {
+                if (!recording) {
+                    return;
+                }
+
+                var left = e.inputBuffer.getChannelData (0);
+                var right = e.inputBuffer.getChannelData (1);
+
+                // we clone the samples
+                leftchannel.push (new Float32Array (left));
+                rightchannel.push (new Float32Array (right));
+                recordingLength += bufferSize;
+                console.log('recording audio');
+            }
+
+            // we connect the recorder
+            volume.connect(recorder);
+            recorder.connect(context.destination); 
+        }
+
+        // Start recording
+        function start()
+        {
+            recording = true;
+
+            // reset the buffers for the new recording
+            leftchannel.length = rightchannel.length = 0;
+            recordingLength = 0;
+        }
+
+        // Stop recording
+        function stop()
+        {
+            // we stop recording
+            recording = false;
+
+            // we flat the left and right channels down
+            var leftBuffer = mergeBuffers ( leftchannel, recordingLength );
+            var rightBuffer = mergeBuffers ( rightchannel, recordingLength );
+            // we interleave both channels together
+            var interleaved = interleave ( leftBuffer, rightBuffer );
+
+            // we create our wav file
+            var buffer = new ArrayBuffer(44 + interleaved.length * 2);
+            var view = new DataView(buffer);
+
+            // RIFF chunk descriptor
+            writeUTFBytes(view, 0, 'RIFF');
+            view.setUint32(4, 44 + interleaved.length * 2, true);
+            writeUTFBytes(view, 8, 'WAVE');
+            // FMT sub-chunk
+            writeUTFBytes(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            // stereo (2 channels)
+            view.setUint16(22, 2, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 4, true);
+            view.setUint16(32, 4, true);
+            view.setUint16(34, 16, true);
+            // data sub-chunk
+            writeUTFBytes(view, 36, 'data');
+            view.setUint32(40, interleaved.length * 2, true);
+
+            // write the PCM samples
+            var lng = interleaved.length;
+            var index = 44;
+            var volume = 1;
+            for (var i = 0; i < lng; i++){
+                view.setInt16(index, interleaved[i] * (0x7FFF * volume), true);
+                index += 2;
+            }
+
+            // our final binary blob
+            var blob = new Blob ( [ view ], { type : 'audio/wav' } );
+
+            // let's save it locally
+            var url = window.URL.createObjectURL(blob);
+            var link = window.document.createElement('a');
+            link.href = url;
+            link.download = 'output.wav';
+            var click = document.createEvent("Event");
+            click.initEvent("click", true, true);
+            link.dispatchEvent(click);
+        }
+
+        function interleave(leftChannel, rightChannel)
+        {
+            var length = leftChannel.length + rightChannel.length;
+            var result = new Float32Array(length);
+
+            var inputIndex = 0;
+
+            for (var index = 0; index < length; ){
+                result[index++] = leftChannel[inputIndex];
+                result[index++] = rightChannel[inputIndex];
+                inputIndex++;
+            }
+            return result;
+        }
+
+        function mergeBuffers(channelBuffer, recordingLength)
+        {
+            var result = new Float32Array(recordingLength);
+            var offset = 0;
+            var lng = channelBuffer.length;
+            for (var i = 0; i < lng; i++){
+                var buffer = channelBuffer[i];
+                result.set(buffer, offset);
+                offset += buffer.length;
+            }
+            return result;
+        }
+
+        function writeUTFBytes(view, offset, string)
+        { 
+            var lng = string.length;
+            for (var i = 0; i < lng; i++){
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // Exposing functions
+        return {
+            init: init,
+            start: start,
+            stop: stop
+        };
+    }
+
+    // Video recording object that will record from a LocalMediaStream received 
+    //  from getUserMedia(), and then collate frames into a .webm video (no audio).
+    //  Source: https://html5-demos.appspot.com/static/getusermedia/record-user-webm.html
+    function VideoRecorder()
+    {
+        // Variables
+        var video = document.createElement('video'); // offscreen video.
+        var canvas = document.createElement('canvas'); // offscreen canvas.
+        var rafId = null;
+        var startTime = null;
+        var endTime = null;
+        var frames = [];
+        var videoLoaded = false;
+        var stream = null;
+
+        // Setup the video recorder, LocalMediaStream parameter from a getUserMedia()
+        //  call is required
+        function init(localMediaStream) 
+        {
+            if (!localMediaStream) {
+                console.log('ERROR: localMediaStream not defined!');
+                return;
+            }
+            stream = localMediaStream;
+
+            document.querySelector('body').appendChild(video);
+            video.autoplay = true;
+            video.src = window.URL.createObjectURL(localMediaStream);
+            video.onloadedmetadata = function() 
+            {
+                video.width = video.clientWidth;
+                video.height = video.clientHeight;
+                canvas.width = video.width;
+                canvas.height = video.height;
+                videoLoaded = true;
+                console.log('video loaded');
+
+                start();
+            };
+        };
+
+        // Start recording
+        function start() 
+        {
+            console.log('start recording');
+            var ctx = canvas.getContext('2d');
+            var CANVAS_HEIGHT = canvas.height;
+            var CANVAS_WIDTH = canvas.width;
+
+            frames = []; // clear existing frames;
+            startTime = Date.now();
+
+            rafId = setInterval(function() 
+            {
+                ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+                // Read back canvas as webp.
+                var url = canvas.toDataURL('image/webp', 1); // image/jpeg is way faster :(
+                frames.push(url);
+
+            }, 25); // 25 = 40hz
+
+            /* requestAnimationFrame() doesn't work with background pages
+            function drawVideoFrame_(time) 
+            {
+                //rafId = requestAnimationFrame(drawVideoFrame_);
+
+                ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+                // Read back canvas as webp.
+                var url = canvas.toDataURL('image/webp', 1); // image/jpeg is way faster :(
+                frames.push(url);
+
+                console.log('recording video');
+            };
+
+            rafId = requestAnimationFrame(drawVideoFrame_);
+            */
+        };
+
+        // Stop video recording
+        function stop() 
+        {
+            //cancelAnimationFrame(rafId);
+            clearInterval(rafId);
+            endTime = Date.now();
+            stream.stop();
+
+            console.log('frames captured: ' + frames.length + ' => ' +
+                    ((endTime - startTime) / 1000) + 's video');
+
+            // Sanity check
+            if (!frames.length) {
+                console.log('ERROR: 0 frames captured!');
+                return;
+            }
+
+            // our final binary blob
+            var blob = Whammy.fromImageArray(frames, 1000 / 60);
+
+            // let's save it locally
+            var url = window.URL.createObjectURL(blob);
+            var link = window.document.createElement('a');
+            link.href = url;
+            link.download = 'output.webm';
+            var click = document.createEvent("Event");
+            click.initEvent("click", true, true);
+            link.dispatchEvent(click);
+        };
+
+        // Embed video into preview element
+        function embedVideoPreview() 
+        {
+            var url = null;
+            var video = $('#video-preview video') || null;
+            var downloadLink = $('#video-preview a[download]') || null;
+
+            if (!video) 
+            {
+                video = document.createElement('video');
+                video.autoplay = true;
+                video.controls = true;
+                video.loop = true;
+                //video.style.position = 'absolute';
+                //video.style.top = '70px';
+                //video.style.left = '10px';
+                video.style.width = canvas.width + 'px';
+                video.style.height = canvas.height + 'px';
+                $('#video-preview').appendChild(video);
+
+                downloadLink = document.createElement('a');
+                downloadLink.download = 'capture.webm';
+                downloadLink.textContent = '[ download video ]';
+                downloadLink.title = 'Download your .webm video';
+                var p = document.createElement('p');
+                p.appendChild(downloadLink);
+
+                $('#video-preview').appendChild(p);
+
+            } else {
+                window.URL.revokeObjectURL(video.src);
+            }
+
+            video.src = url;
+            downloadLink.href = url;
+        }
+
+        // Exposing functions
+        return {
+            init: init,
+            start: start,
+            stop: stop
+        };
+    }
+
 });
