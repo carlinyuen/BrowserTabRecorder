@@ -13,22 +13,25 @@
 
             <form id="bugForm">
 
-                <button id="screenshotButton" type="button">Take Screenshot</button><br />
-                <button id="videoButton" type="button">Record Video</button><br />
+                <p>
+                    <button id="screenshotButton" type="button">Take Screenshot</button>
+                    <button id="videoButton" type="button">Record Video</button>
+                    <br />
+                    <button id="emailButton" type="button">Email Autofill</button>
+                </p>
 
-                <hr />
+                <fieldset>
+                    <label for="bugTitle">Title</label><br />
+                    <input id="bugTitle" class="field" type="text" /><br />
+                    <br />
 
-                <label for="bugTitle">Title</label><br />
-                <input id="bugTitle" type="text" /><br />
-                <br />
+                    <label for="bugDescription">Description</label><br />
+                    <textarea id="bugDescription" class="field"></textarea>
+                </fieldset>
 
-                <label for="bugDescription">Description</label><br />
-                <textarea id="bugDescription">
-                </textarea><br />
-
-                <hr />
-
-                <button id="createButton" type="button">Create Bug</button>
+                <p class="tR">
+                    <button id="createButton" type="button">Create Bug</button>
+                </p>
 
             </form>
 		</div>

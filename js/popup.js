@@ -4,12 +4,16 @@ $(function()
 	// Button handlers
 	$('#screenshotButton').click(takeScreenshot);
 	$('#videoButton').click(toggleCaptureVideo);
+	$('#emailButton').click(autofillFromEmail);
 	$('#createButton').click(createBug);
 
 	// Prevent form submit
 	$('form').submit(function(event) {
 		event.preventDefault();
 	});
+
+    // Focus on title field
+    $('#bugTitle').focus();
 
     // Check to see if already recording
     chrome.browserAction.getBadgeText({}, function(text) {
@@ -88,10 +92,39 @@ $(function()
         }
     }
 
+    // Fill title / description from email
+    function autofillFromEmail()
+    {
+        // TODO
+    }
+
     // Create a new bug by using url parameters
     function createBug()
     {
-        // TODO
+        // Collect all data
+        var params = {
+            title: $('#bugTitle').val(), 
+            description: $('#bugDescription').val(),
+        };
+
+        // Get defaults set from options
+        chrome.storage.local.get("defaults", function (data)
+        {
+            if (false) {   
+                // TODO: check errors
+            }
+            else if (data) 
+            {
+                params.priority = data.priority;
+                params.severity = data.severity;
+                params.type = data.type;
+            }
+            else {
+                console.log('no defaults set!')
+            }
+        
+            // TODO: fire off bug creation using URL parameters
+        });
     }
     
     // Save details that have been added so far
