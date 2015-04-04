@@ -156,8 +156,8 @@ function stopVideoCapture()
     console.log("stopVideoCapture");
     
     displayRecordingState(false);
-    audioRecorder.stop();
-    //videoRecorder.stop();
+    //audioRecorder.stop();
+    videoRecorder.stop();
 }
 
 // Capture video
@@ -428,6 +428,7 @@ function VideoRecorder()
     var endTime = null;
     var frames = [];
     var videoLoaded = false;
+    var stream = null;
 
     // Setup the video recorder, LocalMediaStream parameter from a getUserMedia()
     //  call is required
@@ -437,6 +438,7 @@ function VideoRecorder()
             console.log('ERROR: localMediaStream not defined!');
             return;
         }
+        stream = localMediaStream;
 
         document.querySelector('body').appendChild(video);
         video.autoplay = true;
@@ -457,6 +459,7 @@ function VideoRecorder()
     // Start recording
     function start() 
     {
+        console.log('start recording');
         var ctx = canvas.getContext('2d');
         var CANVAS_HEIGHT = canvas.height;
         var CANVAS_WIDTH = canvas.width;
@@ -464,9 +467,21 @@ function VideoRecorder()
         frames = []; // clear existing frames;
         startTime = Date.now();
 
+        rafId = setInterval(function() 
+        {
+            ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            // Read back canvas as webp.
+            var url = canvas.toDataURL('image/webp', 1); // image/jpeg is way faster :(
+            frames.push(url);
+
+            console.log('recording video');
+        }, 25); // 25 = 40hz
+
+        /* requestAnimationFrame() doesn't work with background pages
         function drawVideoFrame_(time) 
         {
-            rafId = requestAnimationFrame(drawVideoFrame_);
+            //rafId = requestAnimationFrame(drawVideoFrame_);
 
             ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -478,16 +493,25 @@ function VideoRecorder()
         };
 
         rafId = requestAnimationFrame(drawVideoFrame_);
+        */
     };
 
     // Stop video recording
     function stop() 
     {
-        cancelAnimationFrame(rafId);
+        //cancelAnimationFrame(rafId);
+        clearInterval(rafId);
         endTime = Date.now();
+        stream.stop();
 
         console.log('frames captured: ' + frames.length + ' => ' +
                 ((endTime - startTime) / 1000) + 's video');
+
+        // Sanity check
+        if (!frames.length) {
+            console.log('ERROR: 0 frames captured!');
+            return;
+        }
 
         // our final binary blob
         var blob = Whammy.fromImageArray(frames, 1000 / 60);
