@@ -1,8 +1,12 @@
 
 $(function()
 {
-    // Constants
-    var URL_BASE = 'https://b2.corp.google.com/issues/new';
+    // Variables & Constants
+    var URL_BASE = 'https://b2.corp.google.com/issues/new'
+        , TIME_SAVE_DELAY = 250             // 250ms is average human reaction time
+        , saveTimerHandle
+        , $fields = $('input,textarea')
+    ;
 
 	// Button handlers
 	$('#screenshotButton').click(takeScreenshot);
@@ -12,16 +16,12 @@ $(function()
 	$('#createButton').click(createBug);
 
     // Key listeners to fields to save details
-    var $fields = $('input,textarea');
-    $fields.on("keypress paste cut", saveDetails);
+    $fields.on("keyup paste cut", saveDetails);
 
 	// Prevent form submit
 	$('form').submit(function(event) {
 		event.preventDefault();
 	});
-
-    // Focus on title field
-    $('#bugTitle').focus();
 
     // Setup consistent connection with background.js
     var port = chrome.extension.connect({name: "Popup"});
@@ -39,6 +39,10 @@ $(function()
 
     // Load latest details
     loadDetails();
+
+    // Focus on title field
+    // TODO: not sure why this doesn't work...
+    $('#bugTitle').focus();
 
 
     //////////////////////////////////////////////////////////
@@ -121,24 +125,32 @@ $(function()
     // Save details so user doesn't lose it
     function saveDetails()
     {
-        // Collect data
-        var data = {};
-        $fields.each(function (i, el) 
+        // Do this on a timer so that we don't always save, just when user 
+        //  has stopped typing / interacting with the form
+        if (saveTimerHandle) {
+            clearTimeout(saveTimerHandle);
+        }
+        saveTimerHandle = setTimeout(function()
         {
-            var $el = $(el);
-            data[$el.attr('id')] = $el.val();
-        });
-        console.log('saveDetails:', data);
+            // Collect data
+            var data = {};
+            $fields.each(function (i, el) 
+            {
+                var $el = $(el);
+                data[$el.attr('id')] = $el.val();
+            });
+            console.log('saveDetails:', data);
 
-        // Save to local storage
-        chrome.storage.local.set(data, function() 
-        {
-            if (chrome.runtime.lastError) {	// Check for errors
-                console.log(chrome.runtime.lastError);
-            } else {	// Success
-                // Do nothing
-            }
-        });
+            // Save to local storage
+            chrome.storage.local.set(data, function() 
+            {
+                if (chrome.runtime.lastError) {	// Check for errors
+                    console.log(chrome.runtime.lastError);
+                } else {	// Success
+                    saveTimerHandle = null;     // Clear saving timer handle
+                }
+            });
+        }, TIME_SAVE_DELAY);
     }
 
     // Clear details and the form
