@@ -12,7 +12,7 @@
 	, "default_locale": "en"
 	, "background": {
 		"scripts": [
-            "js/third_party/whammy2.min.js"
+            "js/third_party/whammy.min.js"
 			, "js/background.js"
 		]
 	}
@@ -24,6 +24,14 @@
         , "default_title": "__MSG_BROWSER_ACTION_TITLE__"
         , "default_popup": "popup.html"
     }
+    , "content_scripts": [{
+		"matches": [ "<all_urls>" ]
+		, "js": [
+			"js/third_party/jquery-2.1.0.min.js"
+			, "js/bug-filer.js"
+		]
+		, "run_at": "document_start"
+	}]
 	, "options_page": "options.html"
 	, "permissions": [
         "activeTab"
