@@ -1,11 +1,19 @@
 
 $(function()
 {
+    // Constants
+    var URL_BASE = 'https://b2.corp.google.com/issues/new';
+
 	// Button handlers
 	$('#screenshotButton').click(takeScreenshot);
-	$('#videoButton').click(toggleCaptureVideo);
+	$('#videoButton').click(captureVideo);
 	$('#emailButton').click(autofillFromEmail);
+	$('#resetButton').click(clearDetails);
 	$('#createButton').click(createBug);
+
+    // Key listeners to fields to save details
+    var $fields = $('input,textarea');
+    $fields.on("keypress paste cut", saveDetails);
 
 	// Prevent form submit
 	$('form').submit(function(event) {
@@ -15,11 +23,6 @@ $(function()
     // Focus on title field
     $('#bugTitle').focus();
 
-    // Check to see if already recording
-    chrome.browserAction.getBadgeText({}, function(text) {
-        displayRecordVideoButtonPressed(text && text.length);
-    });
-
     // Setup consistent connection with background.js
     var port = chrome.extension.connect({name: "Popup"});
     port.onMessage.addListener(function(message)
@@ -28,74 +31,32 @@ $(function()
 
         switch (message.request)
         {
-            case "audio":
-                playAudio(message.data);
-                break;
-            
-            case "video":
-                break;
-
-            case "captureVideoStarted":
-                displayRecordVideoButtonPressed(true);
-                break;
-            
-            case "captureVideoStopped":
-                displayRecordVideoButtonPressed(false);
-                break;
-            
-            case "screenshot":
-                break;
-            
             default:
                 console.log("Unknown request received:", message.request);
                 break;
         }
     });
 
+    // Load latest details
+    loadDetails();
+
 
     //////////////////////////////////////////////////////////
     // FUNCTIONS
-   
-    // Play audio
-    function playAudio(stream) 
-    {
-        var audio = new Audio(window.URL.createObjectURL(stream)); 
-        audio.play();
-    }
-
-
-    // Take screenshot of active tab
-    function takeScreenshot()
-    {
+  
+    // Take screenshot of the active tab
+    function takeScreenshot() {
         port.postMessage({request: "captureTabScreenshot"});
     }
     
-    // Initiate video capture
-    function toggleCaptureVideo()
-    {        
-        var buttonTitle = $('#videoButton').text();
-        var request = "captureVideoStart";
-        if (buttonTitle == "Stop Recording") {
-            request = "captureVideoStop";
-        }
-
-        port.postMessage({request: request});
-    }
-
-    // Change video recording button text / css based on state
-    function displayRecordVideoButtonPressed(show)
-    {
-        if (show) {
-            $('#videoButton').text('Stop Recording');
-        } else {
-            $('#videoButton').text('Record Video');
-        }
+    // Initiate video capture of the active tab
+    function captureVideo() {        
+        port.postMessage({request: "captureTabVideo"});
     }
 
     // Fill title / description from email
-    function autofillFromEmail()
-    {
-        // TODO
+    function autofillFromEmail() {
+        port.postMessage({request: "emailAutofill"});
     }
 
     // Create a new bug by using url parameters
@@ -104,43 +65,103 @@ $(function()
         // Collect all data
         var params = {
             title: $('#bugTitle').val(), 
-            description: $('#bugDescription').val(),
+            notes: $('#bugDescription').val(),
         };
+        console.log('createBug:', params);
 
         // Get defaults set from options
-        chrome.storage.local.get("defaults", function (data)
+        chrome.storage.local.get(null, function (data)
         {
-            if (false) {   
-                // TODO: check errors
+            if (chrome.runtime.lastError) {	// Check for errors
+                console.log(chrome.runtime.lastError);
             }
-            else if (data) 
+            else if (Object.keys(data).length) 
             {
-                params.priority = data.priority;
-                params.severity = data.severity;
-                params.type = data.type;
-            }
-            else {
-                console.log('no defaults set!')
+                if (data.defaultPriority) {
+                    params.priority = data.defaultPriority;
+                }
+                if (data.defaultSeverity) {
+                    params.severity = data.defaultSeverity;
+                }
+                if (data.defaultType) {
+                    params.type = data.defaultType;
+                }
             }
         
-            // TODO: fire off bug creation using URL parameters
+            // Fire off bug creation using URL parameters
+            var url = URL_BASE + '?' + $.param(params);
+            console.log(url);
+            chrome.tabs.create({ url: url });
+        });
+    }
+
+    // Load details from last session
+    function loadDetails()
+    {
+        // Get form field ids to retrieve data for
+        var keys = [];
+        $fields.each(function (i, el) {
+            keys.push($(el).attr('id'));
+        });
+        console.log('loadDetails:', keys);
+
+        // Get data from local storage
+        chrome.storage.local.get(keys, function (data) 
+        {
+            if (chrome.runtime.lastError) {	// Check for errors
+                console.log(chrome.runtime.lastError);
+            } else if (keys) {	// Success
+                $.each(data, function (key, value) {
+                    $('#' + key).val(value);
+                });
+            }
         });
     }
     
-    // Save details that have been added so far
+    // Save details so user doesn't lose it
     function saveDetails()
     {
         // Collect data
-        var data = {
-            title: $('#bugTitle').val(),
-            description: $('#bugDescription').val(),
-            screenshot: null,   // TODO: add screenshot
-            video: null,        // TODO: add video
-            audio: null,        // TODO: add audio
-        };
+        var data = {};
+        $fields.each(function (i, el) 
+        {
+            var $el = $(el);
+            data[$el.attr('id')] = $el.val();
+        });
+        console.log('saveDetails:', data);
 
-        // Save
-        chrome.storage.local.set(data, function () {
+        // Save to local storage
+        chrome.storage.local.set(data, function() 
+        {
+            if (chrome.runtime.lastError) {	// Check for errors
+                console.log(chrome.runtime.lastError);
+            } else {	// Success
+                // Do nothing
+            }
+        });
+    }
+
+    // Clear details and the form
+    function clearDetails()
+    {
+        // Clear form
+        var keys = [];
+        $fields.each(function (i, el) 
+        {
+            var $el = $(el);
+            $el.val('');
+            keys.push($el.attr('id'));
+        });
+        console.log('clearDetails:', keys);
+        
+        // Delete from storage
+        chrome.storage.local.remove(keys, function() 
+        {
+            if (chrome.runtime.lastError) { // Check for errors
+                console.log(chrome.runtime.lastError);
+            } else {	// Success
+                // Do nothing
+            }
         });
     }
 
