@@ -3,12 +3,18 @@
     position: absolute;
     margin-right: 16px;
     bottom: 16px;
-    width: 256px;
-    border: 6px solid #000;
+    width: 200px;
+    border: 6px solid #888;
     float: right;
     background-position: center center;
     background-repeat: no-repeat;
+    background-size: contain;
     overflow: hidden;
+    opacity: 0.66;
+    transition: opacity 200ms ease-in-out;
+}
+.carlin-bug-filer-thumbnail:hover {
+    opacity: 1.0;
 }
 .carlin-bug-filer-thumbnail img {
     width: 100% !important;
@@ -29,6 +35,8 @@
     right: 0;
     width: 16px;
     height: 16px;
+    margin: 2px;
+    font: 12px/0px Verdana;
 }
 .carlin-bug-filer-thumbnail .actionButton {
     position: absolute;

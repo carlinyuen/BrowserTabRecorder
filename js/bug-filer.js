@@ -7,13 +7,21 @@ $(function()
         , IMAGE_CURSOR_PRESSED = chrome.extension.getURL('images/cursor_pressed.png')
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
+        , ID_THUMBNAIL_CONTAINER = 'carlin-bug-filer'
+        , CLASS_THUMBNAIL = 'carlin-bug-filer-thumbnail'
+        , CLASS_CURSOR_TRACKER = 'carlin-bug-filer-cursor'
         
         // Cursor tracking
         , cursor = $(document.createElement('div'))
-            .addClass('carlin-bug-filer-cursor')
+            .addClass(CLASS_CURSOR_TRACKER)
             .hide()
             .appendTo('body')
         , mousePressed = false
+
+        // Thumbnail handling
+        , thumbnailContainer = $(document.createElement('div'))
+            .attr('id', ID_THUMBNAIL_CONTAINER)
+            .appendTo('body')
 
         // Recording state
         , recording = false
@@ -49,7 +57,7 @@ $(function()
         mousePressed = false;
     }).mouseout(function (event) {
         mousePressed = false;
-    }):
+    });
 
     // Listener for messages from background
     chrome.runtime.onMessage.addListener(function (message, sender, response) 
@@ -104,7 +112,7 @@ $(function()
 
         // Create video thumbnail and add to document
         videoThumbnail = createThumbnail(url, 'video');
-        videoThumbnail.hide().appendTo('body').fadeIn('fast');
+        videoThumbnail.hide().appendTo('#' + ID_THUMBNAIL_CONTAINER).fadeIn('fast');
     }
 
     // Start video recording
@@ -136,15 +144,14 @@ $(function()
         console.log('showScreenshot:', srcURL);
 
         var imageThumbnail = createThumbnail(srcURL, 'image');
-        imageThumbnail.hide().appendTo('body').fadeIn('fast');
+        imageThumbnail.hide().appendTo('#' + ID_THUMBNAIL_CONTAINER).fadeIn('fast');
     }
 
     // Creates a thumbnail div from recording source (image / video), and returns it
     function createThumbnail(sourceURL, type)
     {
         // Create base thumbnail div
-        var result = $(document.createElement('div'))
-            .addClass('carlin-bug-filer-thumbnail');
+        var result = $(document.createElement('div')).addClass(CLASS_THUMBNAIL);
 
         // Add special elements based on content type
         switch (type)
@@ -153,19 +160,37 @@ $(function()
                 result.css({ 'background-image': 'url(' + sourceURL + ')' })
                     .append($(document.createElement('img')).attr('src', sourceURL))
                     .append($(document.createElement('button'))
-                        .addClass('actionButton downloadButton')
+                        .addClass('actionButton')
                         .text('DL')
+                        .click(function (event) 
+                        {
+                            var link = $(document.createElement('a'))
+                                .attr('href', sourceURL)
+                                .attr('download', 'output.webm');
+                            var click = document.createEvent("Event");
+                            click.initEvent("click", true, true);
+                            link.dispatchEvent(click);
+                        })
                     );
                 break;
 
             case "video":
                 result.append($(document.createElement('video')).attr('src', sourceURL))
                     .append($(document.createElement('button'))
-                        .addClass('actionButton recordButton')
+                        .addClass('actionButton')
                         .text('REC')
                     ).append($(document.createElement('button'))
-                        .addClass('actionButton downloadButton')
+                        .addClass('actionButton')
                         .text('DL')
+                        .click(function (event) 
+                        {
+                            var link = $(document.createElement('a'))
+                                .attr('href', sourceURL)
+                                .attr('download', 'output.webm');
+                            var click = document.createEvent("Event");
+                            click.initEvent("click", true, true);
+                            link.dispatchEvent(click);
+                        })
                     );
                 break;
 
@@ -175,7 +200,7 @@ $(function()
         // Add a close button
         result.append($(document.createElement('button'))
             .addClass('closeButton')
-            .text('X')
+            .text('x')
             .click(function (event) 
             {
                 var $this = $(this)
@@ -192,6 +217,9 @@ $(function()
                 $this.parent().fadeOut('fast').remove();
             })
         );
+
+        // Return the result
+        return result;
     }
 
 });
