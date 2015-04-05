@@ -1,0 +1,51 @@
+
+.carlin-bug-filer-thumbnail {
+    position: absolute;
+    margin-right: 16px;
+    bottom: 16px;
+    width: 256px;
+    border: 6px solid #000;
+    float: right;
+    background-position: center center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+.carlin-bug-filer-thumbnail img {
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.carlin-bug-filer-thumbnail video {
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.carlin-bug-filer-thumbnail .closeButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+}
+.carlin-bug-filer-thumbnail .actionButton {
+    position: absolute;
+    margin-right: 6px;
+    bottom: 6px;
+    float: right;
+    width: 16px;
+    height: 16px;
+}
+
+.carlin-bug-filer-cursor {
+    width: 48px;    /* size of image */
+    height: 48px;   /* size of image */
+    position: absolute;
+    z-index: 999;
+    background-position: center center;
+    background-repeat: no-repeat;
+    pointer-events: none !important;
+}
+

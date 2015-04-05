@@ -36,7 +36,7 @@ chrome.extension.onConnect.addListener(function(port)
                 break;
 
             default:
-                console.log("Unknown request received:", request);
+                console.log("Unknown request received!");
                 break;
         }
     });

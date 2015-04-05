@@ -2,60 +2,69 @@ console.log('Initializing Bug-Filer');
 
 $(function()
 {
-    // Variables
-    var IMAGE_CURSOR = 'images/cursor.png'
-        , IMAGE_CURSOR_PRESSED = 'images/cursor_pressed.png'
+    // Variables & Constants
+    var IMAGE_CURSOR = chrome.extension.getURL("images/cursor.png")
+        , IMAGE_CURSOR_PRESSED = chrome.extension.getURL('images/cursor_pressed.png')
+        , WIDTH_CURSOR_IMAGE = 48
+        , HEIGHT_CURSOR_IMAGE = 48
         
-        , thumbnail = $(document.createElement('div'))
-            .addClass('bug-filer-thumbnail')
-            .css({
-                'position': 'fixed',
-                'right': '16px',
-                'bottom': '16px',
-                'width': '256px',
-                'border': '4px solid #000'
-            })
+        // Cursor tracking
         , cursor = $(document.createElement('div'))
-            .addClass('bug-filer-cursor')
-            .css({
-                'width': '48px',
-                'height': '48px',
-                'position': 'absolute',
-                'z-index': '999',
-                'background': '#000',
-                //'background': 'url(images/cursor.png) center center no-repeat'
-            }).appendTo('body')
+            .addClass('carlin-bug-filer-cursor')
+            .hide()
+            .appendTo('body')
+        , mousePressed = false
+
+        // Recording state
         , recording = false
+        , videoStream = null    // We only want to have one live one at a time
+        , videoThumbnail = null // Track current live video thumbnail
     ;
 
 
     /////////////////////////////////////////
     // ACTIONS
 
-    // Listener
-    $(document).mousemove(function (event) {
-        console.log('mousemove');
-        if (recording) {
-            console.log('cursor');
+    // Listener for mouse movement to show cursor for recording
+    $(document).mousemove(function (event) 
+    {
+        if (recording) 
+        {
             cursor.show().css({
-                'top': event.pageY - 24,
-                'left': event.pageX - 24
+                'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
+                'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
+                'background-image': 'url(' 
+                    + (mousePressed ? IMAGE_CURSOR_PRESSED : IMAGE_CURSOR) + ')',
             });
-        } else {
+        } 
+        else {
             cursor.hide();
         }
     });
 
-    chrome.runtime.onMessage.addListener(function (request, sender, response) 
+    // Listener to track mouse press state
+    $(document).mousedown(function (event) {
+        mousePressed = true;
+    }).mouseup(function (event) {
+        mousePressed = false;
+    }).mouseout(function (event) {
+        mousePressed = false;
+    }):
+
+    // Listener for messages from background
+    chrome.runtime.onMessage.addListener(function (message, sender, response) 
     {
-        switch (request.request)
+        console.log('sender:', sender);
+        console.log('message:', message);
+
+        switch (message.request)
         {
-            case "recordingStarted":
-                recording = true;
+            case "video":
+                showVideo(message.data);
                 break;
 
-            case "recordingStopped":
-                recording = false;
+            case "screenshot":
+                showScreenshot(message.data);
                 break;
 
             default:
@@ -67,10 +76,115 @@ $(function()
     /////////////////////////////////////////
     // FUNCTIONS
 
-    // Create thumbnail from recording source (image / video)
-    function createThumbnail(sourceURL)
+    // Show video
+    function showVideo(stream)
     {
+        // Sanity check
+        if (!stream) 
+        {
+            console.log('ERROR: invalid video stream!');
+            alert('Unable to capture tab video feed.');
+        }
+
+        // Only allow one instance
+        if (videoStream) 
+        {
+            console.log('ERROR: cannot have two simultaneously active video streams!');
+            alert('Video capture already initiated on this tab!');
+        }
+        else {
+            videoStream = stream;
+        }
+
+        // Create video thumbnail and add to document
+        var url = window.URL.createObjectURL(stream);
+        videoThumbnail = createThumbnail(url, 'video');
+        videoThumbnail.hide().appendTo('body').fadeIn('fast');
+    }
+
+    // Start video recording
+    function startVideoRecording(video)
+    {
+        // Start recording
+        recording = true;
         // TODO
+    }
+
+    // Stop video recording
+    function stopVideoRecording()
+    {
+        // Collate into webm video using Whammy.js
+        // TODO
+
+        // Set previous video element source to webm file
+        // TODO
+
+        // Clear video stream
+        videoStream.stop();
+        videoStream = null;
+        recording = false;
+    }
+
+    // Show screenshot
+    function showScreenshot(srcURL)
+    {
+        var imageThumbnail = createThumbnail(srcURL, 'image');
+        imageThumbnail.hide().appendTo('body').fadeIn('fast');
+    }
+
+    // Creates a thumbnail div from recording source (image / video), and returns it
+    function createThumbnail(sourceURL, type)
+    {
+        // Create base thumbnail div
+        var result = $(document.createElement('div'))
+            .addClass('carlin-bug-filer-thumbnail');
+
+        // Add special elements based on content type
+        switch (type)
+        {
+            case "image":
+                result.css({ 'background-image': 'url(' + sourceURL + ')' })
+                    .append($(document.createElement('img')).attr('src', sourceURL))
+                    .append($(document.createElement('button'))
+                        .addClass('actionButton downloadButton')
+                        .text('DL')
+                    );
+                break;
+
+            case "video":
+                result.append($(document.createElement('video')).attr('src', sourceURL))
+                    .append($(document.createElement('button'))
+                        .addClass('actionButton recordButton')
+                        .text('REC')
+                    ).append($(document.createElement('button'))
+                        .addClass('actionButton downloadButton')
+                        .text('DL')
+                    );
+                break;
+
+            default: break;
+        }
+
+        // Add a close button
+        result.append($(document.createElement('button'))
+            .addClass('closeButton')
+            .text('X')
+            .click(function (event) 
+            {
+                var $this = $(this)
+                    , $video = $this.siblings('video');
+
+                // Stop video recording if needed
+                if ($video.length && recording) {
+                    if ($video.attr('src') == videoThumbnail.find('video').attr('src')) {
+                        stopVideoRecording();
+                    }
+                }
+                
+                // Remove element
+                $this.parent().fadeOut('fast').remove();
+            })
+        );
     }
 
 });
