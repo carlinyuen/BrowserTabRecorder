@@ -7,15 +7,14 @@
     text-align: right;
     vertical-align: bottom;
     height: 0;
-    overflow: auto;
+    overflow: visible;
     z-index: 999;
-    pointer-events: none;
 }
 
 .carlin-bug-filer-thumbnail {
     position: absolute;
     margin-right: 16px;
-    bottom: 16px;
+    bottom: 0;
     width: 200px;
     border: 6px solid #888;
     float: right;
