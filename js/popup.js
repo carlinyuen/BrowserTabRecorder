@@ -1,9 +1,9 @@
+// Required: js/config.js
 
 $(function()
 {
     // Variables & Constants
-    var URL_BASE = 'https://b2.corp.google.com/issues/new'
-        , TIME_SAVE_DELAY = 250             // 250ms is average human reaction time
+    var TIME_SAVE_DELAY = 250    // 250ms is average human reaction time
         , saveTimerHandle
         , $fields = $('input,textarea')
     ;
@@ -72,26 +72,20 @@ $(function()
         console.log('createBug:', params);
 
         // Get defaults set from options
-        chrome.storage.local.get(null, function (data)
+        chrome.storage.local.get("defaults", function (data)
         {
             if (chrome.runtime.lastError) {	// Check for errors
                 console.log(chrome.runtime.lastError);
             }
-            else if (Object.keys(data).length) 
+            else if (Object.keys(data).length)  // If there are defaults
             {
-                if (data.defaultPriority) {
-                    params.priority = data.defaultPriority;
-                }
-                if (data.defaultSeverity) {
-                    params.severity = data.defaultSeverity;
-                }
-                if (data.defaultType) {
-                    params.type = data.defaultType;
-                }
+                $.each(data, function (key, value) { 
+                    params[key] = value;        // Store into params too
+                });
             }
         
             // Fire off bug creation using URL parameters
-            var url = URL_BASE + '?' + $.param(params);
+            var url = [URL_BUG_API_CREATE, '?', $.param(params)].join('');
             console.log(url);
             chrome.tabs.create({ url: url });
         });

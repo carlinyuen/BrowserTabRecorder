@@ -146,6 +146,8 @@ function captureTabVideo()
                     }, 
                     function (result) 
                     {
+                        console.log('inject videoCapture.js result:', result);
+
                         // Pass along the local media stream
                         sendMessageToActiveTab({
                             request: 'video',
