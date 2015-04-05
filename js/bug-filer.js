@@ -120,7 +120,7 @@ $(function()
     {
         // Start recording
         recording = true;
-        // TODO
+        // TODO: switch recording button to stop
     }
 
     // Stop video recording
@@ -136,6 +136,9 @@ $(function()
         videoStream.stop();
         videoStream = null;
         recording = false;
+
+        // Remove recording button
+        // TODO
     }
 
     // Show screenshot
@@ -166,7 +169,7 @@ $(function()
                         {
                             var link = $(document.createElement('a'))
                                 .attr('href', sourceURL)
-                                .attr('download', 'output.webm');
+                                .attr('download', 'screenshot.png');
                             var click = document.createEvent("Event");
                             click.initEvent("click", true, true);
                             link.dispatchEvent(click);
@@ -189,7 +192,7 @@ $(function()
                         {
                             var link = $(document.createElement('a'))
                                 .attr('href', sourceURL)
-                                .attr('download', 'output.webm');
+                                .attr('download', 'video.webm');
                             var click = document.createEvent("Event");
                             click.initEvent("click", true, true);
                             link.dispatchEvent(click);

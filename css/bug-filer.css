@@ -1,4 +1,17 @@
 
+#carlin-bug-filer {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    text-align: right;
+    vertical-align: bottom;
+    height: 0;
+    overflow: auto;
+    z-index: 999;
+    pointer-events: none;
+}
+
 .carlin-bug-filer-thumbnail {
     position: absolute;
     margin-right: 16px;
@@ -51,7 +64,7 @@
     width: 48px;    /* size of image */
     height: 48px;   /* size of image */
     position: absolute;
-    z-index: 999;
+    z-index: 888;
     background-position: center center;
     background-repeat: no-repeat;
     pointer-events: none !important;
