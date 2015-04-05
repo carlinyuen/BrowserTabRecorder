@@ -79,6 +79,8 @@ $(function()
     // Show video
     function showVideo(stream)
     {
+        console.log('showVideo:');
+
         // Sanity check
         if (!stream) 
         {
@@ -96,8 +98,11 @@ $(function()
             videoStream = stream;
         }
 
-        // Create video thumbnail and add to document
+        // Create object url for the video stream
         var url = window.URL.createObjectURL(stream);
+        console.log(url);
+
+        // Create video thumbnail and add to document
         videoThumbnail = createThumbnail(url, 'video');
         videoThumbnail.hide().appendTo('body').fadeIn('fast');
     }
@@ -128,6 +133,8 @@ $(function()
     // Show screenshot
     function showScreenshot(srcURL)
     {
+        console.log('showScreenshot:', srcURL);
+
         var imageThumbnail = createThumbnail(srcURL, 'image');
         imageThumbnail.hide().appendTo('body').fadeIn('fast');
     }
