@@ -140,10 +140,18 @@ function captureTabVideo()
             // Send to active tab if capture was successful
             if (localMediaStream)
             {
-                sendMessageToActiveTab({
-                    request: 'video',
-                    data: localMediaStream,
-                });
+                // Inject libraries for video / audio capture
+                chrome.tabs.executeScript(null, {
+                        file: 'js/videoCapture.js'
+                    }, 
+                    function (result) 
+                    {
+                        // Pass along the local media stream
+                        sendMessageToActiveTab({
+                            request: 'video',
+                            data: localMediaStream,
+                        });
+                    });
             }
             else    // Failed
             {
