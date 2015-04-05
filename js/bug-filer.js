@@ -179,6 +179,9 @@ $(function()
                     .append($(document.createElement('button'))
                         .addClass('actionButton')
                         .text('REC')
+                        .click(function (event) {
+                            startVideoRecording();
+                        })
                     ).append($(document.createElement('button'))
                         .addClass('actionButton')
                         .text('DL')
