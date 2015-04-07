@@ -44,7 +44,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    border: 8px solid #DDD;
+    border: 8px solid #333;
     opacity: 0.75;
     border-radius: 4px;
 }
@@ -90,6 +90,13 @@
     float: right;
     width: 16px;
     height: 16px;
+}
+.carlin-bug-filer-thumbnail button img {
+    width: 16px !important;
+    height: 16px !important;
+    opacity: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .carlin-bug-filer-cursor {

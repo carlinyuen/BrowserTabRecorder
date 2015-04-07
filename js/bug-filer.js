@@ -5,6 +5,10 @@ $(function()
     // Variables & Constants
     var IMAGE_CURSOR = chrome.extension.getURL("images/cursor.png")
         , IMAGE_CURSOR_PRESSED = chrome.extension.getURL('images/cursor_pressed.png')
+        , IMAGE_DOWNLOAD = chrome.extension.getURL('images/data-transfer-download-2x.png')
+        , IMAGE_RECORD = chrome.extension.getURL('images/media-record-2x.png')
+        , IMAGE_STOP_RECORD = chrome.extension.getURL('images/media-stop-2x.png')
+        , IMAGE_DELETE = chrome.extension.getURL('images/x-2x.png')
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
         , ID_THUMBNAIL_CONTAINER = 'carlin-bug-filer'
@@ -23,7 +27,7 @@ $(function()
             .attr('id', ID_THUMBNAIL_CONTAINER)
             .append($(document.createElement('div')).addClass('background'))
             .appendTo('body')
-            .slideUp()
+            .css({ 'height':'0px' })
 
         // Recording state
         , recording = false
@@ -122,7 +126,6 @@ $(function()
     {
         // Start recording
         recording = true;
-        // TODO: switch recording button to stop
     }
 
     // Stop video recording
@@ -138,9 +141,6 @@ $(function()
         videoStream.stop();
         videoStream = null;
         recording = false;
-
-        // Remove recording button
-        // TODO
     }
 
     // Show screenshot
@@ -150,7 +150,7 @@ $(function()
 
         var imageThumbnail = createThumbnail(srcURL, 'image');
         imageThumbnail.hide().appendTo(thumbnailContainer);
-        thumbnailContainer.show().slideDown('fast', function() {
+        thumbnailContainer.animate({ 'height':'auto' }, 'fast', function() {
             imageThumbnail.fadeIn('fast');
         });
     }
@@ -171,41 +171,53 @@ $(function()
                 container.css({ 'background-image': 'url(' + sourceURL + ')' })
                     .append($(document.createElement('img')).attr('src', sourceURL));
                 result.append($(document.createElement('button'))
-                        .addClass('actionButton')
-                        .text('DL')
-                        .click(function (event) 
-                        {
-                            var link = $(document.createElement('a'))
-                                .attr('href', sourceURL)
-                                .attr('download', 'screenshot.png');
-                            var click = document.createEvent("Event");
-                            click.initEvent("click", true, true);
-                            link.dispatchEvent(click);
-                        })
-                    );
+                    .addClass('actionButton')
+                    .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
+                    .click(function (event) 
+                    {
+                        var link = $(document.createElement('a'))
+                            .attr('href', sourceURL)
+                            .attr('download', 'screenshot.png');
+                        var click = document.createEvent("Event");
+                        click.initEvent("click", true, true);
+                        link.dispatchEvent(click);
+                    })
+                );
                 break;
 
             case "video":
                 container.append($(document.createElement('video')).attr('src', sourceURL));
                 result.append($(document.createElement('button'))
-                        .addClass('actionButton')
-                        .text('REC')
-                        .click(function (event) {
-                            startVideoRecording();
-                        })
-                    ).append($(document.createElement('button'))
-                        .addClass('actionButton')
-                        .text('DL')
-                        .click(function (event) 
+                    .addClass('actionButton')
+                    .append($(document.createElement('img')).attr('src', IMAGE_RECORD))
+                    .click(function (event) 
+                    {
+                        if (!recording)     // Not yet recording, start recording
                         {
-                            var link = $(document.createElement('a'))
-                                .attr('href', sourceURL)
-                                .attr('download', 'video.webm');
-                            var click = document.createEvent("Event");
-                            click.initEvent("click", true, true);
-                            link.dispatchEvent(click);
-                        })
-                    );
+                            startVideoRecording();
+                            $(this).find('img').attr('src', IMAGE_STOP_RECORD);
+                        }
+                        else    // Already recording, stop recording and delete button
+                        {
+                            stopVideoRecording();
+                            $(this).fadeOut('fast', function() {
+                                $(this).remove();
+                            });
+                        }
+                    })
+                ).append($(document.createElement('button'))
+                    .addClass('actionButton')
+                    .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
+                    .click(function (event) 
+                    {
+                        var link = $(document.createElement('a'))
+                            .attr('href', sourceURL)
+                            .attr('download', 'video.webm');
+                        var click = document.createEvent("Event");
+                        click.initEvent("click", true, true);
+                        link.dispatchEvent(click);
+                    })
+                );
                 break;
 
             default: break;
@@ -214,7 +226,7 @@ $(function()
         // Add a close button
         result.append($(document.createElement('button'))
             .addClass('closeButton')
-            .text('x')
+            .append($(document.createElement('img')).attr('src', IMAGE_DELETE))
             .click(function (event) 
             {
                 var $this = $(this)
@@ -228,7 +240,9 @@ $(function()
                 }
                 
                 // Remove element
-                $this.parent().fadeOut('fast').remove();
+                $this.parent().fadeOut('fast', function() {
+                    $(this).remove();
+                });
             })
         );
 
