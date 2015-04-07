@@ -21,7 +21,9 @@ $(function()
         // Thumbnail handling
         , thumbnailContainer = $(document.createElement('div'))
             .attr('id', ID_THUMBNAIL_CONTAINER)
+            .append($(document.createElement('div')).addClass('background'))
             .appendTo('body')
+            .slideUp()
 
         // Recording state
         , recording = false
@@ -147,22 +149,28 @@ $(function()
         console.log('showScreenshot:', srcURL);
 
         var imageThumbnail = createThumbnail(srcURL, 'image');
-        imageThumbnail.hide().appendTo('#' + ID_THUMBNAIL_CONTAINER).fadeIn('fast');
+        imageThumbnail.hide().appendTo(thumbnailContainer);
+        thumbnailContainer.show().slideDown('fast', function() {
+            imageThumbnail.fadeIn('fast');
+        });
     }
 
     // Creates a thumbnail div from recording source (image / video), and returns it
     function createThumbnail(sourceURL, type)
     {
         // Create base thumbnail div
-        var result = $(document.createElement('div')).addClass(CLASS_THUMBNAIL);
+        var result = $(document.createElement('div')).addClass(CLASS_THUMBNAIL)
+            .append($(document.createElement('div')).addClass('border'));
+        var container = $(document.createElement('div')).addClass('container')
+            .appendTo(result);
 
         // Add special elements based on content type
         switch (type)
         {
             case "image":
-                result.css({ 'background-image': 'url(' + sourceURL + ')' })
-                    .append($(document.createElement('img')).attr('src', sourceURL))
-                    .append($(document.createElement('button'))
+                container.css({ 'background-image': 'url(' + sourceURL + ')' })
+                    .append($(document.createElement('img')).attr('src', sourceURL));
+                result.append($(document.createElement('button'))
                         .addClass('actionButton')
                         .text('DL')
                         .click(function (event) 
@@ -178,8 +186,8 @@ $(function()
                 break;
 
             case "video":
-                result.append($(document.createElement('video')).attr('src', sourceURL))
-                    .append($(document.createElement('button'))
+                container.append($(document.createElement('video')).attr('src', sourceURL));
+                result.append($(document.createElement('button'))
                         .addClass('actionButton')
                         .text('REC')
                         .click(function (event) {

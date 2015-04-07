@@ -1,41 +1,74 @@
 
 #carlin-bug-filer {
     position: fixed;
-    bottom: 16px;
-    right: 16px;
-    left: 16px;
-    text-align: right;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    text-align: left;
     vertical-align: bottom;
-    height: 0;
+    height: auto;
     overflow: visible;
     z-index: 999;
+    padding-top: 24px;
+}
+#carlin-bug-filer .background {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #FFF;
+    opacity: 0.9;
+    box-shadow: 0 2px 6px #000;
 }
 
 .carlin-bug-filer-thumbnail {
-    position: absolute;
-    margin-right: 16px;
+    position: relative;
+    margin: 0 0 6px 6px;
     bottom: 0;
     width: 200px;
-    border: 6px solid #888;
+    height: 150px;
     float: right;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    overflow: hidden;
-    opacity: 0.66;
+    overflow: visible;
+    opacity: 0.5;
+    text-align: center;
+    vertical-align: middle;
     transition: opacity 200ms ease-in-out;
 }
 .carlin-bug-filer-thumbnail:hover {
     opacity: 1.0;
 }
-.carlin-bug-filer-thumbnail img {
+.carlin-bug-filer-thumbnail .border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 8px solid #DDD;
+    opacity: 0.75;
+    border-radius: 4px;
+}
+.carlin-bug-filer-thumbnail .container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 8px;
+    background-position: left top;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.carlin-bug-filer-thumbnail .container img {
     width: 100% !important;
     height: 100% !important;
     opacity: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
 }
-.carlin-bug-filer-thumbnail video {
+.carlin-bug-filer-thumbnail .container video {
     width: 100% !important;
     height: auto !important;
     padding: 0 !important;
@@ -51,7 +84,7 @@
     font: 12px/0px Verdana;
 }
 .carlin-bug-filer-thumbnail .actionButton {
-    position: absolute;
+    position: relative;
     margin-right: 6px;
     bottom: 6px;
     float: right;
