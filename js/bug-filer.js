@@ -191,7 +191,7 @@ $(function()
         imageThumbnail.hide().appendTo(thumbnailContainer).fadeIn('fast');
 
         // If container is not showing yet, show it temporarily
-        if (!thumbnailConainer.hasClass('show')) 
+        if (!thumbnailContainer.hasClass('show')) 
         {
             thumbnailContainer.addClass('show');
             setTimeout(function() {
