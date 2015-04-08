@@ -15,6 +15,7 @@ $(function()
         , ID_THUMBNAIL_CONTAINER = 'carlin-bug-filer'
         , CLASS_THUMBNAIL = 'carlin-bug-filer-thumbnail'
         , CLASS_CURSOR_TRACKER = 'carlin-bug-filer-cursor'
+        , CLASS_SHOW_CONTAINER = 'show'
         
         // Cursor tracking
         , cursorTracker
@@ -101,7 +102,7 @@ $(function()
                 .attr('id', ID_THUMBNAIL_CONTAINER)
                 .append($(document.createElement('div')).addClass('tab')
                     .click(function (event) {
-                        $('#' + ID_THUMBNAIL_CONTAINER).toggleClass('show');
+                        $('#' + ID_THUMBNAIL_CONTAINER).toggleClass(CLASS_SHOW_CONTAINER);
                     })
                 )
                 .append($(document.createElement('div')).addClass('background'));
@@ -157,7 +158,7 @@ $(function()
         videoThumbnail.hide().appendTo(thumbnailContainer).fadeIn('fast');
 
         // If container is not showing yet, show it permanently
-        thumbnailContainer.addClass('show');
+        thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
     }
 
     // Start video recording
@@ -191,11 +192,11 @@ $(function()
         imageThumbnail.hide().appendTo(thumbnailContainer).fadeIn('fast');
 
         // If container is not showing yet, show it temporarily
-        if (!thumbnailContainer.hasClass('show')) 
+        if (!thumbnailContainer.hasClass(CLASS_SHOW_CONTAINER)) 
         {
-            thumbnailContainer.addClass('show');
+            thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
             setTimeout(function() {
-                thumbnailContainer.removeClass('show');
+                thumbnailContainer.removeClass(CLASS_SHOW_CONTAINER);
             }, TIME_AUTOHIDE_CONTAINER);
         }
     }
@@ -286,14 +287,14 @@ $(function()
                 }
                 
                 // Remove element
-                $this.parent().fadeOut('fast', function() 
+                $this.parent().slideUp('fast', function() 
                 {
                     // Delete entire thumbnail
                     $(this).remove();
 
                     // If there are no more thumbnails, hide container
                     if (!$('div.' + CLASS_THUMBNAIL).length) {
-                        thumbnailContainer.detach();
+                        thumbnailContainer.removeClass(CLASS_SHOW_CONTAINER).detach();
                     }
                 });
             })
