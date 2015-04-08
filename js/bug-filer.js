@@ -16,18 +16,11 @@ $(function()
         , CLASS_CURSOR_TRACKER = 'carlin-bug-filer-cursor'
         
         // Cursor tracking
-        , cursor = $(document.createElement('div'))
-            .addClass(CLASS_CURSOR_TRACKER)
-            .hide()
-            .appendTo('body')
+        , cursorTracker
         , mousePressed = false
 
         // Thumbnail handling
-        , thumbnailContainer = $(document.createElement('div'))
-            .attr('id', ID_THUMBNAIL_CONTAINER)
-            .append($(document.createElement('div')).addClass('background'))
-            .appendTo('body')
-            .css({ 'height':'0px' })
+        , thumbnailContainer
 
         // Recording state
         , recording = false
@@ -44,7 +37,7 @@ $(function()
     {
         if (recording) 
         {
-            cursor.show().css({
+            cursorTracker.show().css({
                 'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
                 'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
                 'background-image': 'url(' 
@@ -52,7 +45,7 @@ $(function()
             });
         } 
         else {
-            cursor.hide();
+            cursorTracker.hide();
         }
     });
 
@@ -71,13 +64,17 @@ $(function()
         console.log('sender:', sender);
         console.log('message:', message);
 
+        // Handle message
         switch (message.request)
         {
             case "video":
+                createThumbnailContainer();
+                createCursorTracker();
                 showVideo(message.data);
                 break;
 
             case "screenshot":
+                createThumbnailContainer();
                 showScreenshot(message.data);
                 break;
 
@@ -89,6 +86,29 @@ $(function()
 
     /////////////////////////////////////////
     // FUNCTIONS
+    
+    // Create thumbnail container if it doesn't exist
+    function createThumbnailContainer()
+    {
+        if (!thumbnailContainer) {
+            thumbnailContainer = $(document.createElement('div'))
+                .attr('id', ID_THUMBNAIL_CONTAINER)
+                .append($(document.createElement('div')).addClass('background'))
+                .appendTo('body')
+                .css({ 'height':'0px' });
+        }
+    }
+
+    // Create cursor tracker if it doesn't exist
+    function createCursorTracker()
+    {
+        if (!cursorTracker) {
+            cursorTracker = $(document.createElement('div'))
+                .addClass(CLASS_CURSOR_TRACKER)
+                .hide()
+                .appendTo('body');
+        }
+    }
 
     // Show video
     function showVideo(stream)

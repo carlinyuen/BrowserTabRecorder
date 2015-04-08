@@ -1,7 +1,7 @@
 
 #carlin-bug-filer {
     position: fixed;
-    bottom: 0;
+    bottom: -12px;
     right: 0;
     left: 0;
     text-align: left;
