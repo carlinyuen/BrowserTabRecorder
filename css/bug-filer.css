@@ -1,15 +1,29 @@
 
 #carlin-bug-filer {
     position: fixed;
-    bottom: -12px;
+    bottom: -10px;
     right: 0;
     left: 0;
     text-align: left;
     vertical-align: bottom;
-    height: auto;
-    overflow: visible;
+    max-height: 0;
+    overflow: hidden;
     z-index: 999;
-    padding-top: 24px;
+    padding: 24px 0 0 0;
+    transition: max-height 500ms ease-in-out;
+}
+#carlin-bug-filer.show {
+    max-height: 200px;
+}
+#carlin-bug-filer .tab {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    margin-left: -28px;
+    width: 56px;
+    height: 12px;
+    background: url('chrome-extension://__MSG_@@extension_id__/images/tab-icon.png') top center;
+    cursor: pointer;
 }
 #carlin-bug-filer .background {
     position: absolute;
@@ -24,10 +38,11 @@
 
 .carlin-bug-filer-thumbnail {
     position: relative;
-    margin: 0 0 6px 6px;
+    margin-right: 6px;
+    margin-bottom: 18px;    /* +12 from thumbnail container offset */
     bottom: 0;
     width: 200px;
-    height: 150px;
+    height: 128px;
     float: right;
     overflow: visible;
     opacity: 0.5;

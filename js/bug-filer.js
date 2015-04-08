@@ -11,6 +11,7 @@ $(function()
         , IMAGE_DELETE = chrome.extension.getURL('images/x-2x.png')
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
+        , TIME_AUTOHIDE_CONTAINER = 2000    // 2s
         , ID_THUMBNAIL_CONTAINER = 'carlin-bug-filer'
         , CLASS_THUMBNAIL = 'carlin-bug-filer-thumbnail'
         , CLASS_CURSOR_TRACKER = 'carlin-bug-filer-cursor'
@@ -35,17 +36,20 @@ $(function()
     // Listener for mouse movement to show cursor for recording
     $(document).mousemove(function (event) 
     {
-        if (recording) 
+        if (cursorTracker) 
         {
-            cursorTracker.show().css({
-                'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
-                'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
-                'background-image': 'url(' 
-                    + (mousePressed ? IMAGE_CURSOR_PRESSED : IMAGE_CURSOR) + ')',
-            });
-        } 
-        else {
-            cursorTracker.hide();
+            if (recording) 
+            {
+                cursorTracker.show().css({
+                    'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
+                    'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
+                    'background-image': 'url(' 
+                        + (mousePressed ? IMAGE_CURSOR_PRESSED : IMAGE_CURSOR) + ')',
+                });
+            } 
+            else {
+                cursorTracker.hide();
+            }
         }
     });
 
@@ -90,24 +94,36 @@ $(function()
     // Create thumbnail container if it doesn't exist
     function createThumbnailContainer()
     {
-        if (!thumbnailContainer) {
+        // If DNE, create it
+        if (!thumbnailContainer) 
+        {
             thumbnailContainer = $(document.createElement('div'))
                 .attr('id', ID_THUMBNAIL_CONTAINER)
-                .append($(document.createElement('div')).addClass('background'))
-                .appendTo('body')
-                .css({ 'height':'0px' });
+                .append($(document.createElement('div')).addClass('tab')
+                    .click(function (event) {
+                        $('#' + ID_THUMBNAIL_CONTAINER).toggleClass('show');
+                    })
+                )
+                .append($(document.createElement('div')).addClass('background'));
         }
+
+        // Add to body
+        thumbnailContainer.css({ 'bottom':'-24px' })
+            .appendTo('body')
+            .animate({ 'bottom':'-10px' }, 'fast');
     }
 
     // Create cursor tracker if it doesn't exist
     function createCursorTracker()
     {
+        // Create it if it doesn't exist
         if (!cursorTracker) {
             cursorTracker = $(document.createElement('div'))
-                .addClass(CLASS_CURSOR_TRACKER)
-                .hide()
-                .appendTo('body');
+                .addClass(CLASS_CURSOR_TRACKER);
         }
+
+        // Add to body and hide
+        cursorTracker.hide().appendTo('body');
     }
 
     // Show video
@@ -138,7 +154,10 @@ $(function()
 
         // Create video thumbnail and add to document
         videoThumbnail = createThumbnail(url, 'video');
-        videoThumbnail.hide().appendTo('#' + ID_THUMBNAIL_CONTAINER).fadeIn('fast');
+        videoThumbnail.hide().appendTo(thumbnailContainer).fadeIn('fast');
+
+        // If container is not showing yet, show it permanently
+        thumbnailContainer.addClass('show');
     }
 
     // Start video recording
@@ -169,10 +188,16 @@ $(function()
         console.log('showScreenshot:', srcURL);
 
         var imageThumbnail = createThumbnail(srcURL, 'image');
-        imageThumbnail.hide().appendTo(thumbnailContainer);
-        thumbnailContainer.animate({ 'height':'auto' }, 'fast', function() {
-            imageThumbnail.fadeIn('fast');
-        });
+        imageThumbnail.hide().appendTo(thumbnailContainer).fadeIn('fast');
+
+        // If container is not showing yet, show it temporarily
+        if (!thumbnailConainer.hasClass('show')) 
+        {
+            thumbnailContainer.addClass('show');
+            setTimeout(function() {
+                thumbnailContainer.removeClass('show');
+            }, TIME_AUTOHIDE_CONTAINER);
+        }
     }
 
     // Creates a thumbnail div from recording source (image / video), and returns it
@@ -255,13 +280,21 @@ $(function()
                 // Stop video recording if needed
                 if ($video.length && recording) {
                     if ($video.attr('src') == videoThumbnail.find('video').attr('src')) {
+                        console.log('closing currently recording video!');
                         stopVideoRecording();
                     }
                 }
                 
                 // Remove element
-                $this.parent().fadeOut('fast', function() {
+                $this.parent().fadeOut('fast', function() 
+                {
+                    // Delete entire thumbnail
                     $(this).remove();
+
+                    // If there are no more thumbnails, hide container
+                    if (!$('div.' + CLASS_THUMBNAIL).length) {
+                        thumbnailContainer.detach();
+                    }
                 });
             })
         );
