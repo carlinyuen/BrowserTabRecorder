@@ -18,15 +18,17 @@ $(function()
         , CLASS_SHOW_CONTAINER = 'show'
         
         // Cursor tracking
-        , cursorTracker
+        , cursorTracker = null
         , mousePressed = false
 
         // Thumbnail handling
-        , thumbnailContainer
-        , thumbnailHideTimer
+        , thumbnailContainer = null
+        , thumbnailHideTimer = null
 
         // Recording state
         , recording = false
+        , recordingFrameHandle = null
+        , videoRecorder = null
         , videoStream = null    // We only want to have one live one at a time
         , videoThumbnail = null // Track current live video thumbnail
     ;
@@ -45,8 +47,6 @@ $(function()
                 cursorTracker.show().css({
                     'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
                     'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
-                    'background-image': 'url(' 
-                        + (mousePressed ? IMAGE_CURSOR_PRESSED : IMAGE_CURSOR) + ')',
                 });
             } 
             else {
@@ -76,12 +76,20 @@ $(function()
             case "video":
                 createThumbnailContainer();
                 createCursorTracker();
-                showVideo(message.data);
+                showVideo(message.stream, message.sourceURL);
                 break;
 
             case "screenshot":
                 createThumbnailContainer();
-                showScreenshot(message.data);
+                showScreenshot(message.sourceURL);
+                break;
+
+            case "emailAutofill":
+                // TODO
+                break;
+
+            case "cloneBug":
+                // TODO
                 break;
 
             default: break;
@@ -144,57 +152,69 @@ $(function()
     }
 
     // Show video
-    function showVideo(stream)
+    function showVideo(stream, sourceURL)
     {
         console.log('showVideo:');
 
-        // Sanity check
-        if (!stream) 
+        try
         {
-            console.log('ERROR: invalid video stream!');
-            alert('Unable to capture tab video feed.');
-        }
+            // Sanity check
+            if (!stream) 
+            {
+                console.log('ERROR: invalid video stream!');
+                alert('Unable to capture tab video feed.');
+            }
 
-        // Only allow one instance
-        if (videoStream) 
+            // Only allow one instance
+            if (videoStream) 
+            {
+                console.log('ERROR: cannot have two simultaneously active video streams!');
+                alert('Video capture already initiated on this tab!');
+            }
+            else {
+                videoStream = stream;
+            }
+
+            // Create video thumbnail and add to document
+            console.log(sourceURL);
+            videoThumbnail = createThumbnail(sourceURL, 'video');
+            videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
+
+            // If container is not showing yet, show it permanently
+            thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+        }
+        catch (exception)   // If there's errors, stop recording
         {
-            console.log('ERROR: cannot have two simultaneously active video streams!');
-            alert('Video capture already initiated on this tab!');
+            console.log(exception);
+            videoStream = stream = null;
         }
-        else {
-            videoStream = stream;
-        }
-
-        // Create object url for the video stream
-        var url = window.URL.createObjectURL(stream);
-        console.log(url);
-
-        // Create video thumbnail and add to document
-        videoThumbnail = createThumbnail(url, 'video');
-        videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
-
-        // If container is not showing yet, show it permanently
-        thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
     }
 
     // Start video recording
     function startVideoRecording(video)
     {
+        // Hide container
+        thumbnailContainer.removeClass('show');
+        
         // Start recording
         recording = true;
+        videoRecorder = window.VideoRecorder;
+        videoRecorder.init(videoStream);
     }
 
     // Stop video recording
     function stopVideoRecording()
     {
-        // Collate into webm video using Whammy.js
-        // TODO
+        // Get video source url
+        var url = videoRecorder.stop();
 
-        // Set previous video element source to webm file
-        // TODO
+        // Set video element source to webm file
+        var oldURL = videoThumbnail.find('video').attr('src');
+        window.URL.revokeObjectURL(oldURL);
+        videoThumbnail.find('video').attr('src', url);
 
-        // Clear video stream
-        videoStream.stop();
+        // Clear video stream and recorder
+        videoRecorder = null;
         videoStream = null;
         recording = false;
     }

@@ -193,7 +193,7 @@ if (!window.VideoRecorder)
     window.VideoRecorder = (function()
     {
         // Variables
-        var video = document.createElement('video'); // offscreen video.
+        var video = null;
         var canvas = document.createElement('canvas'); // offscreen canvas.
         var rafId = null;
         var startTime = null;
@@ -204,13 +204,17 @@ if (!window.VideoRecorder)
 
         // Setup the video recorder, LocalMediaStream parameter from a getUserMedia()
         //  call is required
-        function init(localMediaStream) 
+        function init(localMediaStream, optionalVideo) 
         {
             if (!localMediaStream) {
                 console.log('ERROR: localMediaStream not defined!');
                 return;
             }
             stream = localMediaStream;
+
+            if (!optionalVideo) {
+                video = document.createElement('video'); // offscreen video.
+            }
 
             document.querySelector('body').appendChild(video);
             video.autoplay = true;
@@ -239,6 +243,19 @@ if (!window.VideoRecorder)
             frames = []; // clear existing frames;
             startTime = Date.now();
 
+            function drawVideoFrame(time) 
+            {
+                rafId = requestAnimationFrame(drawVideoFrame);
+
+                ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+                // Read back canvas as webp.
+                frames.push(canvas.toDataURL('image/webp', 1)); // image/jpeg is way faster :(
+            };
+
+            rafId = requestAnimationFrame(drawVideoFrame);
+
+            /*
             rafId = setInterval(function() 
             {
                 ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -248,12 +265,13 @@ if (!window.VideoRecorder)
                 frames.push(url);
 
             }, 25); // 25 = 40hz
+            */
         };
 
         // Stop video recording
         function stop() 
         {
-            //cancelAnimationFrame(rafId);
+            cancelAnimationFrame(rafId);
             clearInterval(rafId);
             endTime = Date.now();
             stream.stop();
@@ -272,12 +290,17 @@ if (!window.VideoRecorder)
 
             // let's save it locally
             var url = window.URL.createObjectURL(blob);
+
+            /*
             var link = window.document.createElement('a');
             link.href = url;
             link.download = 'output.webm';
             var click = document.createEvent("Event");
             click.initEvent("click", true, true);
             link.dispatchEvent(click);
+            */
+
+            return url;
         };
 
         // Embed video into preview element

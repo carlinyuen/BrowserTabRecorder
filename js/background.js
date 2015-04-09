@@ -32,11 +32,11 @@ chrome.extension.onConnect.addListener(function(port)
                 break;
 
             case "emailAutofill":
-                // TODO
+                sendMessageToActiveTab({ request: 'emailAutofill' });
                 break;
 
             case "cloneBug":
-                // TODO
+                sendMessageToActiveTab({ request: 'cloneBug' });
                 break;
 
             default:
@@ -132,7 +132,7 @@ function captureTabScreenshot()
         {
             sendMessageToActiveTab({
                 request: 'screenshot',
-                data: dataSourceURL,
+                sourceURL: dataSourceURL,
             });
         } 
         else    // Failed
@@ -171,10 +171,9 @@ function captureTabVideo()
                     {
                         console.log('inject videoCapture.js result:', result);
 
-                        // Pass along the local media stream
                         sendMessageToActiveTab({
                             request: 'video',
-                            data: localMediaStream,
+                            stream: localMediaStream,
                         });
                     });
             }

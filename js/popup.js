@@ -29,8 +29,7 @@ $(function()
     {
         console.log("message:", message);
 
-        switch (message.request)
-        {
+        switch (message.request) {
             default: break;
         }
     });

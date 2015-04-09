@@ -22,7 +22,7 @@
     margin-left: -28px;
     width: 56px;
     height: 12px;
-    background: url('chrome-extension://__MSG_@@extension_id__/images/tab-icon.png') top center;
+    background: url('chrome-extension://__MSG_@@extension_id__/images/tab-icon.png') top center no-repeat;
     cursor: pointer;
 }
 #carlin-bug-filer .background {
@@ -123,8 +123,7 @@
     height: 48px;   /* size of image */
     position: absolute;
     z-index: 888;
-    background-position: center center;
-    background-repeat: no-repeat;
+    background: url('chrome-extension://__MSG_@@extension_id__/images/cursor.png') center center no-repeat;
     pointer-events: none !important;
 }
 
