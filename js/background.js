@@ -11,7 +11,7 @@ var popupConnection = null;
 //////////////////////////////////////////////////////////
 // ACTIONS
 
-// Listen for events
+// Listen for events from popup
 chrome.extension.onConnect.addListener(function(port) 
 {
     console.log("Connected to port:", port);
@@ -35,11 +35,34 @@ chrome.extension.onConnect.addListener(function(port)
                 // TODO
                 break;
 
+            case "cloneBug":
+                // TODO
+                break;
+
             default:
                 console.log("Unknown request received!");
                 break;
         }
     });
+});
+
+// Listen for events from content script
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) 
+{
+    console.log('sender:', sender);
+    console.log('message:', message.request);
+
+    // Handle message
+    switch (message.request)
+    {  
+        case "downloadContent":
+            initiateDownload(message.filename, message.contentURL);
+            break;
+
+        default:
+            console.log("Unknown request received!");
+            break;
+    }
 });
 
 // On first install or upgrade
@@ -167,6 +190,22 @@ function captureTabVideo()
 function captureTabGif()
 {
     // TODO
+}
+
+// Initiate download of something
+function initiateDownload(filename, contentURL)
+{
+    console.log('initiateDownload:', filename);
+
+    // Create download link
+    var link = document.createElement('a');
+    link.href = contentURL;
+    link.download = filename;
+
+    // Create fake click
+    var click = document.createEvent("Event");
+    click.initEvent("click", true, true);
+    link.dispatchEvent(click);
 }
 
 

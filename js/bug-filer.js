@@ -84,8 +84,7 @@ $(function()
                 showScreenshot(message.data);
                 break;
 
-            default:
-                break;
+            default: break;
         }
     });
 
@@ -238,12 +237,11 @@ $(function()
                     .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
                     .click(function (event) 
                     {
-                        var link = $(document.createElement('a'))
-                            .attr('href', sourceURL)
-                            .attr('download', 'screenshot.png');
-                        var click = document.createEvent("Event");
-                        click.initEvent("click", true, true);
-                        link.dispatchEvent(click);
+                        chrome.runtime.sendMessage({
+                            request: 'downloadContent',
+                            filename: 'screenshot.png',
+                            contentURL: sourceURL,
+                        });
                     })
                 );
                 break;
@@ -273,12 +271,11 @@ $(function()
                     .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
                     .click(function (event) 
                     {
-                        var link = $(document.createElement('a'))
-                            .attr('href', sourceURL)
-                            .attr('download', 'video.webm');
-                        var click = document.createEvent("Event");
-                        click.initEvent("click", true, true);
-                        link.dispatchEvent(click);
+                        chrome.runtime.sendMessage({
+                            request: 'downloadContent',
+                            filename: 'video.webm',
+                            contentURL: sourceURL,
+                        });
                     })
                 );
                 break;
