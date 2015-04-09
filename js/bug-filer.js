@@ -23,6 +23,7 @@ $(function()
 
         // Thumbnail handling
         , thumbnailContainer
+        , thumbnailHideTimer
 
         // Recording state
         , recording = false
@@ -100,6 +101,15 @@ $(function()
         {
             thumbnailContainer = $(document.createElement('div'))
                 .attr('id', ID_THUMBNAIL_CONTAINER)
+                .mouseenter(function (event) 
+                {
+                    // Clear autohide
+                    if (thumbnailHideTimer) 
+                    {
+                        clearTimeout(thumbnailHideTimer);
+                        thumbnailHideTimer = null;
+                    }
+                })
                 .append($(document.createElement('div')).addClass('tab')
                     .click(function (event) {
                         $('#' + ID_THUMBNAIL_CONTAINER).toggleClass(CLASS_SHOW_CONTAINER);
@@ -108,10 +118,17 @@ $(function()
                 .append($(document.createElement('div')).addClass('background'));
         }
 
+
         // Add to body
-        thumbnailContainer.css({ 'bottom':'-24px' })
-            .appendTo('body')
-            .animate({ 'bottom':'-10px' }, 'fast');
+        if (!thumbnailContainer.parent().length) {
+            thumbnailContainer.appendTo('body');
+        }
+
+        // Animate
+        if (!thumbnailContainer.hasClass(CLASS_SHOW_CONTAINER)) {
+            thumbnailContainer.css({ 'bottom':'-24px' })
+                .animate({ 'bottom':'-10px' }, 'fast');
+        }
     }
 
     // Create cursor tracker if it doesn't exist
@@ -155,7 +172,7 @@ $(function()
 
         // Create video thumbnail and add to document
         videoThumbnail = createThumbnail(url, 'video');
-        videoThumbnail.hide().appendTo(thumbnailContainer).fadeIn('fast');
+        videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
 
         // If container is not showing yet, show it permanently
         thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
@@ -189,13 +206,13 @@ $(function()
         console.log('showScreenshot:', srcURL);
 
         var imageThumbnail = createThumbnail(srcURL, 'image');
-        imageThumbnail.hide().appendTo(thumbnailContainer).fadeIn('fast');
+        imageThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
 
         // If container is not showing yet, show it temporarily
         if (!thumbnailContainer.hasClass(CLASS_SHOW_CONTAINER)) 
         {
             thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
-            setTimeout(function() {
+            thumbnailHideTimer = setTimeout(function() {
                 thumbnailContainer.removeClass(CLASS_SHOW_CONTAINER);
             }, TIME_AUTOHIDE_CONTAINER);
         }
@@ -217,7 +234,7 @@ $(function()
                 container.css({ 'background-image': 'url(' + sourceURL + ')' })
                     .append($(document.createElement('img')).attr('src', sourceURL));
                 result.append($(document.createElement('button'))
-                    .addClass('actionButton')
+                    .addClass('downloadButton')
                     .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
                     .click(function (event) 
                     {
@@ -234,7 +251,7 @@ $(function()
             case "video":
                 container.append($(document.createElement('video')).attr('src', sourceURL));
                 result.append($(document.createElement('button'))
-                    .addClass('actionButton')
+                    .addClass('recordButton')
                     .append($(document.createElement('img')).attr('src', IMAGE_RECORD))
                     .click(function (event) 
                     {
@@ -252,7 +269,7 @@ $(function()
                         }
                     })
                 ).append($(document.createElement('button'))
-                    .addClass('actionButton')
+                    .addClass('downloadButton')
                     .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
                     .click(function (event) 
                     {
