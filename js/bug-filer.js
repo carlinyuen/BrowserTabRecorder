@@ -181,6 +181,7 @@ $(function()
             //var sourceURL = window.webkitURL.createObjectURL(stream);
             console.log("sourceURL:", sourceURL);
 
+            /*
             // Source: http://stackoverflow.com/questions/23847708/pass-large-blob-or-file-from-chrome-extension
             var x = new XMLHttpRequest();
             x.open('GET', sourceURL);
@@ -198,6 +199,7 @@ $(function()
                 thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
             };
             x.send();
+            */
 
             /*
             $.ajax({
@@ -223,14 +225,14 @@ $(function()
                 });
             */
 
-            /*
+            // /*
             // Create video thumbnail and add to document
-            videoThumbnail = createThumbnail(newURL, 'video');
+            videoThumbnail = createThumbnail(sourceURL, 'video');
             videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
 
             // If container is not showing yet, show it permanently
             thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
-            */
+            // */
         }
         catch (exception)   // If there's errors, stop recording
         {

@@ -172,11 +172,30 @@ function captureTabVideo()
                         console.log('inject videoCapture.js result:', result);
                         var sourceURL = window.webkitURL.createObjectURL(localMediaStream);
 
+                        // Trying to regenerate url differently
+                        var x = new XMLHttpRequest();
+                        x.open('GET', sourceURL);
+                        x.responseType = 'blob';
+                        x.onload = function() 
+                        {
+                            var newURL = URL.createObjectURL(x.response);
+                            console.log("newURL:", newURL);
+
+                            sendMessageToActiveTab({
+                                request: 'video',
+                                stream: localMediaStream,
+                                sourceURL: newURL,
+                            });
+                        };
+                        x.send();
+
+                        /*
                         sendMessageToActiveTab({
                             request: 'video',
                             stream: localMediaStream,
                             sourceURL: sourceURL,
                         });
+                        */
                     });
             }
             else    // Failed
