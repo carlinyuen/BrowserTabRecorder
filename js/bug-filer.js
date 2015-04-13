@@ -316,7 +316,9 @@ $(function()
                 break;
 
             case "video":
-                container.append($(document.createElement('video')).attr('src', sourceURL));
+                container.append($(document.createElement('video'))
+                    .attr('autoplay', true)
+                    .attr('src', sourceURL));
                 result.append($(document.createElement('button'))
                     .addClass('recordButton')
                     .append($(document.createElement('img')).attr('src', IMAGE_RECORD))
