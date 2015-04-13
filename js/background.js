@@ -170,10 +170,12 @@ function captureTabVideo()
                     function (result) 
                     {
                         console.log('inject videoCapture.js result:', result);
+                        var sourceURL = window.webkitURL.createObjectURL(localMediaStream);
 
                         sendMessageToActiveTab({
                             request: 'video',
                             stream: localMediaStream,
+                            sourceURL: sourceURL,
                         });
                     });
             }
