@@ -132,7 +132,8 @@ $(function()
         }
 
         // Animate
-        if (!thumbnailContainer.hasClass(CLASS_SHOW_CONTAINER)) {
+        if (!thumbnailContainer.hasClass(CLASS_SHOW_CONTAINER)) 
+        {
             thumbnailContainer.css({ 'bottom':'-24px' })
                 .animate({ 'bottom':'-10px' }, 'fast');
         }
@@ -142,7 +143,8 @@ $(function()
     function createCursorTracker()
     {
         // Create it if it doesn't exist
-        if (!cursorTracker) {
+        if (!cursorTracker) 
+        {
             cursorTracker = $(document.createElement('div'))
                 .addClass(CLASS_CURSOR_TRACKER);
         }
@@ -175,21 +177,64 @@ $(function()
                 videoStream = stream;
             }
 
-            // Create video source url
+            // Get new video source url via AJAX call
             //var sourceURL = window.webkitURL.createObjectURL(stream);
             console.log("sourceURL:", sourceURL);
 
+            // Source: http://stackoverflow.com/questions/23847708/pass-large-blob-or-file-from-chrome-extension
+            x.open('GET', sourceURL);
+            x.responseType = 'blob';
+            x.onload = function() 
+            {
+                var newURL = URL.createObjectURL(x.response);
+                console.log("newURL:", newURL);
+             
+                // Create video thumbnail and add to document
+                videoThumbnail = createThumbnail(newURL, 'video');
+                videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
+
+                // If container is not showing yet, show it permanently
+                thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+            };
+            x.send();
+
+            /*
+            $.ajax({
+                url: sourceURL,
+                dataType: 'blob',
+            })
+                .success(function (response) 
+                {
+                    var newURL = URL.createObjectURL(response);
+                    console.log("newURL:", newURL);
+
+                    // Create video thumbnail and add to document
+                    videoThumbnail = createThumbnail(newURL, 'video');
+                    videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
+
+                    // If container is not showing yet, show it permanently
+                    thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+                })
+                .fail(function (error) 
+                {
+                    console.log(error);
+                    videoStream = null;
+                });
+            */
+
+            /*
             // Create video thumbnail and add to document
-            videoThumbnail = createThumbnail(sourceURL, 'video');
+            videoThumbnail = createThumbnail(newURL, 'video');
             videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
 
             // If container is not showing yet, show it permanently
             thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+            */
         }
         catch (exception)   // If there's errors, stop recording
         {
             console.log(exception);
-            videoStream = stream = null;
+            videoStream = null;
         }
     }
 

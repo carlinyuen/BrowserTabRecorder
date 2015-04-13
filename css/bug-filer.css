@@ -109,13 +109,15 @@
     padding: 0;
     width: 20px;
     height: 20px;
+    vertical-align: middle;
 }
 .carlin-bug-filer-thumbnail button img {
     width: 12px !important;
-    height: 10px !important;
+    height: 12px !important;
     opacity: 1 !important;
     padding: 0 !important;
     margin: 0 !important;
+    vertical-align: middle !important;
 }
 
 .carlin-bug-filer-cursor {
