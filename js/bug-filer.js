@@ -182,6 +182,7 @@ $(function()
             console.log("sourceURL:", sourceURL);
 
             // Source: http://stackoverflow.com/questions/23847708/pass-large-blob-or-file-from-chrome-extension
+            var x = new XMLHttpRequest();
             x.open('GET', sourceURL);
             x.responseType = 'blob';
             x.onload = function() 
