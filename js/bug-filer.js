@@ -76,7 +76,7 @@ $(function()
             case "video":
                 createThumbnailContainer();
                 createCursorTracker();
-                showVideo(message.stream, message.sourceURL);
+                showVideo(message.stream);
                 break;
 
             case "screenshot":
@@ -152,7 +152,7 @@ $(function()
     }
 
     // Show video
-    function showVideo(stream, sourceURL)
+    function showVideo(stream)
     {
         console.log('showVideo:');
 
@@ -175,8 +175,11 @@ $(function()
                 videoStream = stream;
             }
 
+            // Create video source url
+            var sourceURL = window.webkitURL.createObjectURL(stream);
+            console.log("sourceURL:", sourceURL);
+
             // Create video thumbnail and add to document
-            console.log(sourceURL);
             videoThumbnail = createThumbnail(sourceURL, 'video');
             videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
 
