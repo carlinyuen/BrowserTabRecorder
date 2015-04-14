@@ -229,8 +229,7 @@ function stopVideoCapture(callback, sendResponse)
     }
 
     // Stop video capture and save file
-    var videoSourceURL = null;
-    // TODO
+    var videoSourceURL = videoRecorder.stop();
 
     // Check callback
     if (callback) {

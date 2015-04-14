@@ -113,14 +113,20 @@ window.VideoRecorder = (function()
         endTime = Date.now();
 
         // Clean up stream
-        stream.stop();
-        stream = null;
+        try {
+            stream.stop();
+        } catch (exception) {
+            console.log(exception);
+        } finally {
+            stream = null;
+        }
 
         console.log('frames captured: ' + frames.length + ' => ' +
                 ((endTime - startTime) / 1000) + 's video');
 
         // Sanity check
-        if (!frames.length) {
+        if (!frames.length) 
+        {
             console.log('ERROR: 0 frames captured!');
             return null;
         }
@@ -155,7 +161,8 @@ window.VideoRecorder = (function()
     // Exposing functions
     return {
         start: start,
-        stop: stop
+        stop: stop,
+        download: download,
     };
 })();
 
