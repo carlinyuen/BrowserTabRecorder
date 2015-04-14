@@ -6,6 +6,7 @@ console.log('Initializing Bug-Filer v' + MANIFEST.version,
 
 // Variables
 var popupConnection = null;
+var videoConnection = null;
 
 
 //////////////////////////////////////////////////////////
@@ -58,6 +59,13 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
         case "downloadContent":
             initiateDownload(message.filename, message.contentURL);
             break;
+
+        case "videoURL":
+            chrome.tabs.sendMessage(sender.tab.id, {
+                request: "videoURL",
+                stream: videoConnection,
+                sourceURL: window.URL.createObjectURL(videoConnection),
+            });
 
         default:
             console.log("Unknown request received!");
@@ -163,27 +171,21 @@ function captureTabVideo()
             // Send to active tab if capture was successful
             if (localMediaStream)
             {
-                // Inject libraries for video / audio capture
-                chrome.tabs.executeScript(null, {
-                        file: 'js/videoCapture.js'
-                    }, 
-                    function (result) 
-                    {
-                        console.log('inject videoCapture.js result:', result);
-                        var sourceURL = window.URL.createObjectURL(localMediaStream);
+                videoConnection = localMediaStream;
+                var sourceURL = window.URL.createObjectURL(localMediaStream);
 
-                        // Send to active tab
-                        sendMessageToActiveTab({
-                            request: 'video',
-                            stream: localMediaStream,
-                            sourceURL: sourceURL,
-                        });
-                    });
+                // Send to active tab
+                sendMessageToActiveTab({
+                    request: 'video',
+                    stream: localMediaStream,
+                    sourceURL: sourceURL,
+                });
             }
             else    // Failed
             {
                 console.log("ERROR: could not capture video")
                 console.log(chrome.runtime.lastError);
+                videoConnection = null;
             }
         });
 }

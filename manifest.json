@@ -41,5 +41,7 @@
 	]
     , "web_accessible_resources": [
         "images/*"
+        , "video.html"
+        , "js/video.js"
     ]
 }
