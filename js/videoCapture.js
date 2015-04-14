@@ -7,49 +7,68 @@
 window.VideoRecorder = (function()
 {
     // Variables
-    var video = null;
-    var canvas = document.createElement('canvas'); // offscreen canvas.
-    var rafId = null;
-    var startTime = null;
-    var endTime = null;
-    var frames = [];
-    var videoLoaded = false;
-    var stream = null;
+    var video = document.createElement('video')     // offscreen video
+        , canvas = document.createElement('canvas') // offscreen canvas
+        , rafId = null                  // Handle for animation request function
+        , startTime = null              // Timer to track recording length
+        , endTime = null                // Timer to track recording length
+        , stream = null                 // Reference to video stream to record from
+        , frames = []                   // Storage for video frames captured
+        , recordedVideoURL = null       // Source url for last recorded video
+    ;
 
-    // Setup the video recorder, LocalMediaStream parameter from a getUserMedia()
-    //  call is required
-    function init(localMediaStream, optionalVideo) 
+    // Initialize recorder
+    init();
+
+
+    // Setup the video recorder
+    function init() 
     {
-        if (!localMediaStream) {
-            console.log('ERROR: localMediaStream not defined!');
-            return;
-        }
-        stream = localMediaStream;
-
-        if (!optionalVideo) {
-            video = document.createElement('video'); // offscreen video.
-        }
-
         document.querySelector('body').appendChild(video);
         video.autoplay = true;
-        video.src = window.URL.createObjectURL(localMediaStream);
         video.onloadedmetadata = function() 
         {
             video.width = video.clientWidth;
             video.height = video.clientHeight;
             canvas.width = video.width;
             canvas.height = video.height;
-            videoLoaded = true;
             console.log('video loaded');
 
-            start();
+            // Begin recording
+            record();
         };
     };
 
-    // Start recording
-    function start() 
+    // Start recording off the LocalMediaStream parameter from a getUserMedia()
+    function start(localMediaStream) 
     {
-        console.log('start recording');
+        console.log('VideoRecorder : start()');
+
+        if (!localMediaStream) 
+        {
+            console.log('ERROR: localMediaStream not defined!');
+            return false;
+        } 
+        else if (stream)    // Can't record more than one
+        {
+            console.log('ERROR: already recording another video!');
+            return false;
+        }
+        else {
+            stream = localMediaStream;
+        }
+
+        // Set video source to begin loading video
+        video.src = window.URL.createObjectURL(localMediaStream);
+
+        return true;
+    }
+
+    // Begin actual recording of video frames
+    function record()
+    {
+        console.log('VideoRecorder : record()');
+
         var ctx = canvas.getContext('2d');
         var CANVAS_HEIGHT = canvas.height;
         var CANVAS_WIDTH = canvas.width;
@@ -57,6 +76,7 @@ window.VideoRecorder = (function()
         frames = []; // clear existing frames;
         startTime = Date.now();
 
+        // Frame redraw function
         function drawVideoFrame(time) 
         {
             rafId = requestAnimationFrame(drawVideoFrame);
@@ -82,13 +102,19 @@ window.VideoRecorder = (function()
         */
     };
 
-    // Stop video recording
+    // Stop video recording and return source URL for compiled webm video
     function stop() 
     {
+        console.log('VideoRecorder : stop()');
+
+        // Stop recording
         cancelAnimationFrame(rafId);
-        clearInterval(rafId);
+        //clearInterval(rafId);
         endTime = Date.now();
+
+        // Clean up stream
         stream.stop();
+        stream = null;
 
         console.log('frames captured: ' + frames.length + ' => ' +
                 ((endTime - startTime) / 1000) + 's video');
@@ -96,64 +122,38 @@ window.VideoRecorder = (function()
         // Sanity check
         if (!frames.length) {
             console.log('ERROR: 0 frames captured!');
-            return;
+            return null;
         }
 
-        // our final binary blob
-        var blob = Whammy.fromImageArray(frames, 1000 / 60);
+        // Compile our final binary video blob and create a source URL to it
+        var videoBlob = Whammy.fromImageArray(frames, 1000 / 60);
+        recordedVideoURL = window.URL.createObjectURL(videoBlob);
+        console.log('sourceURL:', sourceURL);
 
-        // let's save it locally
-        var url = window.URL.createObjectURL(blob);
+        // Cleanup
+        frames = [];
 
-        /*
+        return sourceURL;
+    };
+
+    // Download last recorded video
+    function download()
+    {
+        console.log("VideoRecorder : download()");
+
+        // Create download link
         var link = window.document.createElement('a');
-        link.href = url;
-        link.download = 'output.webm';
+        link.href = recordedVideoURL;
+        link.download = 'video.webm';
+
+        // Fire off fake click to trigger download
         var click = document.createEvent("Event");
         click.initEvent("click", true, true);
         link.dispatchEvent(click);
-        */
-
-        return url;
-    };
-
-    // Embed video into preview element
-    function embedVideoPreview() 
-    {
-        var url = null;
-        var video = $('#video-preview video') || null;
-        var downloadLink = $('#video-preview a[download]') || null;
-
-        if (!video) 
-        {
-            video = document.createElement('video');
-            video.autoplay = true;
-            video.controls = true;
-            video.loop = true;
-            video.style.width = canvas.width + 'px';
-            video.style.height = canvas.height + 'px';
-            $('#video-preview').appendChild(video);
-
-            downloadLink = document.createElement('a');
-            downloadLink.download = 'capture.webm';
-            downloadLink.textContent = '[ download video ]';
-            downloadLink.title = 'Download your .webm video';
-            var p = document.createElement('p');
-            p.appendChild(downloadLink);
-
-            $('#video-preview').appendChild(p);
-
-        } else {
-            window.URL.revokeObjectURL(video.src);
-        }
-
-        video.src = url;
-        downloadLink.href = url;
     }
 
     // Exposing functions
     return {
-        init: init,
         start: start,
         stop: stop
     };
