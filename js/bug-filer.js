@@ -160,90 +160,25 @@ $(function()
     }
 
     // Show video
-    function showVideo(stream, sourceURL)
+    function showVideo(video)
     {
         console.log('showVideo:');
 
         try
         {
             // Sanity check
-            if (!stream) 
+            if (!video) 
             {
-                console.log('ERROR: invalid video stream!');
+                console.log('ERROR: invalid video!');
                 alert('Unable to capture tab video feed.');
             }
 
-            // Only allow one instance
-            if (videoStream) 
-            {
-                console.log('ERROR: cannot have two simultaneously active video streams!');
-                alert('Video capture already initiated on this tab!');
-            }
-            else {
-                videoStream = stream;
-            }
-
-            // Generate video source url
-            //  -- DOES NOT WORK, gives error about no instance of function found
-            //var sourceURL = window.webkitURL.createObjectURL(stream);
-            console.log("sourceURL:", sourceURL);
-
-            /*
-            // Get new video source url via AJAX call
-            // Source: http://stackoverflow.com/questions/23847708/pass-large-blob-or-file-from-chrome-extension
-            var x = new XMLHttpRequest();
-            x.open('GET', sourceURL);
-            x.responseType = 'blob';
-            x.onload = function() 
-            {
-                var newURL = window.URL.createObjectURL(x.response);
-                console.log("newURL:", newURL);
-             
-                // Create video thumbnail and add to document
-                videoThumbnail = createThumbnail(newURL, 'video');
-                videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
-
-                // If container is not showing yet, show it permanently
-                thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
-            };
-            x.send();
-            */
-
-            /*
-            $.ajax({
-                url: sourceURL,
-                dataType: 'blob',
-            })
-                .success(function (response) 
-                {
-                    var newURL = URL.createObjectURL(response);
-                    console.log("newURL:", newURL);
-
-                    // Create video thumbnail and add to document
-                    videoThumbnail = createThumbnail(newURL, 'video');
-                    videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
-
-                    // If container is not showing yet, show it permanently
-                    thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
-                })
-                .fail(function (error) 
-                {
-                    console.log(error);
-                    videoStream = null;
-                });
-            */
-
-            // /*
             // Create video thumbnail and add to document
-            //videoThumbnail = createThumbnail(sourceURL, 'video');
-            videoThumbnail = $(document.createElement('iframe'))
-                .addClass(CLASS_THUMBNAIL)
-                .attr('src', chrome.runtime.getURL('video.html'));
+            videoThumbnail = createThumbnail(video, 'video');
             videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
 
             // If container is not showing yet, show it permanently
             thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
-            // */
         }
         catch (exception)   // If there's errors, stop recording
         {
