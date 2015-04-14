@@ -1,10 +1,7 @@
-console.log('Initializing Bug-Filer');
-
 $(function()
 {
     // Variables & Constants
     var IMAGE_CURSOR = chrome.extension.getURL("images/cursor.png")
-        , IMAGE_CURSOR_PRESSED = chrome.extension.getURL('images/cursor_pressed.png')
         , IMAGE_DOWNLOAD = chrome.extension.getURL('images/data-transfer-download-2x.png')
         , IMAGE_RECORD = chrome.extension.getURL('images/media-record-2x.png')
         , IMAGE_STOP_RECORD = chrome.extension.getURL('images/media-stop-2x.png')
@@ -19,7 +16,6 @@ $(function()
         
         // Cursor tracking
         , cursorTracker = null
-        , mousePressed = false
 
         // Thumbnail handling
         , thumbnailContainer = null
@@ -27,7 +23,6 @@ $(function()
 
         // Recording state
         , recording = false
-        , recordingFrameHandle = null
         , currentVideoThumbnail = null  // Track current live video thumbnail
     ;
 
@@ -42,24 +37,12 @@ $(function()
         {
             if (recording) 
             {
-                cursorTracker.show().css({
+                cursorTracker.css({
                     'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
                     'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
                 });
             } 
-            else {
-                cursorTracker.hide();
-            }
         }
-    });
-
-    // Listener to track mouse press state
-    $(document).mousedown(function (event) {
-        mousePressed = true;
-    }).mouseup(function (event) {
-        mousePressed = false;
-    }).mouseout(function (event) {
-        mousePressed = false;
     });
 
     // Listener for messages from background
@@ -215,6 +198,9 @@ $(function()
 
             // Hide container
             thumbnailContainer.removeClass('show');
+
+            // Show cursor tracker
+            cursorTracker.fadeIn('fast');
             
             // Set recording to true
             recording = true;
@@ -247,6 +233,9 @@ $(function()
                 });
             currentVideoThumbnail = null;
         }
+
+        // Hide cursor tracker
+        cursorTracker.fadeOut('fast');
 
         // Set recording state to false
         recording = false;
