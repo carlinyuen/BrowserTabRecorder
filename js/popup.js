@@ -5,59 +5,61 @@ $(function()
     // Variables & Constants
     var TIME_SAVE_DELAY = 250    // 250ms is average human reaction time
         , saveTimerHandle
-        , $fields = $('input,textarea')
+        , $fields
     ;
 
-	// Button handlers
-	$('#screenshotButton').click(takeScreenshot);
-	$('#videoButton').click(captureVideo);
-	$('#emailButton').click(autofillFromEmail);
-	$('#resetButton').click(clearDetails);
-	$('#createButton').click(createBug);
-
-    // Key listeners to fields to save details
-    $fields.on("keyup paste cut", saveDetails);
-
-	// Prevent form submit
-	$('form').submit(function(event) {
-		event.preventDefault();
-	});
-
-    // Setup consistent connection with background.js
-    var port = chrome.extension.connect({name: "Popup"});
-    port.onMessage.addListener(function(message)
-    {
-        console.log("message:", message);
-
-        switch (message.request) {
-            default: break;
-        }
-    });
-
-    // Load latest details
-    loadDetails();
-
-    // Focus on title field
-    // TODO: not sure why this doesn't work...
-    $('#bugTitle').focus();
-
+    init();
 
     //////////////////////////////////////////////////////////
     // FUNCTIONS
+    
+    // Initialize the popup
+    function init()
+    {
+        // Setting variables
+        $fields = $('input,textarea');
+
+        // Button handlers
+        $('#screenshotButton').click(takeScreenshot);
+        $('#videoButton').click(captureVideo);
+        $('#emailButton').click(autofillFromEmail);
+        $('#cloneButton').click(cloneFromBuganizer);
+        $('#resetButton').click(clearDetails);
+        $('#createButton').click(createBug);
+
+        // Key listeners to fields to save details
+        $fields.on("keyup paste cut", saveDetails);
+
+        // Prevent form submit
+        $('form').submit(function(event) {
+            event.preventDefault();
+        });
+
+        // Load latest details
+        loadDetails();
+
+        // Focus on title field
+        $('#bugTitle').focus();
+    }
   
     // Take screenshot of the active tab
     function takeScreenshot() {
-        port.postMessage({request: "captureTabScreenshot"});
+        chrome.runtime.sendMessage({request: "captureTabScreenshot"});
     }
     
     // Initiate video capture of the active tab
     function captureVideo() {        
-        port.postMessage({request: "captureTabVideo"});
+        chrome.runtime.sendMessage({request: "captureTabVideo"});
     }
 
     // Fill title / description from email
     function autofillFromEmail() {
-        port.postMessage({request: "emailAutofill"});
+        chrome.runtime.sendMessage({request: "emailAutofill"});
+    }
+
+    // Clone bug from buganizer
+    function autofillFromEmail() {
+        chrome.runtime.sendMessage({request: "emailAutofill"});
     }
 
     // Create a new bug by using url parameters

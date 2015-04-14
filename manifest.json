@@ -11,7 +11,10 @@
 	}
 	, "default_locale": "en"
 	, "background": {
-		"scripts": [ "js/background.js" ]
+		"scripts": [ 
+            "js/videoCapture.js"
+            , "js/background.js"
+        ]
 	}
     , "browser_action": {
         "default_icon": {
@@ -28,16 +31,13 @@
 			"js/third_party/jquery-2.1.0.min.js"
 			, "js/bug-filer.js"
 		]
-		, "run_at": "document_start"
+		, "run_at": "document_idle"
 	}]
-	, "options_page": "options.html"
 	, "permissions": [
         "activeTab"
-        , "tabs"
         , "storage"
 		, "unlimitedStorage"
         , "tabCapture"
-        , "<all_urls>"
 	]
     , "web_accessible_resources": [
         "images/*"

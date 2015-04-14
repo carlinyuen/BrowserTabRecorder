@@ -28,9 +28,7 @@ $(function()
         // Recording state
         , recording = false
         , recordingFrameHandle = null
-        , videoRecorder = null
-        , videoStream = null    // We only want to have one live one at a time
-        , videoThumbnail = null // Track current live video thumbnail
+        , currentVideoThumbnail = null  // Track current live video thumbnail
     ;
 
 
@@ -76,12 +74,20 @@ $(function()
             case "video":
                 createThumbnailContainer();
                 createCursorTracker();
-                showVideo(message.stream, message.sourceURL);
+                createVideoThumbnail();
                 break;
 
             case "screenshot":
                 createThumbnailContainer();
-                showScreenshot(message.sourceURL);
+                createScreenshotThumbnail(message.sourceURL);
+                break;
+
+            case "videoRecordingStarted":
+                videoRecordingStarted(message.stream);
+                break;
+
+            case "videoRecordingStopped":
+                videoRecordingStopped(message.sourceURL);
                 break;
 
             case "emailAutofill":
@@ -159,70 +165,116 @@ $(function()
         cursorTracker.hide().appendTo('body');
     }
 
-    // Show video
-    function showVideo(video)
+    // Create a container for the video
+    function createVideoThumbnail()
     {
-        console.log('showVideo:');
+        console.log('createVideoThumbnail()');
 
         try
         {
-            // Sanity check
-            if (!video) 
-            {
-                console.log('ERROR: invalid video!');
-                alert('Unable to capture tab video feed.');
-            }
-
             // Create video thumbnail and add to document
-            videoThumbnail = createThumbnail(video, 'video');
-            videoThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
+            createThumbnail('video')
+                .hide()
+                .appendTo(thumbnailContainer)
+                .slideDown('fast');
 
             // If container is not showing yet, show it permanently
             thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
         }
-        catch (exception)   // If there's errors, stop recording
-        {
+        catch (exception) {   // If there's errors, stop recording
             console.log(exception);
-            videoStream = null;
         }
     }
 
     // Start video recording
-    function startVideoRecording(video)
+    function startVideoRecording($target)
     {
-        // Hide container
-        thumbnailContainer.removeClass('show');
-        
-        // Start recording
-        recording = true;
-        videoRecorder = window.VideoRecorder;
-        videoRecorder.init(videoStream);
+        // Track which video thumbnail is being recorded
+        if ($target) {
+            currentVideoThumbnail = $target.parents('.' + CLASS_THUMBNAIL);
+        }
+
+        // Tell background page to start recording
+        chrome.runtime.sendMessage({
+            request: 'startVideoRecording',
+        });
+    }
+
+    // Video recording started
+    function videoRecordingStarted(stream)
+    {
+        // Sanity check
+        if (stream) 
+        {
+            // If currentVideoThumbnail exists, change record button
+            if (currentVideoThumbnail) 
+            {
+                currentVideoThumbnail.find('.recordButton img')
+                    .attr('src', IMAGE_STOP_RECORD);
+            }
+
+            // Hide container
+            thumbnailContainer.removeClass('show');
+            
+            // Set recording to true
+            recording = true;
+        }
+        else    // Error
+        {
+            console.log('ERROR: invalid video stream!');
+            alert('Unable to capture tab video feed.');
+        }
     }
 
     // Stop video recording
     function stopVideoRecording()
     {
-        // Get video source url
-        var url = videoRecorder.stop();
-
-        // Set video element source to webm file
-        var oldURL = videoThumbnail.find('video').attr('src');
-        window.URL.revokeObjectURL(oldURL);
-        videoThumbnail.find('video').attr('src', url);
-
-        // Clear video stream and recorder
-        videoRecorder = null;
-        videoStream = null;
-        recording = false;
+        // Tell background page to stop recording
+        chrome.runtime.sendMessage({
+            request: 'stopVideoRecording',
+        });
     }
 
-    // Show screenshot
-    function showScreenshot(srcURL)
+    // Video recording stopped
+    function videoRecordingStopped(sourceURL)
     {
-        console.log('showScreenshot:', srcURL);
+        // Remove / hide recording button on thumbnail if exists
+        if (currentVideoThumbnail)
+        {
+            currentVideoThumbnail.find('.recordButton')
+                .fadeOut('fast', function() {
+                    $(this).remove();
+                });
+            currentVideoThumbnail = null;
+        }
 
-        var imageThumbnail = createThumbnail(srcURL, 'image');
-        imageThumbnail.hide().appendTo(thumbnailContainer).slideDown('fast');
+        // Set recording state to false
+        recording = false;
+
+        // Sanity check
+        if (sourceURL)
+        {
+            // Set video element source to webm file
+            currentVideoThumbnail.find('video')
+                .attr('src', sourceURL);
+        }
+        else    // Error
+        {
+            console.log('Error creating video file from video feed!');
+            alert('Error creating video file from video feed!');
+        }
+    }
+
+    // Create screenshot container element
+    function createScreenshotThumbnail(srcURL)
+    {
+        console.log('createScreenshotThumbnail:', srcURL);
+
+        // Create image thumbnail container
+        createThumbnail('image', srcURL)
+            .hide()
+            .appendTo(thumbnailContainer)
+            .slideDown('fast');
 
         // If container is not showing yet, show it temporarily
         if (!thumbnailContainer.hasClass(CLASS_SHOW_CONTAINER)) 
@@ -235,7 +287,7 @@ $(function()
     }
 
     // Creates a thumbnail div from recording source (image / video), and returns it
-    function createThumbnail(sourceURL, type)
+    function createThumbnail(type, sourceURL)
     {
         // Create base thumbnail div
         var result = $(document.createElement('div')).addClass(CLASS_THUMBNAIL)
@@ -265,24 +317,16 @@ $(function()
 
             case "video":
                 container.append($(document.createElement('video'))
-                    .attr('autoplay', true)
-                    .attr('src', sourceURL));
+                    .attr('autoplay', true);
                 result.append($(document.createElement('button'))
                     .addClass('recordButton')
                     .append($(document.createElement('img')).attr('src', IMAGE_RECORD))
                     .click(function (event) 
                     {
-                        if (!recording)     // Not yet recording, start recording
-                        {
-                            startVideoRecording();
-                            $(this).find('img').attr('src', IMAGE_STOP_RECORD);
-                        }
-                        else    // Already recording, stop recording and delete button
-                        {
-                            stopVideoRecording();
-                            $(this).fadeOut('fast', function() {
-                                $(this).remove();
-                            });
+                        if (!recording) {    // Not yet recording, start recording
+                            startVideoRecording($(this));
+                        } else {   // Already recording, stop recording
+                            stopVideoRecording($(this));
                         }
                     })
                 ).append($(document.createElement('button'))
@@ -308,12 +352,13 @@ $(function()
             .append($(document.createElement('img')).attr('src', IMAGE_DELETE))
             .click(function (event) 
             {
-                var $this = $(this)
-                    , $video = $this.siblings('video');
+                var $this = $(this);
 
                 // Stop video recording if needed
-                if ($video.length && recording) {
-                    if ($video.attr('src') == videoThumbnail.find('video').attr('src')) {
+                if (recording) 
+                {
+                    if ($this.sibling('.recordButton').find('img').attr('src') == IMAGE_STOP_RECORD) 
+                    {
                         console.log('closing currently recording video!');
                         stopVideoRecording();
                     }
