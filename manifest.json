@@ -33,9 +33,11 @@
 	, "options_page": "options.html"
 	, "permissions": [
         "activeTab"
+        , "tabs"
         , "storage"
 		, "unlimitedStorage"
         , "tabCapture"
+        , "<all_urls>"
 	]
     , "web_accessible_resources": [
         "images/*"

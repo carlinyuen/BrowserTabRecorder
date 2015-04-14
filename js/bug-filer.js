@@ -110,14 +110,20 @@ $(function()
                 .attr('id', ID_THUMBNAIL_CONTAINER)
                 .mouseenter(function (event) 
                 {
-                    // Clear autohide
-                    if (thumbnailHideTimer) 
+                    if (thumbnailHideTimer) // Clear autohide
                     {
                         clearTimeout(thumbnailHideTimer);
                         thumbnailHideTimer = null;
                     }
                 })
                 .append($(document.createElement('div')).addClass('tab')
+                    .mouseenter(function (event) 
+                    {
+                        var container = $('#' + ID_THUMBNAIL_CONTAINER);
+                        if (!container.hasClass(CLASS_SHOW_CONTAINER)) {
+                            container.addClass(CLASS_SHOW_CONTAINER);
+                        }
+                    })
                     .click(function (event) {
                         $('#' + ID_THUMBNAIL_CONTAINER).toggleClass(CLASS_SHOW_CONTAINER);
                     })
@@ -177,18 +183,19 @@ $(function()
                 videoStream = stream;
             }
 
-            // Get new video source url via AJAX call
+            // Generate video source url
+            //  -- DOES NOT WORK, gives error about no instance of function found
             //var sourceURL = window.webkitURL.createObjectURL(stream);
             console.log("sourceURL:", sourceURL);
 
-            /*
+            // Get new video source url via AJAX call
             // Source: http://stackoverflow.com/questions/23847708/pass-large-blob-or-file-from-chrome-extension
             var x = new XMLHttpRequest();
             x.open('GET', sourceURL);
             x.responseType = 'blob';
             x.onload = function() 
             {
-                var newURL = URL.createObjectURL(x.response);
+                var newURL = window.URL.createObjectURL(x.response);
                 console.log("newURL:", newURL);
              
                 // Create video thumbnail and add to document
@@ -199,7 +206,6 @@ $(function()
                 thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
             };
             x.send();
-            */
 
             /*
             $.ajax({

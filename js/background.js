@@ -170,7 +170,7 @@ function captureTabVideo()
                     function (result) 
                     {
                         console.log('inject videoCapture.js result:', result);
-                        var sourceURL = window.webkitURL.createObjectURL(localMediaStream);
+                        var sourceURL = window.URL.createObjectURL(localMediaStream);
 
                         // Send to active tab
                         sendMessageToActiveTab({
