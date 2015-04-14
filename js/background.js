@@ -1,12 +1,12 @@
-
-// Constants
 var MANIFEST = chrome.runtime.getManifest();     // Manifest reference
 console.log('Initializing Bug-Filer v' + MANIFEST.version, 
         chrome.i18n.getMessage('@@ui_locale'));
 
 // Variables
-var popupConnection = null;
-var videoConnection = null;
+var popupConnection = null      // Handle for port connection to popup
+    , videoConnection = null    // Handle for video capture stream
+    , videoRecorder = null      // Reference to video recording object
+;
 
 
 //////////////////////////////////////////////////////////
@@ -25,11 +25,11 @@ chrome.extension.onConnect.addListener(function(port)
         switch (message.request)
         {
             case "captureTabVideo":
-                captureTabVideo();
+                sendMessageToActiveTab(message);
                 break;
 
             case "captureTabScreenshot":
-                captureTabScreenshot();
+                captureTabScreenshot(message);
                 break;
 
             case "emailAutofill":
@@ -68,8 +68,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             // TODO: stop recording and pass video to response
             break;
 
-        case "updatePopup":
-            // Tell popup to update its fields
+        case "updatePopup":     // Tell popup to update its fields
             if (popupConnection) {
                 popupConnection.postMessage({request: "update"});
             }
@@ -132,7 +131,7 @@ function sendMessageToActiveTab(message)
 }
 
 // Capture screenshot from the current active tab
-function captureTabScreenshot()
+function captureTabScreenshot(data)
 {
     console.log('captureTabScreenshot');
 
@@ -146,10 +145,8 @@ function captureTabScreenshot()
         // Send to active tab if capture was successful
         if (dataSourceURL) 
         {
-            sendMessageToActiveTab({
-                request: 'screenshot',
-                sourceURL: dataSourceURL,
-            });
+            data.sourceURL = dataSourceURL;
+            sendMessageToActiveTab(data);
         } 
         else    // Failed
         {
@@ -166,7 +163,7 @@ function captureTabVideo()
 
     // Capture audio at the same time, can record both
     chrome.tabCapture.capture({
-            audio: true,
+            audio: false,
             video: true,
             videoConstraints: {
                 mandatory: {

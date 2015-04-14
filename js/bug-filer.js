@@ -35,15 +35,12 @@ $(function()
     // Listener for mouse movement to show cursor for recording
     $(document).mousemove(function (event) 
     {
-        if (cursorTracker) 
+        if (cursorTracker && recording) 
         {
-            if (recording) 
-            {
-                cursorTracker.css({
-                    'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
-                    'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
-                });
-            } 
+            cursorTracker.css({
+                'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
+                'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
+            });
         }
     });
 
@@ -56,13 +53,13 @@ $(function()
         // Handle message
         switch (message.request)
         {
-            case "video":
+            case "captureTabVideo":
                 createThumbnailContainer();
                 createCursorTracker();
                 createVideoThumbnail();
                 break;
 
-            case "screenshot":
+            case "captureTabScreenshot":
                 createThumbnailContainer();
                 createScreenshotThumbnail(message.sourceURL);
                 break;
@@ -83,7 +80,9 @@ $(function()
                 cloneFromBuganizer();
                 break;
 
-            default: break;
+            default: 
+                console.log("Unknown request received!");
+                break;
         }
     });
 

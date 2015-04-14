@@ -18,16 +18,19 @@ $(function()
         // Handle message
         switch (message.request)
         {
-            case "update":
-                // Update fields
+            case "update":  // Update fields
                 loadDetails();
                 break;
 
-            default: break;
+            default: 
+                console.log("Unknown request received!");
+                break;
         }
     });
 
+    // Initialize popup
     init();
+
 
     //////////////////////////////////////////////////////////
     // FUNCTIONS
