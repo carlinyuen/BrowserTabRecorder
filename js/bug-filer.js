@@ -64,14 +64,6 @@ $(function()
                 createScreenshotThumbnail(message.sourceURL);
                 break;
 
-            case "videoRecordingStarted":
-                videoRecordingStarted(message.stream);
-                break;
-
-            case "videoRecordingStopped":
-                videoRecordingStopped(message.sourceURL);
-                break;
-
             case "emailAutofill":
                 autofillFromEmail(message.fields);
                 break;
@@ -208,8 +200,8 @@ $(function()
         }
         else    // Error
         {
-            console.log('ERROR: invalid video stream!');
-            alert('Unable to capture tab video feed.');
+            console.log('ERROR: invalid video stream or already recording another tab!');
+            alert('Unable to capture tab video feed or already recording another tab!');
         }
     }
 
@@ -250,8 +242,8 @@ $(function()
         }
         else    // Error
         {
-            console.log('Error creating video file from video feed!');
-            alert('Error creating video file from video feed!');
+            console.log('Error recording video file from video feed!');
+            alert('Error recording video file from video feed!');
         }
     }
 

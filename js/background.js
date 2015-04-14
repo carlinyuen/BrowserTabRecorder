@@ -165,6 +165,13 @@ function captureTabVideo(sendResponse)
 {
     console.log("captureTabVideo");
 
+    // Sanity check, can only record one at a time
+    if (videoConnection) 
+    {
+        sendResponse(null);     // Send back nothing
+        return;
+    }
+
     // Capture only video from the tab
     chrome.tabCapture.capture({
             audio: false,
@@ -180,15 +187,18 @@ function captureTabVideo(sendResponse)
             // Send to active tab if capture was successful
             if (localMediaStream)
             {
+                // Store stream for reference
                 videoConnection = localMediaStream;
 
-                // TODO: Start recording
+                // Start recording
+                videoRecorder = 
             }
             else    // Failed
             {
                 console.log("ERROR: could not capture video")
                 console.log(chrome.runtime.lastError);
                 videoConnection = null;
+                videoRecorder = null;
             }
 
             // Send to response
@@ -199,6 +209,16 @@ function captureTabVideo(sendResponse)
 // Stop video capture and send compiled .webm video file to sendResponse()
 function stopVideoCapture(sendResponse)
 {
+    // Sanity check
+    if (!videoRecorder || !videoConnection) 
+    {
+        videoConnection = null;
+        videoRecorder = null;
+        sendResponse(null);     // Send back nothing
+        return;
+    }
+
+    // Stop video capture and save file
 }
 
 // Capture gif from the current active tab
