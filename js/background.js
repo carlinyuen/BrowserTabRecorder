@@ -1,3 +1,10 @@
+/* Required: 
+ *  js/third_party/whammy.js
+ *  js/third_party/gifshot.min.js
+ *  js/videoCapture.js
+ *  js/audioCapture.js
+ */
+
 var MANIFEST = chrome.runtime.getManifest();     // Manifest reference
 console.log('Initializing Bug-Filer v' + MANIFEST.version, 
         chrome.i18n.getMessage('@@ui_locale'));
@@ -5,7 +12,7 @@ console.log('Initializing Bug-Filer v' + MANIFEST.version,
 // Variables
 var popupConnection = null      // Handle for port connection to popup
     , videoConnection = null    // Handle for video capture stream
-    , videoRecorder = null      // Reference to video recording object
+    , videoRecorder = Vid      // Reference to video recording object
 ;
 
 
@@ -191,14 +198,12 @@ function captureTabVideo(sendResponse)
                 videoConnection = localMediaStream;
 
                 // Start recording
-                videoRecorder = 
             }
             else    // Failed
             {
                 console.log("ERROR: could not capture video")
                 console.log(chrome.runtime.lastError);
                 videoConnection = null;
-                videoRecorder = null;
             }
 
             // Send to response
@@ -211,10 +216,9 @@ function captureTabVideo(sendResponse)
 function stopVideoCapture(callback, sendResponse)
 {
     // Sanity check
-    if (!videoRecorder || !videoConnection) 
+    if (!videoConnection) 
     {
         videoConnection = null;
-        videoRecorder = null;
         sendResponse(null);     // Send back nothing
         return;
     }

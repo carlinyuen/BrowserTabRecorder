@@ -1,4 +1,4 @@
-// Required: js/config.js
+/* Required: js/config.js */
 
 $(function()
 {
