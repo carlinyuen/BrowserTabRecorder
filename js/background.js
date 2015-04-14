@@ -98,7 +98,7 @@ chrome.runtime.onInstalled.addListener(function(details)
 
     // On first install
 	if (details.reason == "install") {
-        chrome.tabs.create({url: "options.html"});  // Open up options page
+        //chrome.tabs.create({url: "options.html"});  // Open up options page
 	}
 
 	// If upgrading to new version number
