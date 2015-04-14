@@ -12,7 +12,10 @@
 	, "default_locale": "en"
 	, "background": {
 		"scripts": [ 
-            "js/videoCapture.js"
+            "js/whammy.js"
+            , "js/gifshot.min.js"
+            , "js/audioCapture.js"
+            , "js/videoCapture.js"
             , "js/background.js"
         ]
 	}

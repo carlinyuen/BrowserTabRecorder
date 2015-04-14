@@ -206,8 +206,9 @@ function captureTabVideo(sendResponse)
         });
 }
 
-// Stop video capture and send compiled .webm video file to sendResponse()
-function stopVideoCapture(sendResponse)
+// Stop video capture and build compiled .webm video file
+//  If callback DNE, send video to sendResponse(), otherwise pass along video
+function stopVideoCapture(callback, sendResponse)
 {
     // Sanity check
     if (!videoRecorder || !videoConnection) 
@@ -219,12 +220,31 @@ function stopVideoCapture(sendResponse)
     }
 
     // Stop video capture and save file
+    var videoSourceURL = null;
+    // TODO
+
+    // Check callback
+    if (callback) {
+        callback(videoSourceURL, sendResponse);
+    }
 }
 
 // Capture gif from the current active tab
-function captureTabGif()
+function captureTabGif(videoSourceURL, sendResponse)
 {
-    // TODO
+    // Using gifshot library to generate gif from video
+    gifshot.createGIF({
+            'video': [videoSourceURL]
+        }, 
+        function (obj) 
+        {
+            if (!obj.error) {   // Pass along image src
+                sendResponse(obj.image);
+            } else {            // Error
+                console.log(obj.error);
+                sendResponse(null);
+            }
+        });
 }
 
 // Initiate download of something
