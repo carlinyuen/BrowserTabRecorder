@@ -3,10 +3,29 @@
 $(function()
 {
     // Variables & Constants
-    var TIME_SAVE_DELAY = 250    // 250ms is average human reaction time
-        , saveTimerHandle
-        , $fields
+    var TIME_SAVE_DELAY = 250       // 250ms is average human reaction time
+        , backgroundConnection      // Port handle for connection to background.js
+        , saveTimerHandle           // Timer handle for saving delay
+        , $fields                   // Reference to input fields in the popup
     ;
+
+    // Listener for messages from background
+    backgroundConnection = chrome.extension.connect({name: "Popup"});
+    backgroundConnection.onMessage.addListener(function(message) 
+    {
+        console.log('message:', message);
+
+        // Handle message
+        switch (message.request)
+        {
+            case "update":
+                // Update fields
+                loadDetails();
+                break;
+
+            default: break;
+        }
+    });
 
     init();
 
@@ -38,28 +57,56 @@ $(function()
         // Load latest details
         loadDetails();
 
+        // Check current active tab's url to determine available actions
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
+        {
+            var url = tabs[0].url;
+            console.log("Active tab:", url);
+
+            // Test domains
+            if (DOMAIN_BUGANIZER_REGEX.test(url)) {
+                $('#cloneButton').prop('disabled', true);
+            }
+            else if (DOMAIN_GMAIL_REGEX.test(url) || DOMAIN_GMAIL_REGEX.test(url)) {
+                $('#emailButton').prop('disabled', true);
+            }
+        });
+
         // Focus on title field
         $('#bugTitle').focus();
     }
   
     // Take screenshot of the active tab
     function takeScreenshot() {
-        chrome.runtime.sendMessage({request: "captureTabScreenshot"});
+        backgroundConnection.postMessage({request: "captureTabScreenshot"});
     }
     
     // Initiate video capture of the active tab
     function captureVideo() {        
-        chrome.runtime.sendMessage({request: "captureTabVideo"});
+        backgroundConnection.postMessage({request: "captureTabVideo"});
     }
 
     // Fill title / description from email
-    function autofillFromEmail() {
-        chrome.runtime.sendMessage({request: "emailAutofill"});
+    function autofillFromEmail() 
+    {
+        // Send current field data
+        var data = {};
+        $fields.each(function (i, el) 
+        {
+            var $el = $(el);
+            data[$el.attr('id')] = $el.val();
+        });
+
+        // Pass along in message
+        backgroundConnection.postMessage({
+            request: "emailAutofill",
+            fields: data,
+        });
     }
 
     // Clone bug from buganizer
-    function autofillFromEmail() {
-        chrome.runtime.sendMessage({request: "emailAutofill"});
+    function cloneFromBuganizer() {
+        backgroundConnection.postMessage({request: "cloneFromBuganizer"});
     }
 
     // Create a new bug by using url parameters

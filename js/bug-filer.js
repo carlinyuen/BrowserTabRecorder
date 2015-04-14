@@ -1,3 +1,5 @@
+// Required: js/config.js
+
 $(function()
 {
     // Variables & Constants
@@ -74,11 +76,11 @@ $(function()
                 break;
 
             case "emailAutofill":
-                // TODO
+                autofillFromEmail(message.fields);
                 break;
 
             case "cloneBug":
-                // TODO
+                cloneFromBuganizer();
                 break;
 
             default: break;
@@ -180,7 +182,7 @@ $(function()
         // Tell background page to start recording
         chrome.runtime.sendMessage({
             request: 'startVideoRecording',
-        });
+        }, videoRecordingStarted);
     }
 
     // Video recording started
@@ -218,7 +220,7 @@ $(function()
         // Tell background page to stop recording
         chrome.runtime.sendMessage({
             request: 'stopVideoRecording',
-        });
+        }, videoRecordingStopped);
     }
 
     // Video recording stopped
@@ -369,6 +371,61 @@ $(function()
 
         // Return the result
         return result;
+    }
+
+    // Autofill bug fields in popup from email
+    //  param fields is a object with fields to store data into
+    function autofillFromEmail(fields)
+    {
+        var domain = window.location.host
+            , error = false;
+
+        // Check that we are on some email client
+        if (DOMAIN_GMAIL_REGEX.test(domain)) 
+        {
+            // TODO collect data from email
+
+        } 
+        else if (DOMAIN_INBOX_REGEX.test(domain)) 
+        {
+        }
+        else    // Error
+        {
+            error = true;
+            console.log('ERROR: Not currently on email page!');
+            alert('Not currently on an email page!');
+        }
+
+        // Save data to local storage
+        chrome.storage.local.set(fields, function() 
+        {
+            if (chrome.runtime.lastError) 
+            {
+                console.log(chrome.runtime.lastError);
+                alert('Could not collect autofill data from email.');
+            } 
+            else {	// Success, update popup
+                chrome.runtime.sendMessage({request: "updatePopup"});
+            }
+        });
+    }
+
+    // Clone a bug from Google's Buganizer
+    function cloneFromBuganizer()
+    {
+        // Check that we are on Buganizer
+        if (DOMAIN_BUGANIZER_REGEX.test(window.location.host)) 
+        {
+            // TODO get data from the various fields
+            
+            // TODO fire off URL to open new bug
+
+        } 
+        else    // Error
+        {
+            console.log('ERROR: Not currently on Buganizer page!');
+            alert('Not currently on a Buganizer issue page!');
+        }
     }
 
 });

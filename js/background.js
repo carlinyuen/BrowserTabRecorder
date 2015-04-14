@@ -33,11 +33,11 @@ chrome.extension.onConnect.addListener(function(port)
                 break;
 
             case "emailAutofill":
-                sendMessageToActiveTab({ request: 'emailAutofill' });
+                sendMessageToActiveTab(message);
                 break;
 
             case "cloneBug":
-                sendMessageToActiveTab({ request: 'cloneBug' });
+                sendMessageToActiveTab(message);
                 break;
 
             default:
@@ -60,12 +60,20 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             initiateDownload(message.filename, message.contentURL);
             break;
 
-        case "videoURL":
-            chrome.tabs.sendMessage(sender.tab.id, {
-                request: "videoURL",
-                stream: videoConnection,
-                sourceURL: window.URL.createObjectURL(videoConnection),
-            });
+        case "startVideoRecording":
+            // TODO: start recording and pass stream to response
+            break;
+
+        case "stopVideoRecording":
+            // TODO: stop recording and pass video to response
+            break;
+
+        case "updatePopup":
+            // Tell popup to update its fields
+            if (popupConnection) {
+                popupConnection.postMessage({request: "update"});
+            }
+            break;
 
         default:
             console.log("Unknown request received!");

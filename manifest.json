@@ -29,6 +29,7 @@
         , "css": [ "css/bug-filer.css" ]
 		, "js": [
 			"js/third_party/jquery-2.1.0.min.js"
+            , "js/config.js"
 			, "js/bug-filer.js"
 		]
 		, "run_at": "document_idle"
