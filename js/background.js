@@ -231,9 +231,18 @@ function stopVideoCapture(callback, sendResponse)
     // Stop video capture and save file
     var videoSourceURL = videoRecorder.stop();
 
-    // Check callback
+    // If output was bad, don't continue
+    if (!videoSourceURL) 
+    {
+        sendResponse(null);
+        return;
+    }
+
+    // If callback exists, pass parameters, otherwise send response back
     if (callback) {
         callback(videoSourceURL, sendResponse);
+    } else {
+        sendResponse(videoSourceURL);
     }
 }
 
@@ -248,7 +257,7 @@ function captureTabGif(videoSourceURL, sendResponse)
         {
             if (!obj.error) {   // Pass along image src
                 sendResponse(obj.image);
-            } else {            // Error
+            } else {            // Error, send back null
                 console.log(obj.error);
                 sendResponse(null);
             }
