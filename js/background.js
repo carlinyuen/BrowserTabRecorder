@@ -61,11 +61,15 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             break;
 
         case "startVideoRecording":
-            // TODO: start recording and pass stream to response
+            captureTabVideo(sendResponse);
             break;
 
         case "stopVideoRecording":
-            // TODO: stop recording and pass video to response
+            stopVideoCapture(sendResponse);
+            break;
+
+        case "videoRecordingStatus":
+            sendResponse(videoConnection);
             break;
 
         case "updatePopup":     // Tell popup to update its fields
@@ -156,12 +160,12 @@ function captureTabScreenshot(data)
     });
 }
 
-// Capture video
-function captureTabVideo()
+// Capture video stream of tab, will pass stream back to sendResponse()
+function captureTabVideo(sendResponse)
 {
-    console.log("captureVideo");
+    console.log("captureTabVideo");
 
-    // Capture audio at the same time, can record both
+    // Capture only video from the tab
     chrome.tabCapture.capture({
             audio: false,
             video: true,
@@ -177,14 +181,8 @@ function captureTabVideo()
             if (localMediaStream)
             {
                 videoConnection = localMediaStream;
-                var sourceURL = window.URL.createObjectURL(localMediaStream);
 
-                // Send to active tab
-                sendMessageToActiveTab({
-                    request: 'video',
-                    stream: localMediaStream,
-                    sourceURL: sourceURL,
-                });
+                // TODO: Start recording
             }
             else    // Failed
             {
@@ -192,7 +190,15 @@ function captureTabVideo()
                 console.log(chrome.runtime.lastError);
                 videoConnection = null;
             }
+
+            // Send to response
+            sendResponse(localMediaStream);
         });
+}
+
+// Stop video capture and send compiled .webm video file to sendResponse()
+function stopVideoCapture(sendResponse)
+{
 }
 
 // Capture gif from the current active tab
