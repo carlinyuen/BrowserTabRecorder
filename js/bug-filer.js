@@ -374,11 +374,12 @@ $(function()
         // Check that we are on some email client
         if (DOMAIN_GMAIL_REGEX.test(domain)) 
         {
-            // TODO collect data from email
+            // TODO collect data from email and append to fields
 
         } 
         else if (DOMAIN_INBOX_REGEX.test(domain)) 
         {
+            // TODO collect data from email and append to fields
         }
         else    // Error
         {
@@ -408,9 +409,12 @@ $(function()
         if (DOMAIN_BUGANIZER_REGEX.test(window.location.host)) 
         {
             // TODO get data from the various fields
+            var params = {};
             
-            // TODO fire off URL to open new bug
-
+            // Fire off bug creation using URL parameters
+            var url = [URL_BUG_API_CREATE, '?', $.param(params)].join('');
+            console.log(url);
+            chrome.tabs.create({ url: url });
         } 
         else    // Error
         {
