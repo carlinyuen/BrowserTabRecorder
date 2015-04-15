@@ -83,7 +83,7 @@
     margin: 0 !important;
 }
 .carlin-bug-filer-thumbnail .container video {
-    width: auto !important;
+    width: 100% !important;
     height: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
