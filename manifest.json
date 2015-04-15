@@ -42,6 +42,7 @@
         , "storage"
 		, "unlimitedStorage"
         , "tabCapture"
+        , "file:///*"
 	]
     , "web_accessible_resources": [
         "images/*"

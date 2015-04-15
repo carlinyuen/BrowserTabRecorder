@@ -154,6 +154,11 @@ $(function()
     {
         console.log('createVideoThumbnail()');
 
+        // Clear autohide timer, we want user to see they need to hit record
+        if (thumbnailHideTimer) {
+            clearTimeout(thumbnailHideTimer);
+        }
+
         try
         {
             // Create video thumbnail and add to document
@@ -255,9 +260,7 @@ $(function()
             if (currentVideoThumbnail)
             {
                 // Set video element source to webm file
-                currentVideoThumbnail
-                    .find('video')
-                    .attr('src', sourceURL);
+                currentVideoThumbnail.find('video').attr('src', sourceURL);
             }
             else    // Show error and try to download immediately
             {
@@ -297,10 +300,22 @@ $(function()
         if (!thumbnailContainer.hasClass(CLASS_SHOW_CONTAINER)) 
         {
             thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
-            thumbnailHideTimer = setTimeout(function() {
-                thumbnailContainer.removeClass(CLASS_SHOW_CONTAINER);
-            }, TIME_AUTOHIDE_CONTAINER);
+            autohideThumbnailContainer();
         }
+    }
+
+    // Set thumbnail container for autohide, will refresh the timer if exists
+    function autohideThumbnailContainer()
+    {
+        // Clear autohide timer
+        if (thumbnailHideTimer) {
+            clearTimeout(thumbnailHideTimer);
+        }
+
+        // Set new autohide timer
+        thumbnailHideTimer = setTimeout(function() {
+            thumbnailContainer.removeClass(CLASS_SHOW_CONTAINER);
+        }, TIME_AUTOHIDE_CONTAINER);
     }
 
     // Convert date to a format that is good for downloading
@@ -313,6 +328,27 @@ $(function()
             + "_" + ('0' + date.getMinutes()).slice(-2) 
             + '_' + ('0' + date.getSeconds()).slice(-2) 
         ;
+    }
+
+    // Download and generate url for a local extension resource blob
+    //  Mostly for us to get the videos across
+    function createLocalObjectURL(sourceURL, callback)
+    {
+        console.log('createLocalObjectURL:', sourceURL);
+
+        // Generate xhr and get url for resource
+        //  Source: https://developer.chrome.com/apps/app_external
+        var x = new XMLHttpRequest();
+        x.open('GET', sourceURL);
+        x.responseType = 'blob';
+        x.onload = function() 
+        {
+            var url = window.URL.createObjectURL(x.response);
+            console.log('localObjectURL:', url);
+
+            callback(url);  // Callback must exist
+        };
+        x.send();
     }
 
     // Creates a thumbnail div from recording source (image / video), and returns it
