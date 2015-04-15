@@ -254,8 +254,10 @@ $(function()
             // This should exist
             if (currentVideoThumbnail)
             {
-                // Set video element source to webm file
-                currentVideoThumbnail.find('video').attr('src', sourceURL);
+                // Generate local url and set video element source to webm file
+                createLocalObjectURL(sourceURL, function (url) {
+                    currentVideoThumbnail.find('video').attr('src', url);
+                });
             }
             else    // Show error and try to download immediately
             {
