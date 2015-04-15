@@ -33,7 +33,7 @@ $(function()
     // ACTIONS
 
     // Listener for mouse movement to show cursor for recording
-    $(document).mousemove(function (event) 
+    $(document).on('mousemove scroll', (function (event) 
     {
         if (cursorTracker && recording) 
         {

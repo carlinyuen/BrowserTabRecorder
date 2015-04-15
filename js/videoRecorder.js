@@ -138,12 +138,12 @@ window.VideoRecorder = (function()
         // Compile our final binary video blob and create a source URL to it
         var videoBlob = Whammy.fromImageArray(frames, 1000 / 60);
         recordedVideoURL = window.URL.createObjectURL(videoBlob);
-        console.log('sourceURL:', sourceURL);
+        console.log('recordedVideoURL:', recordedVideoURL);
 
         // Cleanup
         frames = [];
 
-        return sourceURL;
+        return recordedVideoURL;
     };
 
     // Download last recorded video
