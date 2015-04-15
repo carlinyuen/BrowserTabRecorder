@@ -8,7 +8,7 @@
     vertical-align: bottom;
     max-height: 0;
     overflow: hidden;
-    z-index: 999;
+    z-index: 9999;
     padding: 16px 0 12px 0;
     transition: max-height 500ms ease-in-out;
 }
@@ -127,7 +127,7 @@
     width: 48px;    /* size of image */
     height: 48px;   /* size of image */
     position: absolute;
-    z-index: 888;
+    z-index: 10000;
     background: url('chrome-extension://__MSG_@@extension_id__/images/cursor.png') center center no-repeat;
     pointer-events: none !important;
 }

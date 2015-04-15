@@ -130,7 +130,7 @@ $(function()
         if (!thumbnailContainer.hasClass(CLASS_SHOW_CONTAINER)) 
         {
             thumbnailContainer.css({ 'bottom':'-24px' })
-                .animate({ 'bottom':'-10px' }, 'fast');
+                .animate({ 'bottom':'-12px' }, 'fast');
         }
     }
 
