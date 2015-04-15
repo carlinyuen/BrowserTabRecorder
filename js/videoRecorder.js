@@ -80,31 +80,30 @@ window.VideoRecorder = (function()
         startTime = Date.now();
 
         // Frame redraw function
+        /*
         function drawVideoFrame(time) 
         {
             rafId = requestAnimationFrame(drawVideoFrame);
 
+            // Draw video onto canvas, and read back canvas as webp
             ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-            // Read back canvas as webp.
             frames.push(canvas.toDataURL('image/webp', 1)); // image/jpeg is way faster :(
 
             console.log('draw video');
         };
-
         rafId = requestAnimationFrame(drawVideoFrame);
+        */
 
-        /*
+        // Frame redraw function
         rafId = setInterval(function() 
         {
-            ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            console.log('draw video');
 
-            // Read back canvas as webp.
-            var url = canvas.toDataURL('image/webp', 1); // image/jpeg is way faster :(
-            frames.push(url);
+            // Draw video onto canvas, and read back canvas as webp
+            ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            frames.push(canvas.toDataURL('image/webp', 1)); // image/jpeg is way faster :(
 
         }, 25); // 25 = 40hz
-        */
     };
 
     // Stop video recording and return source URL for compiled webm video
@@ -113,8 +112,8 @@ window.VideoRecorder = (function()
         console.log('VideoRecorder : stop()');
 
         // Stop recording
-        cancelAnimationFrame(rafId);
-        //clearInterval(rafId);
+        //cancelAnimationFrame(rafId);
+        clearInterval(rafId);
         endTime = Date.now();
 
         // Clean up stream
