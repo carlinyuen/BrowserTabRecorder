@@ -59,6 +59,14 @@ $(function()
                 createVideoThumbnail();
                 break;
 
+            case "videoRecordingStarted":
+                videoRecordingStarted(message.stream);
+                break;
+
+            case "videoRecordingStopped":
+                videoRecordingStopped(message.sourceURL);
+                break;
+
             case "captureTabScreenshot":
                 createThumbnailContainer();
                 createScreenshotThumbnail(message.sourceURL);
@@ -175,7 +183,7 @@ $(function()
         // Tell background page to start recording
         chrome.runtime.sendMessage({
             request: 'startVideoRecording',
-        }, videoRecordingStarted);
+        });
     }
 
     // Video recording started
@@ -217,7 +225,7 @@ $(function()
         // Tell background page to stop recording
         chrome.runtime.sendMessage({
             request: 'stopVideoRecording',
-        }, videoRecordingStopped);
+        });
     }
 
     // Video recording stopped

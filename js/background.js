@@ -68,11 +68,11 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             break;
 
         case "startVideoRecording":
-            captureTabVideo(sendResponse);
+            captureTabVideo();
             break;
 
         case "stopVideoRecording":
-            stopVideoCapture(sendResponse);
+            stopVideoCapture();
             break;
 
         case "videoRecordingStatus":
@@ -168,14 +168,18 @@ function captureTabScreenshot(data)
 }
 
 // Capture video stream of tab, will pass stream back to sendResponse()
-function captureTabVideo(sendResponse)
+function captureTabVideo()
 {
     console.log("captureTabVideo");
 
     // Sanity check, can only record one at a time
     if (videoConnection) 
     {
-        sendResponse(null);     // Send back nothing
+        console.log('ERROR: video stream already exists, cannot capture two at a time!');
+        sendMessageToActiveTab({
+            request: 'videoRecordingStarted',
+            stream: null
+        });
         return;
     }
 
@@ -191,6 +195,8 @@ function captureTabVideo(sendResponse)
         }, 
         function (localMediaStream) 
         {
+            console.log('tabCapture:', localMediaStream);
+
             // Send to active tab if capture was successful
             if (localMediaStream)
             {
@@ -212,19 +218,27 @@ function captureTabVideo(sendResponse)
             }
 
             // Send to response
-            sendResponse(videoConnection);
+            sendMessageToActiveTab({
+                request: 'videoRecordingStarted',
+                stream: videoConnection
+            });
         });
 }
 
 // Stop video capture and build compiled .webm video file
-//  If callback DNE, send video to sendResponse(), otherwise pass along video
-function stopVideoCapture(callback, sendResponse)
+//  If callback DNE, send video to active page, otherwise pass along video to callback
+function stopVideoCapture(callback)
 {
+    console.log("stopVideoCapture");
+
     // Sanity check
     if (!videoConnection) 
     {
         videoConnection = null;
-        sendResponse(null);     // Send back nothing
+        sendMessageToActiveTab({
+            request: 'videoRecordingStopped',
+            sourceURL: null
+        });
         return;
     }
 
@@ -234,15 +248,23 @@ function stopVideoCapture(callback, sendResponse)
     // If output was bad, don't continue
     if (!videoSourceURL) 
     {
-        sendResponse(null);
+        sendMessageToActiveTab({
+            request: 'videoRecordingStopped',
+            sourceURL: null
+        });
         return;
     }
 
-    // If callback exists, pass parameters, otherwise send response back
+    // If callback exists, pass parameters
     if (callback) {
-        callback(videoSourceURL, sendResponse);
-    } else {
-        sendResponse(videoSourceURL);
+        callback(videoSourceURL);
+    } 
+    else    // Pass video to active tab
+    {
+        sendMessageToActiveTab({
+            request: 'videoRecordingStopped',
+            sourceURL: videoSourceURL
+        });
     }
 }
 
