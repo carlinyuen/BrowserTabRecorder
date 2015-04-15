@@ -253,9 +253,13 @@ $(function()
                 // Generate local url and set video element source to webm file
                 createLocalObjectURL(sourceURL, function (url) 
                 {
-                    thumb.find('video')
-                        .attr('controls', true)
-                        .attr('src', url);
+                    thumb.find('video').attr('src', url)
+                        .on('loadedmetadata', function() {
+                            $(this).attr('controls', true);
+                        })
+                        .on('error', function() {
+                            // TODO: tell user preview not available, but can download
+                        });
                 });
             }
             else    // Show error and try to download immediately
