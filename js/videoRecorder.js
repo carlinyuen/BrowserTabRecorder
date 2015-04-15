@@ -24,15 +24,18 @@ window.VideoRecorder = (function()
     // Setup the video recorder
     function init() 
     {
+        console.log('init()');
+
         document.querySelector('body').appendChild(video);
         video.autoplay = true;
         video.onloadedmetadata = function() 
         {
+            console.log('video loaded!');
+
             video.width = video.clientWidth;
             video.height = video.clientHeight;
             canvas.width = video.width;
             canvas.height = video.height;
-            console.log('video loaded');
 
             // Begin recording
             record();
@@ -85,6 +88,8 @@ window.VideoRecorder = (function()
 
             // Read back canvas as webp.
             frames.push(canvas.toDataURL('image/webp', 1)); // image/jpeg is way faster :(
+
+            console.log('draw video');
         };
 
         rafId = requestAnimationFrame(drawVideoFrame);
