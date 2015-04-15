@@ -291,7 +291,7 @@ function convertVideoToGif(videoSourceURL, senderTabId)
 
             // Send to active tab if senderTabId is not set
             chrome.tabs.sendMessage(senderTabId, {
-                request: 'gif',
+                request: 'convertedGif',
                 sourceURL: src
             });
         });

@@ -61,6 +61,10 @@ $(function()
                 videoRecordingStopped(message.sourceURL);
                 break;
 
+            case "convertedGif":
+                convertedGif(message.sourceURL);
+                break;
+
             case "captureTabScreenshot":
                 createThumbnailContainer();
                 createScreenshotThumbnail(message.sourceURL);
@@ -253,11 +257,19 @@ $(function()
                 // Generate local url and set video element source to webm file
                 createLocalObjectURL(sourceURL, function (url) 
                 {
-                    thumb.find('video').attr('src', url)
+                    thumb.find('video')
+                        .attr('src', url)                   
                         .on('loadedmetadata', function() {
-                            $(this).attr('controls', true);
+                            $(this).attr('controls', true); // Show controls
                         })
-                        .on('error', function() {
+                        .on('error', function() 
+                        {
+                            // Try turning into a gif?
+                            chrome.runtime.sendMessage({
+                                request: 'convertVideoToGif',
+                                sourceURL: sourceURL,
+                            });
+                            
                             // TODO: tell user preview not available, but can download
                         });
                 });
@@ -266,6 +278,9 @@ $(function()
             {
                 console.log('Could not find video element on page. Attempting to download!');
                 alert('Could not find video element on page. Attempting to download!');
+
+                // Clear reference to selected video thumbnail
+                currentVideoThumbnail = null;
 
                 // Try to download
                 chrome.runtime.sendMessage({
@@ -279,10 +294,50 @@ $(function()
         {
             console.log('Error recording video file from video feed!');
             alert('Error recording video file from video feed!');
+
+            // Clear reference to selected video thumbnail
+            currentVideoThumbnail = null;
+        }
+    }
+
+    // Update thumbnail with converted gif from video
+    function convertedGif(sourceURL)
+    {
+        // Sanity check
+        if (!sourceURL)
+        {
+            console.log('Error converting video to gif!');
+            alert('Error converting video to gif!');
+
+            // Clear reference to selected video thumbnail
+            currentVideoThumbnail = null;
+            return;
         }
 
-        // Clear reference to selected video thumbnail
-        currentVideoThumbnail = null;
+        // Check that video thumbnail exists still
+        if (!currentVideoThumbnail) 
+        {
+            console.log('Could not find video to convert to gif!');
+            alert('Could not find video to convert to gif!');
+            return;
+        }
+
+        // Switch out video with img pointed to gif
+        currentVideoThumbnail.find('video')
+            .replaceWith($(document.createElement('img'))
+                .addClass('gif')
+                .attr('src', sourceURL)
+            );
+        currentVideoThumbnail.find('.downloadButton')
+            .off('click')
+            .click(function (event) 
+            {
+                chrome.runtime.sendMessage({
+                    request: 'downloadContent',
+                    filename: 'screencapture - ' + $(this).attr('date') + '.gif',
+                    contentURL: $(this).parent().find('img.gif').attr('src'),
+                });
+            });
     }
 
     // Create screenshot container element
