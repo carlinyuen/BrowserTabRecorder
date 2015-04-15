@@ -165,6 +165,8 @@ $(function()
     // Start video recording
     function startVideoRecording($target)
     {
+        console.log('startVideoRecording:', $target);
+
         // Track which video thumbnail is being recorded
         if ($target) {
             currentVideoThumbnail = $target.parents('.' + CLASS_THUMBNAIL);
@@ -179,6 +181,8 @@ $(function()
     // Video recording started
     function videoRecordingStarted(stream)
     {
+        console.log('videoRecordingStarted:', stream);
+
         // Sanity check
         if (stream) 
         {
@@ -208,6 +212,8 @@ $(function()
     // Stop video recording
     function stopVideoRecording()
     {
+        console.log('stopVideoRecording');
+
         // Tell background page to stop recording
         chrome.runtime.sendMessage({
             request: 'stopVideoRecording',
@@ -217,6 +223,8 @@ $(function()
     // Video recording stopped
     function videoRecordingStopped(sourceURL)
     {
+        console.log('videoRecordingStopped:', sourceURL);
+
         // Remove / hide recording button on thumbnail if exists
         if (currentVideoThumbnail)
         {
