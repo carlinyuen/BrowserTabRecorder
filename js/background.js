@@ -244,6 +244,7 @@ function stopVideoCapture(senderTabId, callback)
 
     // Stop video capture and save file
     var videoSourceURL = videoRecorder.stop();
+    videoConnection = null;
 
     // If output was bad, don't continue
     if (!videoSourceURL) 

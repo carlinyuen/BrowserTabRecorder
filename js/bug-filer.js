@@ -254,9 +254,26 @@ $(function()
             // This should exist
             if (currentVideoThumbnail)
             {
+                var thumb = currentVideoThumbnail;
+
                 // Generate local url and set video element source to webm file
-                createLocalObjectURL(sourceURL, function (url) {
-                    currentVideoThumbnail.find('video').attr('src', url);
+                createLocalObjectURL(sourceURL, function (url) 
+                {
+                    try {
+                        thumb.find('video').attr('src', url);
+                    } 
+                    catch (exception) 
+                    {
+                        console.log('Could not show video due to security policy. Attempting to download!');
+                        console.log(exception);
+                        alert('Could not show video due to security policy. Attempting to download!');
+                        // Try to download
+                        chrome.runtime.sendMessage({
+                            request: 'downloadContent',
+                            filename: 'screencapture - ' + formatDate(new Date()) + '.webm',
+                            contentURL: url,
+                        });
+                    }
                 });
             }
             else    // Show error and try to download immediately
@@ -267,7 +284,7 @@ $(function()
                 // Try to download
                 chrome.runtime.sendMessage({
                     request: 'downloadContent',
-                    filename: 'video - ' + formatDate(new Date()) + '.webm',
+                    filename: 'screencapture - ' + formatDate(new Date()) + '.webm',
                     contentURL: sourceURL,
                 });
             }
@@ -391,6 +408,7 @@ $(function()
 
             case "video":
                 container.append($(document.createElement('video'))
+                    .attr('controls', true)
                     .attr('autoplay', true));
                 result.append($(document.createElement('button'))
                     .addClass('recordButton')
