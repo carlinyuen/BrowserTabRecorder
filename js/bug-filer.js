@@ -240,7 +240,6 @@ $(function()
                 .fadeOut('fast', function() {
                     $(this).remove();
                 });
-            currentVideoThumbnail = null;
         }
 
         // Hide cursor tracker
@@ -252,15 +251,35 @@ $(function()
         // Sanity check
         if (sourceURL)
         {
-            // Set video element source to webm file
-            currentVideoThumbnail.find('video')
-                .attr('src', sourceURL);
+            // This should exist
+            if (currentVideoThumbnail)
+            {
+                // Set video element source to webm file
+                currentVideoThumbnail
+                    .find('video')
+                    .attr('src', sourceURL);
+            }
+            else    // Show error and try to download immediately
+            {
+                console.log('Could not find video element on page. Attempting to download!');
+                alert('Could not find video element on page. Attempting to download!');
+
+                // Try to download
+                chrome.runtime.sendMessage({
+                    request: 'downloadContent',
+                    filename: 'video - ' + formatDate(new Date()) + '.webm',
+                    contentURL: sourceURL,
+                });
+            }
         }
         else    // Error
         {
             console.log('Error recording video file from video feed!');
             alert('Error recording video file from video feed!');
         }
+
+        // Clear reference to selected video thumbnail
+        currentVideoThumbnail = null;
     }
 
     // Create screenshot container element
