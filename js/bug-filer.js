@@ -19,7 +19,7 @@ $(function()
         , thumbnailContainer = null         // Reference to thumbnail container
         , thumbnailHideTimer = null         // Timer handle for autohiding container
         , recording = false                 // Recording state
-        , currentVideoThumbnail = null      // Track current live video thumbnail
+        , selectedThumbnail = null          // Track current live video thumbnail
     ;
 
 
@@ -51,6 +51,12 @@ $(function()
                 createThumbnailContainer();
                 createCursorTracker();
                 createVideoThumbnail();
+                break;
+
+            case "captureTabGif":
+                createThumbnailContainer();
+                createCursorTracker();
+                createGifThumbnail();
                 break;
 
             case "videoRecordingStarted":
@@ -168,6 +174,32 @@ $(function()
         }
     }
 
+    // Create a container for the video
+    function createGifThumbnail()
+    {
+        console.log('createGifThumbnail()');
+
+        // Clear autohide timer, we want user to see they need to hit record
+        if (thumbnailHideTimer) {
+            clearTimeout(thumbnailHideTimer);
+        }
+
+        try
+        {
+            // Create video thumbnail and add to document
+            createThumbnail('gif')
+                .hide()
+                .appendTo(thumbnailContainer)
+                .slideDown('fast');
+
+            // If container is not showing yet, show it permanently
+            thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+        }
+        catch (exception) {   // If there's errors, stop recording
+            console.log(exception);
+        }
+    }
+
     // Start video recording
     function startVideoRecording($target)
     {
@@ -175,13 +207,15 @@ $(function()
 
         // Track which video thumbnail is being recorded
         if ($target) {
-            currentVideoThumbnail = $target.parents('.' + CLASS_THUMBNAIL);
+            selectedThumbnail = $target.parents('.' + CLASS_THUMBNAIL);
         }
+        
+        // Adjust request based on gif vs video
+        var request = ($target.find('img.gif').length) 
+            ? 'startGifRecording' : 'startVideoRecording'
 
         // Tell background page to start recording
-        chrome.runtime.sendMessage({
-            request: 'startVideoRecording',
-        });
+        chrome.runtime.sendMessage({ request: request });
     }
 
     // Video recording started
@@ -192,10 +226,10 @@ $(function()
         // Sanity check
         if (stream) 
         {
-            // If currentVideoThumbnail exists, change record button
-            if (currentVideoThumbnail) 
+            // If selectedThumbnail exists, change record button
+            if (selectedThumbnail) 
             {
-                currentVideoThumbnail.find('.recordButton img')
+                selectedThumbnail.find('.recordButton img')
                     .attr('src', IMAGE_STOP_RECORD);
             }
 
@@ -220,21 +254,21 @@ $(function()
     {
         console.log('stopVideoRecording');
 
+        // Adjust request based on gif vs video
+        var request = ($target.find('img.gif').length) 
+            ? 'stopGifRecording' : 'stopVideoRecording'
+
         // Tell background page to stop recording
-        chrome.runtime.sendMessage({
-            request: 'stopVideoRecording',
-        });
+        chrome.runtime.sendMessage({ request: request });
     }
 
-    // Video recording stopped
-    function videoRecordingStopped(sourceURL)
+    // UI changes to indicate recording is over
+    function recordingStoppedInterfaceUpdate()
     {
-        console.log('videoRecordingStopped:', sourceURL);
-
         // Remove / hide recording button on thumbnail if exists
-        if (currentVideoThumbnail)
+        if (selectedThumbnail)
         {
-            currentVideoThumbnail.find('.recordButton')
+            selectedThumbnail.find('.recordButton')
                 .fadeOut('fast', function() {
                     $(this).remove();
                 });
@@ -245,63 +279,73 @@ $(function()
 
         // Set recording state to false
         recording = false;
+    }
+
+    // Video recording stopped
+    function videoRecordingStopped(sourceURL)
+    {
+        console.log('videoRecordingStopped:', sourceURL);
+
+        // UI changes for stopped recording
+        recordingStoppedInterfaceUpdate();
 
         // Sanity check
-        if (sourceURL)
-        {
-            // This should exist
-            if (currentVideoThumbnail)
-            {
-                var thumb = currentVideoThumbnail;
-
-                // Generate local url and set video element source to webm file
-                createLocalObjectURL(sourceURL, function (url) 
-                {
-                    thumb.find('video')
-                        .attr('src', url)                   
-                        .on('loadedmetadata', function() {
-                            $(this).attr('controls', true); // Show controls
-                        })
-                        .on('error', function() 
-                        {
-                            // Tell user preview not available, but can download
-                            alert('Preview not available, but you can still download the video!');
-                            console.log('WARNING: preview not available due to content security policy, but can still download.');
-
-                            // TODO: put up an image in the thumbnail
-                        });
-                });
-            }
-            else    // Show error and try to download immediately
-            {
-                console.log('Could not find video element on page. Attempting to download!');
-                alert('Could not find video element on page. Attempting to download!');
-
-                // Clear reference to selected video thumbnail
-                currentVideoThumbnail = null;
-
-                // Try to download
-                chrome.runtime.sendMessage({
-                    request: 'downloadContent',
-                    filename: 'screencapture - ' + formatDate(new Date()) + '.webm',
-                    contentURL: sourceURL,
-                });
-            }
-        }
-        else    // Error
+        if (!sourceURL)
         {
             console.log('Error recording video file from video feed!');
             alert('Error recording video file from video feed!');
 
             // Clear reference to selected video thumbnail
-            currentVideoThumbnail = null;
+            selectedThumbnail = null;
+            return;
         }
+
+        // Check that video thumbnail exists still
+        if (!selectedThumbnail)
+        {
+            console.log('Could not find video element on page. Attempting to download!');
+            alert('Could not find video element on page. Attempting to download!');
+
+            // Try to download
+            chrome.runtime.sendMessage({
+                request: 'downloadContent',
+                filename: 'screencapture - ' + formatDate(new Date()) + '.webm',
+                contentURL: sourceURL,
+            });
+
+            return;
+        }
+
+        // Generate local url and set video element source to webm file
+        var thumb = selectedThumbnail;
+        createLocalObjectURL(sourceURL, function (url) 
+        {
+            thumb.find('video')
+                .attr('src', url)                   
+                .on('loadedmetadata', function() {
+                    $(this).attr('controls', true); // Show controls
+                })
+                .on('error', function() 
+                {
+                    // Tell user preview not available, but can download
+                    alert('Preview not available, but you can still download the video!');
+                    console.log('WARNING: preview not available due to content security policy, but can still download.');
+
+                    // TODO: put up an image in the thumbnail
+                });
+        });
+    
+        // Clear reference
+        selectedThumbnail = null;
     }
 
     // Update thumbnail with converted gif from video
     function convertedGif(sourceURL)
     {
         console.log('convertedGif:', sourceURL);
+
+        // UI changes for stopped recording
+        recordingStoppedInterfaceUpdate();
 
         // Sanity check
         if (!sourceURL)
@@ -310,25 +354,33 @@ $(function()
             alert('Error converting video to gif!');
 
             // Clear reference to selected video thumbnail
-            currentVideoThumbnail = null;
+            selectedThumbnail = null;
             return;
         }
 
         // Check that video thumbnail exists still
-        if (!currentVideoThumbnail) 
+        if (!selectedThumbnail) 
         {
-            console.log('Could not find video to convert to gif!');
-            alert('Could not find video to convert to gif!');
+            console.log('Could not find video element on page. Attempting to download!');
+            alert('Could not find video element on page. Attempting to download!');
+
+            // Try to download
+            chrome.runtime.sendMessage({
+                request: 'downloadContent',
+                filename: 'screencapture - ' + formatDate(new Date()) + '.gif',
+                contentURL: sourceURL,
+            });
+
             return;
         }
 
         // Switch out video with img pointed to gif
-        currentVideoThumbnail.find('video')
+        selectedThumbnail.find('video')
             .replaceWith($(document.createElement('img'))
                 .addClass('gif')
                 .attr('src', sourceURL)
             );
-        currentVideoThumbnail.find('.downloadButton')
+        selectedThumbnail.find('.downloadButton')
             .off('click')
             .click(function (event) 
             {
@@ -338,6 +390,9 @@ $(function()
                     contentURL: $(this).parent().find('img.gif').attr('src'),
                 });
             });
+
+        // Clear reference
+        selectedThumbnail = null;
     }
 
     // Create screenshot container element

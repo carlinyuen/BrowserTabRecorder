@@ -44,6 +44,7 @@ $(function()
         // Button handlers
         $('#screenshotButton').click(takeScreenshot);
         $('#videoButton').click(captureVideo);
+        $('#gifButton').click(captureGif);
         $('#emailButton').click(autofillFromEmail);
         $('#cloneButton').click(cloneFromBuganizer);
         $('#resetButton').click(clearDetails);
@@ -87,6 +88,11 @@ $(function()
     // Initiate video capture of the active tab
     function captureVideo() {        
         backgroundConnection.postMessage({request: "captureTabVideo"});
+    }
+
+    // Initiate gif capture of the active tab
+    function captureGif() {        
+        backgroundConnection.postMessage({request: "captureTabGif"});
     }
 
     // Fill title / description from email

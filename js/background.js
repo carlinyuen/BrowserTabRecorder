@@ -35,6 +35,10 @@ chrome.extension.onConnect.addListener(function(port)
                 sendMessageToActiveTab(message);
                 break;
 
+            case "captureTabGif":
+                sendMessageToActiveTab(message);
+                break;
+
             case "captureTabScreenshot":
                 captureTabScreenshot(message);
                 break;
@@ -67,12 +71,17 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             initiateDownload(message.filename, message.contentURL);
             break;
 
+        case "startGifRecording":
         case "startVideoRecording":
             captureTabVideo(sender.tab.id);
             break;
 
         case "stopVideoRecording":
             stopVideoCapture(sender.tab.id);
+            break;
+
+        case "stopGifRecording":
+            stopVideoCapture(sender.tab.id, convertVideoToGif);
             break;
 
         case "videoRecordingStatus":
