@@ -264,7 +264,11 @@ $(function()
                         })
                         .on('error', function() 
                         {
-                            // TODO: tell user preview not available, but can download
+                            // Tell user preview not available, but can download
+                            alert('Preview not available, but you can still download the video!');
+                            console.log('WARNING: preview not available due to content security policy, but can still download.');
+
+                            // TODO: put up an image in the thumbnail
                         });
                 });
             }
