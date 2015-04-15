@@ -299,7 +299,7 @@ $(function()
 
             case "video":
                 container.append($(document.createElement('video'))
-                    .attr('autoplay', true);
+                    .attr('autoplay', true));
                 result.append($(document.createElement('button'))
                     .addClass('recordButton')
                     .append($(document.createElement('img')).attr('src', IMAGE_RECORD))
