@@ -98,13 +98,8 @@ $(function()
         {
             thumbnailContainer = $(document.createElement('div'))
                 .attr('id', ID_THUMBNAIL_CONTAINER)
-                .mouseenter(function (event) 
-                {
-                    if (thumbnailHideTimer) // Clear autohide
-                    {
-                        clearTimeout(thumbnailHideTimer);
-                        thumbnailHideTimer = null;
-                    }
+                .mouseenter(function (event) {
+                    clearAutohideTimer();
                 })
                 .append($(document.createElement('div')).addClass('tab')
                     .mouseenter(function (event) 
@@ -304,13 +299,22 @@ $(function()
         }
     }
 
+    // Clear autohide timer
+    function clearAutohideTimer()
+    {
+        // Clear autohide timer
+        if (thumbnailHideTimer) 
+        {
+            clearTimeout(thumbnailHideTimer);
+            thumbnailHideTimer = null;
+        }
+    }
+
     // Set thumbnail container for autohide, will refresh the timer if exists
     function autohideThumbnailContainer()
     {
-        // Clear autohide timer
-        if (thumbnailHideTimer) {
-            clearTimeout(thumbnailHideTimer);
-        }
+        // Clear timer
+        clearAutohideTimer();
 
         // Set new autohide timer
         thumbnailHideTimer = setTimeout(function() {
