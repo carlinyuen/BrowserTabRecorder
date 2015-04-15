@@ -282,16 +282,19 @@ $(function()
         {
             case "image":
                 container.css({ 'background-image': 'url(' + sourceURL + ')' })
-                    .append($(document.createElement('img')).attr('src', sourceURL));
+                    .append($(document.createElement('img'))
+                        .addClass('screenshot')
+                        .attr('src', sourceURL));
                 result.append($(document.createElement('button'))
                     .addClass('downloadButton')
+                    .attr('date', new Date().toLocaleString())
                     .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
                     .click(function (event) 
                     {
                         chrome.runtime.sendMessage({
                             request: 'downloadContent',
-                            filename: 'screenshot.png',
-                            contentURL: sourceURL,
+                            filename: 'screenshot - ' + $(this).attr('date') + '.png',
+                            contentURL: $(this).parent().find('img.screenshot').attr('src'),
                         });
                     })
                 );
@@ -313,13 +316,43 @@ $(function()
                     })
                 ).append($(document.createElement('button'))
                     .addClass('downloadButton')
+                    .attr('date', new Date().toLocaleString())
                     .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
                     .click(function (event) 
                     {
                         chrome.runtime.sendMessage({
                             request: 'downloadContent',
-                            filename: 'video.webm',
-                            contentURL: sourceURL,
+                            filename: 'screencapture - ' + $(this).attr('date') + '.webm',
+                            contentURL: $(this).parent().find('video').attr('src'),
+                        });
+                    })
+                );
+                break;
+
+            case "gif":
+                container.append($(document.createElement('img'))
+                    .addClass('gif'));
+                result.append($(document.createElement('button'))
+                    .addClass('recordButton')
+                    .append($(document.createElement('img')).attr('src', IMAGE_RECORD))
+                    .click(function (event) 
+                    {
+                        if (!recording) {    // Not yet recording, start recording
+                            startVideoRecording($(this));
+                        } else {   // Already recording, stop recording
+                            stopVideoRecording($(this));
+                        }
+                    })
+                ).append($(document.createElement('button'))
+                    .addClass('downloadButton')
+                    .attr('date', new Date().toLocaleString())
+                    .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
+                    .click(function (event) 
+                    {
+                        chrome.runtime.sendMessage({
+                            request: 'downloadContent',
+                            filename: 'screencapture - ' + $(this).attr('date') + '.gif',
+                            contentURL: $(this).parent().find('img.gif').attr('src'),
                         });
                     })
                 );

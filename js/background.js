@@ -12,7 +12,7 @@ console.log('Initializing Bug-Filer v' + MANIFEST.version,
 // Variables
 var popupConnection = null              // Handle for port connection to popup
     , videoConnection = null            // Handle for video capture stream
-    , videoRecorder = VideoRecorder()   // Reference to video recording object
+    , videoRecorder = VideoRecorder   // Reference to video recording object
 ;
 
 
