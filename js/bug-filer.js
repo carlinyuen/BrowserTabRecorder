@@ -264,12 +264,6 @@ $(function()
                         })
                         .on('error', function() 
                         {
-                            // Try turning into a gif?
-                            chrome.runtime.sendMessage({
-                                request: 'convertVideoToGif',
-                                sourceURL: sourceURL,
-                            });
-                            
                             // TODO: tell user preview not available, but can download
                         });
                 });
