@@ -68,11 +68,11 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             break;
 
         case "startVideoRecording":
-            captureTabVideo();
+            captureTabVideo(sender.tab.id);
             break;
 
         case "stopVideoRecording":
-            stopVideoCapture();
+            stopVideoCapture(sender.tab.id);
             break;
 
         case "videoRecordingStatus":
@@ -168,7 +168,7 @@ function captureTabScreenshot(data)
 }
 
 // Capture video stream of tab, will pass stream back to sendResponse()
-function captureTabVideo()
+function captureTabVideo(senderTabId)
 {
     console.log("captureTabVideo");
 
@@ -176,7 +176,7 @@ function captureTabVideo()
     if (videoConnection) 
     {
         console.log('ERROR: video stream already exists, cannot capture two at a time!');
-        sendMessageToActiveTab({
+        chrome.tabs.sendMessage(senderTabId, {
             request: 'videoRecordingStarted',
             stream: null
         });
@@ -218,7 +218,7 @@ function captureTabVideo()
             }
 
             // Send to response
-            sendMessageToActiveTab({
+            chrome.tabs.sendMessage(senderTabId, {
                 request: 'videoRecordingStarted',
                 stream: videoConnection
             });
@@ -227,7 +227,7 @@ function captureTabVideo()
 
 // Stop video capture and build compiled .webm video file
 //  If callback DNE, send video to active page, otherwise pass along video to callback
-function stopVideoCapture(callback)
+function stopVideoCapture(senderTabId, callback)
 {
     console.log("stopVideoCapture");
 
@@ -235,7 +235,7 @@ function stopVideoCapture(callback)
     if (!videoConnection) 
     {
         videoConnection = null;
-        sendMessageToActiveTab({
+        chrome.tabs.sendMessage(senderTabId, {
             request: 'videoRecordingStopped',
             sourceURL: null
         });
@@ -248,7 +248,7 @@ function stopVideoCapture(callback)
     // If output was bad, don't continue
     if (!videoSourceURL) 
     {
-        sendMessageToActiveTab({
+        chrome.tabs.sendMessage(senderTabId, {
             request: 'videoRecordingStopped',
             sourceURL: null
         });
@@ -257,11 +257,11 @@ function stopVideoCapture(callback)
 
     // If callback exists, pass parameters
     if (callback) {
-        callback(videoSourceURL);
+        callback(videoSourceURL, senderTabId);
     } 
     else    // Pass video to active tab
     {
-        sendMessageToActiveTab({
+        chrome.tabs.sendMessage(senderTabId, {
             request: 'videoRecordingStopped',
             sourceURL: videoSourceURL
         });
@@ -269,7 +269,7 @@ function stopVideoCapture(callback)
 }
 
 // Capture gif from the current active tab
-function captureTabGif(videoSourceURL, sendResponse)
+function captureTabGif(videoSourceURL, senderTabId)
 {
     // Using gifshot library to generate gif from video
     gifshot.createGIF({
@@ -277,12 +277,18 @@ function captureTabGif(videoSourceURL, sendResponse)
         }, 
         function (obj) 
         {
-            if (!obj.error) {   // Pass along image src
-                sendResponse(obj.image);
-            } else {            // Error, send back null
+            var src = null;
+            if (!obj.error) {
+                src = obj.image;    // Set src
+            } else {
                 console.log(obj.error);
-                sendResponse(null);
             }
+
+            // Send to active tab if senderTabId is not set
+            chrome.tabs.sendMessage(senderTabId, {
+                request: 'gifRecordingStopped',
+                sourceURL: src
+            });
         });
 }
 
