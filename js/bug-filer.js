@@ -15,17 +15,11 @@ $(function()
         , CLASS_THUMBNAIL = 'carlin-bug-filer-thumbnail'
         , CLASS_CURSOR_TRACKER = 'carlin-bug-filer-cursor'
         , CLASS_SHOW_CONTAINER = 'show'
-        
-        // Cursor tracking
-        , cursorTracker = null
-
-        // Thumbnail handling
-        , thumbnailContainer = null
-        , thumbnailHideTimer = null
-
-        // Recording state
-        , recording = false
-        , currentVideoThumbnail = null  // Track current live video thumbnail
+        , cursorTracker = null              // Reference to cursor tracker element
+        , thumbnailContainer = null         // Reference to thumbnail container
+        , thumbnailHideTimer = null         // Timer handle for autohiding container
+        , recording = false                 // Recording state
+        , currentVideoThumbnail = null      // Track current live video thumbnail
     ;
 
 
