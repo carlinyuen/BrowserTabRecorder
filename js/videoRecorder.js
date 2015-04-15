@@ -122,8 +122,8 @@ window.VideoRecorder = (function()
             stream = null;
         }
 
-        console.log('frames captured: ' + frames.length + ' => ' +
-                ((endTime - startTime) / 1000) + 's video');
+        var duration = ((endTime - startTime) / 1000);
+        console.log('frames: ' + frames.length + ' => ' + duration + 's video');
 
         // Sanity check
         if (!frames.length) 
@@ -140,7 +140,12 @@ window.VideoRecorder = (function()
         // Cleanup
         frames = [];
 
-        return recordedVideoURL;
+        return {
+            width: video.width,
+            height: video.height,
+            length: duration,
+            sourceURL: recordedVideoURL,
+        };
     };
 
     // Download last recorded video

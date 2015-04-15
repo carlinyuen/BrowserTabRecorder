@@ -250,34 +250,34 @@ function stopVideoCapture(senderTabId, callback)
         videoConnection = null;
         chrome.tabs.sendMessage(senderTabId, {
             request: 'videoRecordingStopped',
-            sourceURL: null
+            sourceURL: null,
         });
         return;
     }
 
     // Stop video capture and save file
-    var videoSourceURL = videoRecorder.stop();
+    var videoData = videoRecorder.stop();
     videoConnection = null;
 
     // If output was bad, don't continue
-    if (!videoSourceURL) 
+    if (!videoData || !videoData.sourceURL) 
     {
         chrome.tabs.sendMessage(senderTabId, {
             request: 'videoRecordingStopped',
-            sourceURL: null
+            sourceURL: null,
         });
         return;
     }
 
     // If callback exists, pass parameters
     if (callback) {
-        callback(videoSourceURL, senderTabId);
+        callback(videoData, senderTabId);
     } 
     else    // Pass video to active tab
     {
         chrome.tabs.sendMessage(senderTabId, {
             request: 'videoRecordingStopped',
-            sourceURL: videoSourceURL
+            sourceURL: videoData.sourceURL,
         });
     }
 }
@@ -285,7 +285,7 @@ function stopVideoCapture(senderTabId, callback)
 // Convert video file to gif
 function convertVideoToGif(videoData, senderTabId)
 {
-    console.log("convertVideToGif:", videoData);
+    console.log("convertVideoToGif:", videoData);
 
     // Santity check
     if (!videoData || !videoData.sourceURL) 
@@ -302,8 +302,9 @@ function convertVideoToGif(videoData, senderTabId)
         gifWidth: (videoData.width || 640),
         gifHeight: (videoData.height || 480),
         numFrames: (videoData.length || 2) * 10,
-        video: [videoData.sourceURL]
+        video: [videoData.sourceURL],
     };
+    console.log('options:', options);
 
     // Using gifshot library to generate gif from video
     gifshot.createGIF(options, 
