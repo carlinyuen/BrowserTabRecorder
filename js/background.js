@@ -80,7 +80,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             break;
 
         case "convertVideoToGif":
-            convertVideoToGif(message.sourceURL, sender.tab.id);
+            convertVideoToGif(message, sender.tab.id);
             break;
 
         case "updatePopup":     // Tell popup to update its fields
@@ -274,12 +274,30 @@ function stopVideoCapture(senderTabId, callback)
 }
 
 // Convert video file to gif
-function convertVideoToGif(videoSourceURL, senderTabId)
+function convertVideoToGif(videoData, senderTabId)
 {
+    console.log("convertVideToGif:", videoData);
+
+    // Santity check
+    if (!videoData || !videoData.sourceURL) 
+    {
+        chrome.tabs.sendMessage(senderTabId, {
+            request: 'convertedGif',
+            sourceURL: null,
+        });
+        return;
+    }
+
+    // Collect option
+    var options = {
+        gifWidth: (videoData.width || 640),
+        gifHeight: (videoData.height || 480),
+        numFrames: (videoData.length || 2) * 10,
+        video: [videoData.sourceURL]
+    };
+
     // Using gifshot library to generate gif from video
-    gifshot.createGIF({
-            'video': [videoSourceURL]
-        }, 
+    gifshot.createGIF(options, 
         function (obj) 
         {
             var src = null;
