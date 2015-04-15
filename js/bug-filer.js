@@ -253,8 +253,11 @@ $(function()
                 // Generate local url and set video element source to webm file
                 createLocalObjectURL(sourceURL, function (url) 
                 {
-                    try {
-                        thumb.find('video').attr('src', url);
+                    try 
+                    {
+                        thumb.find('video')
+                            .attr('controls', true)
+                            .attr('src', url);
                     } 
                     catch (exception) 
                     {
@@ -384,7 +387,8 @@ $(function()
                 container.css({ 'background-image': 'url(' + sourceURL + ')' })
                     .append($(document.createElement('img'))
                         .addClass('screenshot')
-                        .attr('src', sourceURL));
+                        .attr('src', sourceURL)
+                    );
                 result.append($(document.createElement('button'))
                     .addClass('downloadButton')
                     .attr('date', formatDate(new Date()))
@@ -402,8 +406,9 @@ $(function()
 
             case "video":
                 container.append($(document.createElement('video'))
-                    .attr('controls', true)
-                    .attr('autoplay', true));
+                    .attr('autoplay', true)
+                    .text('Hit the record button to start')
+                );
                 result.append($(document.createElement('button'))
                     .addClass('recordButton')
                     .append($(document.createElement('img')).attr('src', IMAGE_RECORD))

@@ -7,7 +7,9 @@
 window.VideoRecorder = (function()
 {
     // Variables
-    var video = document.createElement('video')     // offscreen video
+    var FRAME_RATE_RECORDING = 40       // Frames per second
+        , TIME_FRAME_DELAY = 1000 / FRAME_RATE_RECORDING
+        , video = document.createElement('video')     // offscreen video
         , canvas = document.createElement('canvas') // offscreen canvas
         , rafId = null                  // Handle for animation request function
         , startTime = null              // Timer to track recording length
@@ -79,7 +81,6 @@ window.VideoRecorder = (function()
         frames = []; // clear existing frames;
         startTime = Date.now();
 
-        // Frame redraw function
         /*
         function drawVideoFrame(time) 
         {
@@ -88,8 +89,6 @@ window.VideoRecorder = (function()
             // Draw video onto canvas, and read back canvas as webp
             ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             frames.push(canvas.toDataURL('image/webp', 1)); // image/jpeg is way faster :(
-
-            console.log('draw video');
         };
         rafId = requestAnimationFrame(drawVideoFrame);
         */
@@ -97,13 +96,11 @@ window.VideoRecorder = (function()
         // Frame redraw function
         rafId = setInterval(function() 
         {
-            console.log('draw video');
-
             // Draw video onto canvas, and read back canvas as webp
             ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             frames.push(canvas.toDataURL('image/webp', 1)); // image/jpeg is way faster :(
 
-        }, 25); // 25 = 40hz
+        }, TIME_FRAME_DELAY);
     };
 
     // Stop video recording and return source URL for compiled webm video
@@ -136,7 +133,7 @@ window.VideoRecorder = (function()
         }
 
         // Compile our final binary video blob and create a source URL to it
-        var videoBlob = Whammy.fromImageArray(frames, 1000 / 60);
+        var videoBlob = Whammy.fromImageArray(frames, FRAME_RATE_RECORDING);
         recordedVideoURL = window.URL.createObjectURL(videoBlob);
         console.log('recordedVideoURL:', recordedVideoURL);
 

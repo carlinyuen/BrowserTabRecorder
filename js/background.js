@@ -79,6 +79,10 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             sendResponse(videoConnection);
             break;
 
+        case "convertVideoToGif":
+            convertVideoToGif(message.sourceURL, sender.tab.id);
+            break;
+
         case "updatePopup":     // Tell popup to update its fields
             if (popupConnection) {
                 popupConnection.postMessage({request: "update"});
@@ -269,8 +273,8 @@ function stopVideoCapture(senderTabId, callback)
     }
 }
 
-// Capture gif from the current active tab
-function captureTabGif(videoSourceURL, senderTabId)
+// Convert video file to gif
+function convertVideoToGif(videoSourceURL, senderTabId)
 {
     // Using gifshot library to generate gif from video
     gifshot.createGIF({
@@ -287,7 +291,7 @@ function captureTabGif(videoSourceURL, senderTabId)
 
             // Send to active tab if senderTabId is not set
             chrome.tabs.sendMessage(senderTabId, {
-                request: 'gifRecordingStopped',
+                request: 'gif',
                 sourceURL: src
             });
         });
