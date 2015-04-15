@@ -268,6 +268,13 @@ $(function()
         }
     }
 
+    // Convert date to a format that is good for downloading
+    function formatDate(date)
+    {
+        return date.getFullYear() + '.' + (date.getMonth() + 1) + '.' + date.getDate()
+            + '-' + date.getHours() + '.' + date.getMinutes() + '.' + date.getSeconds();
+    }
+
     // Creates a thumbnail div from recording source (image / video), and returns it
     function createThumbnail(type, sourceURL)
     {
@@ -287,7 +294,7 @@ $(function()
                         .attr('src', sourceURL));
                 result.append($(document.createElement('button'))
                     .addClass('downloadButton')
-                    .attr('date', new Date().toLocaleString())
+                    .attr('date', formatDate(new Date()))
                     .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
                     .click(function (event) 
                     {
@@ -316,7 +323,7 @@ $(function()
                     })
                 ).append($(document.createElement('button'))
                     .addClass('downloadButton')
-                    .attr('date', new Date().toLocaleString())
+                    .attr('date', formatDate(new Date()))
                     .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
                     .click(function (event) 
                     {
@@ -345,7 +352,7 @@ $(function()
                     })
                 ).append($(document.createElement('button'))
                     .addClass('downloadButton')
-                    .attr('date', new Date().toLocaleString())
+                    .attr('date', formatDate(new Date()))
                     .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
                     .click(function (event) 
                     {
