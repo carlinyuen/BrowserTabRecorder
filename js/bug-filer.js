@@ -211,7 +211,7 @@ $(function()
         }
         
         // Adjust request based on gif vs video
-        var request = ($target.find('img.gif').length) 
+        var request = (selectedThumbnail.find('img.gif').length) 
             ? 'startGifRecording' : 'startVideoRecording'
 
         // Tell background page to start recording
@@ -255,7 +255,7 @@ $(function()
         console.log('stopVideoRecording');
 
         // Adjust request based on gif vs video
-        var request = ($target.find('img.gif').length) 
+        var request = (selectedThumbnail.find('img.gif').length) 
             ? 'stopGifRecording' : 'stopVideoRecording'
 
         // Tell background page to stop recording
