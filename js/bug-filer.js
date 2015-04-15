@@ -303,6 +303,8 @@ $(function()
     // Update thumbnail with converted gif from video
     function convertedGif(sourceURL)
     {
+        console.log('convertedGif:', sourceURL);
+
         // Sanity check
         if (!sourceURL)
         {

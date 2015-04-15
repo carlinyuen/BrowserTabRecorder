@@ -83,6 +83,9 @@
     padding: 0 !important;
     margin: 0 !important;
 }
+.carlin-bug-filer-thumbnail .container img.gif {
+    opacity: 1.0 !important;
+}
 .carlin-bug-filer-thumbnail .container video {
     width: 100% !important;
     height: 100% !important;
