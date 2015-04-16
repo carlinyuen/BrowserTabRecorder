@@ -40,7 +40,7 @@
     position: relative;
     margin: 4px 6px 6px 0;
     bottom: 0;
-    width: 24%;
+    width: 19%;
     height: 128px;
     float: right;
     overflow: visible;
@@ -130,6 +130,12 @@
     z-index: 10000;
     background: url('chrome-extension://__MSG_@@extension_id__/images/cursor.png') center center no-repeat;
     pointer-events: none !important;
+}
+
+@media (min-width: 701px) and (max-width: 1000px) {
+    .carlin-bug-filer-thumbnail {
+        width: 24%;
+    }
 }
 
 @media (min-width: 501px) and (max-width: 700px) {
