@@ -85,7 +85,10 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             break;
 
         case "videoRecordingStatus":
-            sendResponse(videoConnection);
+            sendResponse({
+                request: "recordingStatus",
+                stream: videoConnection,
+            });
             break;
 
         case "convertVideoToGif":

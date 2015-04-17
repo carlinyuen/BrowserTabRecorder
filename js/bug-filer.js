@@ -90,10 +90,36 @@ $(function()
         }
     });
 
+    // Initialize bug-filer
+    init();
+
 
     /////////////////////////////////////////
     // FUNCTIONS
     
+    // Initialize the extension script
+    function init() 
+    {
+        checkRecordingState(function (status) 
+        {
+            if (status && status.stream) 
+            {
+                createThumbnailContainer();
+                createCursorTracker();
+                selectedThumbnail = createVideoThumbnail();
+                videoRecordingStarted(status.stream);
+            }
+        });
+    }
+
+    // Check recording state of background page, callback param is video stream
+    function checkRecordingState(callback)
+    {
+        chrome.runtime.sendMessage({
+            request: "videoRecordingStatus"
+        }, callback);
+    }
+
     // Create thumbnail container if it doesn't exist
     function createThumbnailContainer()
     {
@@ -161,17 +187,21 @@ $(function()
         try
         {
             // Create video thumbnail and add to document
-            createThumbnail('video')
+            var thumb = createThumbnail('video')
                 .hide()
                 .appendTo(thumbnailContainer)
                 .slideDown('fast');
 
             // If container is not showing yet, show it permanently
             thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+
+            return thumb;
         }
         catch (exception) {   // If there's errors, stop recording
             console.log(exception);
         }
+
+        return null;
     }
 
     // Create a container for the video
@@ -187,17 +217,21 @@ $(function()
         try
         {
             // Create video thumbnail and add to document
-            createThumbnail('gif')
+            var thumb = createThumbnail('gif')
                 .hide()
                 .appendTo(thumbnailContainer)
                 .slideDown('fast');
 
             // If container is not showing yet, show it permanently
             thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+
+            return thumb;
         }
         catch (exception) {   // If there's errors, stop recording
             console.log(exception);
         }
+
+        return null;
     }
 
     // Start video recording
@@ -323,7 +357,11 @@ $(function()
             thumb.find('video')
                 .attr('src', url)                   
                 .on('loadedmetadata', function() {
-                    $(this).attr('controls', true); // Show controls
+                    $(this).hover(function(event) {
+                        $(this).attr('controls', true); // Show controls
+                    }, function (event) {
+                        $(this).attr('controls', false); // Hide controls
+                    });
                 })
                 .on('error', function() 
                 {
@@ -401,7 +439,7 @@ $(function()
         console.log('createScreenshotThumbnail:', srcURL);
 
         // Create image thumbnail container
-        createThumbnail('image', srcURL)
+        var thumb = createThumbnail('image', srcURL)
             .hide()
             .appendTo(thumbnailContainer)
             .slideDown('fast');
@@ -412,6 +450,8 @@ $(function()
             thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
             autohideThumbnailContainer();
         }
+
+        return thumb;
     }
 
     // Clear autohide timer
