@@ -108,6 +108,8 @@
 }
 .carlin-bug-filer-thumbnail .recordButton {
     position: absolute;
+    width: auto;
+    height: auto;
     top: 0;
     left: 0;
     right: 0;

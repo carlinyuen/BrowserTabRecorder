@@ -264,7 +264,7 @@ $(function()
             // If selectedThumbnail exists, change record button
             if (selectedThumbnail) 
             {
-                selectedThumbnail.find('.' + CLASS_BUTTON_RECORD + ' img')
+                selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
                     .addClass(CLASS_CURRENTLY_RECORDING);
             }
 
@@ -300,13 +300,15 @@ $(function()
     // UI changes to indicate recording is over
     function recordingStoppedInterfaceUpdate()
     {
-        // Remove / hide recording button on thumbnail if exists
+        // Remove / hide recording button, show download button
         if (selectedThumbnail)
         {
             selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
                 .fadeOut('fast', function() {
                     $(this).remove();
                 });
+            selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
+                .fadeIn('fast');
         }
 
         // Hide cursor tracker
