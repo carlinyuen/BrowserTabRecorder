@@ -5,8 +5,8 @@ $(function()
     // Variables & Constants
     var IMAGE_CURSOR = chrome.extension.getURL("images/cursor.png")
         , IMAGE_DOWNLOAD = chrome.extension.getURL('images/data-transfer-download-2x.png')
-        , IMAGE_RECORD = chrome.extension.getURL('images/media-record-2x.png')
-        , IMAGE_STOP_RECORD = chrome.extension.getURL('images/media-stop-2x.png')
+        , IMAGE_RECORD = chrome.extension.getURL('images/media-record-8x.png')
+        , IMAGE_STOP_RECORD = chrome.extension.getURL('images/media-stop-8x.png')
         , IMAGE_DELETE = chrome.extension.getURL('images/x-2x.png')
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
@@ -15,6 +15,9 @@ $(function()
         , CLASS_THUMBNAIL = 'carlin-bug-filer-thumbnail'
         , CLASS_CURSOR_TRACKER = 'carlin-bug-filer-cursor'
         , CLASS_SHOW_CONTAINER = 'show'
+        , CLASS_DOWNLOAD_TARGET = 'target'
+        , CLASS_BUTTON_DOWNLOAD = 'downloadButton'
+        , CLASS_BUTTON_CLOSE = 'closeButton'
         , cursorTracker = null              // Reference to cursor tracker element
         , thumbnailContainer = null         // Reference to thumbnail container
         , thumbnailHideTimer = null         // Timer handle for autohiding container
@@ -418,7 +421,7 @@ $(function()
                 .addClass('gif')
                 .attr('src', sourceURL)
             );
-        selectedThumbnail.find('.downloadButton')
+        selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
             .off('click')
             .click(function (event) 
             {
@@ -442,7 +445,8 @@ $(function()
         var thumb = createThumbnail('image', srcURL)
             .hide()
             .appendTo(thumbnailContainer)
-            .slideDown('fast');
+            .slideDown('fast')
+            .find('.' + CLASS_BUTTON_DOWNLOAD).show();
 
         // If container is not showing yet, show it temporarily
         if (!thumbnailContainer.hasClass(CLASS_SHOW_CONTAINER)) 
@@ -525,28 +529,18 @@ $(function()
             case "image":
                 container.css({ 'background-image': 'url(' + sourceURL + ')' })
                     .append($(document.createElement('img'))
+                        .attr('title', 'screenshot - ' + formatDate(new Date()) + '.png')
+                        .addClass(CLASS_DOWNLOAD_TARGET)
                         .addClass('screenshot')
                         .attr('src', sourceURL)
                     );
-                result.append($(document.createElement('button'))
-                    .addClass('downloadButton')
-                    .attr('date', formatDate(new Date()))
-                    .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
-                    .click(function (event) 
-                    {
-                        chrome.runtime.sendMessage({
-                            request: 'downloadContent',
-                            filename: 'screenshot - ' + $(this).attr('date') + '.png',
-                            contentURL: $(this).parent().find('img.screenshot').attr('src'),
-                        });
-                    })
-                );
                 break;
 
             case "video":
                 container.append($(document.createElement('video'))
+                    .attr('title', 'screencapture - ' + formatDate(new Date()) + '.webm')
+                    .addClass(CLASS_DOWNLOAD_TARGET)
                     .attr('autoplay', true)
-                    .text('Hit the record button to start')
                 );
                 result.append($(document.createElement('button'))
                     .addClass('recordButton')
@@ -559,23 +553,13 @@ $(function()
                             stopVideoRecording($(this));
                         }
                     })
-                ).append($(document.createElement('button'))
-                    .addClass('downloadButton')
-                    .attr('date', formatDate(new Date()))
-                    .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
-                    .click(function (event) 
-                    {
-                        chrome.runtime.sendMessage({
-                            request: 'downloadContent',
-                            filename: 'screencapture - ' + $(this).attr('date') + '.webm',
-                            contentURL: $(this).parent().find('video').attr('src'),
-                        });
-                    })
                 );
                 break;
 
             case "gif":
                 container.append($(document.createElement('img'))
+                    .attr('title', 'screencapture - ' + formatDate(new Date()) + '.gif')
+                    .addClass(CLASS_DOWNLOAD_TARGET)
                     .addClass('gif'));
                 result.append($(document.createElement('button'))
                     .addClass('recordButton')
@@ -588,27 +572,41 @@ $(function()
                             stopVideoRecording($(this));
                         }
                     })
-                ).append($(document.createElement('button'))
-                    .addClass('downloadButton')
-                    .attr('date', formatDate(new Date()))
-                    .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
-                    .click(function (event) 
-                    {
-                        chrome.runtime.sendMessage({
-                            request: 'downloadContent',
-                            filename: 'screencapture - ' + $(this).attr('date') + '.gif',
-                            contentURL: $(this).parent().find('img.gif').attr('src'),
-                        });
-                    })
                 );
                 break;
 
             default: break;
         }
 
+        // Add a download button
+        result.append($(document.createElement('button'))
+            .addClass(CLASS_BUTTON_DOWNLOAD)
+            .hide()     // Hide it first, show it after recording is done
+            .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
+            .click(function (event) 
+            {
+                var $target = $(this).parent().find('.' + CLASS_DOWNLOAD_TARGET);
+
+                // Sanity Check
+                if (!$target.length) 
+                {
+                    console.log('ERROR: no target download found!');
+                    alert("Couldn't find target download!");
+                    return;
+                }
+
+                // Send message with target src and title
+                chrome.runtime.sendMessage({
+                    request: 'downloadContent',
+                    filename: $target.attr('title'),
+                    contentURL: $target.attr('src'),
+                });
+            })
+        );
+
         // Add a close button
         result.append($(document.createElement('button'))
-            .addClass('closeButton')
+            .addClass(CLASS_BUTTON_CLOSE)
             .append($(document.createElement('img')).attr('src', IMAGE_DELETE))
             .click(function (event) 
             {
