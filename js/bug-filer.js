@@ -4,10 +4,6 @@ $(function()
 {
     // Variables & Constants
     var IMAGE_CURSOR = chrome.extension.getURL("images/cursor.png")
-        , IMAGE_DOWNLOAD = chrome.extension.getURL('images/data-transfer-download-2x.png')
-        , IMAGE_RECORD = chrome.extension.getURL('images/media-record-8x.png')
-        , IMAGE_STOP_RECORD = chrome.extension.getURL('images/media-stop-8x.png')
-        , IMAGE_DELETE = chrome.extension.getURL('images/x-2x.png')
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
         , TIME_AUTOHIDE_CONTAINER = 2000    // 2s
@@ -17,7 +13,9 @@ $(function()
         , CLASS_SHOW_CONTAINER = 'show'
         , CLASS_DOWNLOAD_TARGET = 'target'
         , CLASS_BUTTON_DOWNLOAD = 'downloadButton'
+        , CLASS_BUTTON_RECORD = 'recordButton'
         , CLASS_BUTTON_CLOSE = 'closeButton'
+        , CLASS_CURRENTLY_RECORDING = 'recording'
         , cursorTracker = null              // Reference to cursor tracker element
         , thumbnailContainer = null         // Reference to thumbnail container
         , thumbnailHideTimer = null         // Timer handle for autohiding container
@@ -266,8 +264,8 @@ $(function()
             // If selectedThumbnail exists, change record button
             if (selectedThumbnail) 
             {
-                selectedThumbnail.find('.recordButton img')
-                    .attr('src', IMAGE_STOP_RECORD);
+                selectedThumbnail.find('.' + CLASS_BUTTON_RECORD + ' img')
+                    .addClass(CLASS_CURRENTLY_RECORDING);
             }
 
             // Hide container
@@ -305,7 +303,7 @@ $(function()
         // Remove / hide recording button on thumbnail if exists
         if (selectedThumbnail)
         {
-            selectedThumbnail.find('.recordButton')
+            selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
                 .fadeOut('fast', function() {
                     $(this).remove();
                 });
@@ -541,10 +539,8 @@ $(function()
                     .attr('title', 'screencapture - ' + formatDate(new Date()) + '.webm')
                     .addClass(CLASS_DOWNLOAD_TARGET)
                     .attr('autoplay', true)
-                );
-                result.append($(document.createElement('button'))
-                    .addClass('recordButton')
-                    .append($(document.createElement('img')).attr('src', IMAGE_RECORD))
+                ).append($(document.createElement('button'))    // Add record button
+                    .addClass(CLASS_BUTTON_RECORD)
                     .click(function (event) 
                     {
                         if (!recording) {    // Not yet recording, start recording
@@ -560,10 +556,9 @@ $(function()
                 container.append($(document.createElement('img'))
                     .attr('title', 'screencapture - ' + formatDate(new Date()) + '.gif')
                     .addClass(CLASS_DOWNLOAD_TARGET)
-                    .addClass('gif'));
-                result.append($(document.createElement('button'))
-                    .addClass('recordButton')
-                    .append($(document.createElement('img')).attr('src', IMAGE_RECORD))
+                    .addClass('gif')
+                ).append($(document.createElement('button'))    // Add record button
+                    .addClass(CLASS_BUTTON_RECORD)
                     .click(function (event) 
                     {
                         if (!recording) {    // Not yet recording, start recording
@@ -582,7 +577,6 @@ $(function()
         result.append($(document.createElement('button'))
             .addClass(CLASS_BUTTON_DOWNLOAD)
             .hide()     // Hide it first, show it after recording is done
-            .append($(document.createElement('img')).attr('src', IMAGE_DOWNLOAD))
             .click(function (event) 
             {
                 var $target = $(this).parent().find('.' + CLASS_DOWNLOAD_TARGET);
@@ -607,7 +601,6 @@ $(function()
         // Add a close button
         result.append($(document.createElement('button'))
             .addClass(CLASS_BUTTON_CLOSE)
-            .append($(document.createElement('img')).attr('src', IMAGE_DELETE))
             .click(function (event) 
             {
                 var $this = $(this);
@@ -615,7 +608,7 @@ $(function()
                 // Stop video recording if needed
                 if (recording) 
                 {
-                    if ($this.sibling('.recordButton').find('img').attr('src') == IMAGE_STOP_RECORD) 
+                    if ($this.sibling('.recordButton').hasClass(CLASS_CURRENTLY_RECORDING))
                     {
                         console.log('closing currently recording video!');
                         stopVideoRecording();

@@ -76,37 +76,23 @@
     background-repeat: no-repeat;
     background-size: cover;
 }
-.carlin-bug-filer-thumbnail .container img {
+.carlin-bug-filer-thumbnail .container img.target {
     width: 100% !important;
     height: 100% !important;
     opacity: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
 }
-.carlin-bug-filer-thumbnail .container img.gif {
+.carlin-bug-filer-thumbnail .container img.target.gif {
     opacity: 1.0 !important;
 }
-.carlin-bug-filer-thumbnail .container video {
+.carlin-bug-filer-thumbnail .container video.target {
     width: 100% !important;
     height: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
 }
-.carlin-bug-filer-thumbnail .closeButton {
-    position: absolute;
-    top: 0;
-    right: 0;
-}
-.carlin-bug-filer-thumbnail .recordButton {
-    position: absolute;
-    right: 24px;
-    bottom: 0;
-}
-.carlin-bug-filer-thumbnail .downloadButton {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-}
+
 .carlin-bug-filer-thumbnail button {
     margin: 2px;
     padding: 0;
@@ -114,14 +100,31 @@
     height: 20px;
     vertical-align: middle;
 }
-.carlin-bug-filer-thumbnail button img {
-    width: 12px !important;
-    height: 12px !important;
-    opacity: 1 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    vertical-align: middle !important;
+.carlin-bug-filer-thumbnail .closeButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: url('chrome-extension://__MSG_@@extension_id__/images/x-2x.png') center center no-repeat;
 }
+.carlin-bug-filer-thumbnail .recordButton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    background: url('chrome-extension://__MSG_@@extension_id__/images/media-record-8x.png') center center no-repeat;
+}
+.carlin-bug-filer-thumbnail .recordButton.recording {
+    background: url('chrome-extension://__MSG_@@extension_id__/images/media-stop-8x.png') center center no-repeat;
+}
+.carlin-bug-filer-thumbnail .downloadButton {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background: url('chrome-extension://__MSG_@@extension_id__/images/data-transfer-download-2x.png') center center no-repeat;
+}
+
 
 .carlin-bug-filer-cursor {
     width: 48px;    /* size of image */
