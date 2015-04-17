@@ -199,6 +199,8 @@ function captureTabVideo(senderTabId)
         return;
     }
 
+    // TODO: get options
+
     // Capture only video from the tab
     chrome.tabCapture.capture({
             audio: false,
