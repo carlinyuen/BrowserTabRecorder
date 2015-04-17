@@ -104,7 +104,9 @@
     position: absolute;
     top: 0;
     right: 0;
-    background: url('chrome-extension://__MSG_@@extension_id__/images/x-2x.png') center center no-repeat;
+    z-index: 999;
+    font-weight: bold;
+    line-height: 0;
 }
 .carlin-bug-filer-thumbnail .recordButton {
     position: absolute;
@@ -119,6 +121,9 @@
 }
 .carlin-bug-filer-thumbnail .recordButton.recording {
     background: url('chrome-extension://__MSG_@@extension_id__/images/media-stop-8x.png') center center no-repeat;
+}
+.carlin-bug-filer-thumbnail .recordButton.processing {
+    background: url('chrome-extension://__MSG_@@extension_id__/images/Preloader_10.gif') center center no-repeat;
 }
 .carlin-bug-filer-thumbnail .downloadButton {
     position: absolute;

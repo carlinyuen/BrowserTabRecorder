@@ -16,6 +16,7 @@ $(function()
         , CLASS_BUTTON_RECORD = 'recordButton'
         , CLASS_BUTTON_CLOSE = 'closeButton'
         , CLASS_CURRENTLY_RECORDING = 'recording'
+        , CLASS_CURRENTLY_PROCESSING = 'processing'
         , cursorTracker = null              // Reference to cursor tracker element
         , thumbnailContainer = null         // Reference to thumbnail container
         , thumbnailHideTimer = null         // Timer handle for autohiding container
@@ -288,6 +289,14 @@ $(function()
     function stopVideoRecording()
     {
         console.log('stopVideoRecording');
+
+        // Change recording button to processing icon
+        if (selectedThumbnail)
+        {
+            selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
+                .removeClass(CLASS_CURRENTLY_RECORDING)
+                .addClass(CLASS_CURRENTLY_PROCESSING);
+        }
 
         // Adjust request based on gif vs video
         var request = (selectedThumbnail.find('img.gif').length) 
@@ -603,8 +612,14 @@ $(function()
         // Add a close button
         result.append($(document.createElement('button'))
             .addClass(CLASS_BUTTON_CLOSE)
+            .text('X')
             .click(function (event) 
             {
+                // Confirm delete
+                if (!confirm('Are you sure you want to delete this?')) {
+                    return;
+                }
+
                 var $this = $(this);
 
                 // Stop video recording if needed
