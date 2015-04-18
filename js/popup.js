@@ -205,11 +205,6 @@ $(function()
     // Clear details and the form
     function clearDetails()
     {
-        // Confirm clear
-        if (!confirm('Are you sure you want to clear?')) {
-            return;
-        }
-
         // Clear form
         var keys = [];
         $fields.each(function (i, el) 
