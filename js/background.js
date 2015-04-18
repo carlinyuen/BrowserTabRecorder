@@ -31,16 +31,20 @@ chrome.extension.onConnect.addListener(function(port)
 
         switch (message.request)
         {
-            case "captureTabVideo":
-                sendMessageToActiveTab(message);
+            case "captureTabScreenshot":
+                captureTabScreenshot(message);
                 break;
 
             case "captureTabGif":
                 sendMessageToActiveTab(message);
                 break;
 
-            case "captureTabScreenshot":
-                captureTabScreenshot(message);
+            case "captureTabVideo":
+                sendMessageToActiveTab(message);
+                break;
+
+            case "captureTabAudio":
+                sendMessageToActiveTab(message);
                 break;
 
             case "emailAutofill":

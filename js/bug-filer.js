@@ -50,16 +50,25 @@ $(function()
         // Handle message
         switch (message.request)
         {
-            case "captureTabVideo":
+            case "captureTabScreenshot":
                 createThumbnailContainer();
-                createCursorTracker();
-                createVideoThumbnail();
+                createScreenshotThumbnail(message.sourceURL);
                 break;
 
             case "captureTabGif":
                 createThumbnailContainer();
                 createCursorTracker();
                 createGifThumbnail();
+                break;
+
+            case "captureTabVideo":
+                createThumbnailContainer();
+                createCursorTracker();
+                createVideoThumbnail();
+                break;
+
+            case "captureTabAudio":
+                // TODO:
                 break;
 
             case "videoRecordingStarted":
@@ -72,11 +81,6 @@ $(function()
 
             case "convertedGif":
                 convertedGif(message.sourceURL);
-                break;
-
-            case "captureTabScreenshot":
-                createThumbnailContainer();
-                createScreenshotThumbnail(message.sourceURL);
                 break;
 
             case "emailAutofill":
