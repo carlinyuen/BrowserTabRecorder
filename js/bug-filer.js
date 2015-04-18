@@ -4,6 +4,7 @@ $(function()
 {
     // Variables & Constants
     var IMAGE_CURSOR = chrome.extension.getURL("images/cursor.png")
+        , IMAGE_ICON_VIDEO = chrome.extension.getURL("images/video-8x.png")
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
         , TIME_AUTOHIDE_CONTAINER = 2000    // 2s
@@ -381,7 +382,13 @@ $(function()
                     alert('Preview not available, but you can still download the video!');
                     console.log('WARNING: preview not available due to content security policy, but can still download.');
 
-                    // TODO: put up an image in the thumbnail
+                    // Show video icon image instead
+                    thumb.find('video').fadeOut('fast', function (event) {
+                        $(this).remove();
+                    });
+                    thumb.css({
+                        'background': 'url(' + IMAGE_ICON_VIDEO + ') center center no-repeat'
+                    });
                 });
         });
     
