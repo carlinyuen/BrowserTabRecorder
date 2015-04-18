@@ -42,13 +42,15 @@ $(function()
         $fields = $('input,textarea');
 
         // Button handlers
+        $('#optionsButton').click(openOptionsPage);
         $('#screenshotButton').click(takeScreenshot);
-        $('#videoButton').click(captureVideo);
         $('#gifButton').click(captureGif);
+        $('#videoButton').click(captureVideo);
+        $('#audioButton').click(captureAudio);
         $('#emailButton').click(autofillFromEmail);
         $('#cloneButton').click(cloneFromBuganizer);
-        $('#resetButton').click(clearDetails);
         $('#createButton').click(createBug);
+        $('#resetButton').click(clearDetails);
 
         // Key listeners to fields to save details
         $fields.on("keyup paste cut", saveDetails);
@@ -79,20 +81,30 @@ $(function()
         // Focus on title field
         $('#bugTitle').focus();
     }
+
+    // Open options page
+    function openOptionsPage() {
+        chrome.tabs.create({url: "options.html"});
+    }
   
     // Take screenshot of the active tab
     function takeScreenshot() {
         backgroundConnection.postMessage({request: "captureTabScreenshot"});
     }
     
+    // Initiate gif capture of the active tab
+    function captureGif() {        
+        backgroundConnection.postMessage({request: "captureTabGif"});
+    }
+
     // Initiate video capture of the active tab
     function captureVideo() {        
         backgroundConnection.postMessage({request: "captureTabVideo"});
     }
 
-    // Initiate gif capture of the active tab
+    // Initiate audio capture of the active tab
     function captureGif() {        
-        backgroundConnection.postMessage({request: "captureTabGif"});
+        backgroundConnection.postMessage({request: "captureTabAudio"});
     }
 
     // Fill title / description from email

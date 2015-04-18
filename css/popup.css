@@ -25,6 +25,16 @@ h1 img {
 	vertical-align: middle;
     margin-top: -8px;
 }
+#optionsButton {
+    float: right;
+    background: url('chrome-extension://__MSG_@@extension_id__/images/cog-2x.png') center center no-repeat;
+    padding: 8px;
+    border: none;
+    opacity: 0.5;
+}
+#optionsButton:hover {
+    opacity: 1.0;
+}
 
 p {
     margin-bottom: 0;
