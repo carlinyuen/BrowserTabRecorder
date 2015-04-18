@@ -22,7 +22,7 @@
     margin-left: -28px;
     width: 56px;
     height: 12px;
-    background: url('chrome-extension://__MSG_@@extension_id__/images/tab-icon.png') top center no-repeat;
+    background: url('chrome-extension://__MSG_@@extension_id__/images/drawer-handle.png') top center no-repeat;
     cursor: pointer;
 }
 #carlin-bug-filer .background {
