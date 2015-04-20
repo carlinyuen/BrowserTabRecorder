@@ -58,7 +58,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    border: 8px solid #333;
+    border: 1px solid #888;
+    padding: 7px;
     opacity: 0.75;
     border-radius: 4px;
 }
@@ -76,25 +77,24 @@
     background-repeat: no-repeat;
     background-size: cover;
 }
-.carlin-bug-filer-thumbnail .container img.target {
+.carlin-bug-filer-thumbnail .target {
     width: 100% !important;
     height: 100% !important;
-    opacity: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
+    background-color: #222;
+}
+.carlin-bug-filer-thumbnail .container img.target {
+    opacity: 0 !important;
 }
 .carlin-bug-filer-thumbnail .container img.target.gif {
     opacity: 1.0 !important;
 }
 .carlin-bug-filer-thumbnail .container video.target {
-    width: 100% !important;
-    height: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
 }
 
 .carlin-bug-filer-thumbnail button {
-    margin: 2px;
+    margin: 0 4px 0 0;
     padding: 0;
     width: 20px;
     height: 20px;
@@ -111,6 +111,7 @@
     z-index: 999;
     font-weight: bold;
     line-height: 0;
+    margin: 2px 3px 0 0;
 }
 .carlin-bug-filer-thumbnail .recordButton {
     position: absolute;
@@ -121,13 +122,13 @@
     right: 0;
     bottom: 0;
     margin: 0;
-    background: url('chrome-extension://__MSG_@@extension_id__/images/media-record-8x.png') center center no-repeat;
+    background: white url('chrome-extension://__MSG_@@extension_id__/images/media-record-8x.png') center center no-repeat;
 }
 .carlin-bug-filer-thumbnail .recordButton.recording {
-    background: url('chrome-extension://__MSG_@@extension_id__/images/media-stop-8x.png') center center no-repeat;
+    background: white url('chrome-extension://__MSG_@@extension_id__/images/media-stop-8x.png') center center no-repeat;
 }
 .carlin-bug-filer-thumbnail .recordButton.processing {
-    background: url('chrome-extension://__MSG_@@extension_id__/images/Preloader_10.gif') center center no-repeat;
+    background: white url('chrome-extension://__MSG_@@extension_id__/images/Preloader_10.gif') center center no-repeat;
 }
 .carlin-bug-filer-thumbnail .downloadButton {
     position: absolute;
@@ -136,6 +137,7 @@
     border: 1px solid #46b8da;
     border-radius: 4px;
     background: #5bc0de url('chrome-extension://__MSG_@@extension_id__/images/data-transfer-download-2x.png') center center no-repeat;
+    margin: 0 3px 4px 0;
 }
 
 
