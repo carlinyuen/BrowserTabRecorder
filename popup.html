@@ -6,7 +6,6 @@
 	</head>
 
 	<body>
-
 		<div id="content">
 
             <h1><img src="images/icon24.png" alt="" /> 
@@ -14,66 +13,87 @@
                 <button id="optionsButton" title="Options" type="button"></button>
             </h1>
 
-            <form id="bugForm">
+            <!-- Ways to record the tab -->
+            <section id="recordingSection">
+            <h2 class="divider">record</h2>
+            <button id="screenshotButton" class="icon" 
+                title="Take .png screenshot of active tab" type="button">
+                <img src="images/aperture-2x.png" alt="" /> 
+                Pic
+            </button>
+            <button id="gifButton" class="icon" 
+                title="Record a .gif image file of active tab" type="button">
+                <img src="images/layers-2x.png" alt="" /> 
+                GIF
+            </button> 
+            <button id="videoButton" class="icon" 
+                title="Record a .webm video file of active tab" type="button">
+                <img src="images/video-2x.png" alt="" /> 
+                Video
+            </button>
+            <button id="audioButton" class="icon" 
+                title="Record a audio file of active tab" type="button">
+                <img src="images/microphone-2x.png" alt="" /> 
+                Audio
+            </button> 
+            </section>
 
-                <p>
-                    <button id="screenshotButton" class="icon" title="Take .png screenshot of active tab" type="button">
-                        <img src="images/aperture-2x.png" alt="" /> 
-                        Screenshot
-                    </button>
-                    <button id="gifButton" class="icon" title="Record a .gif image file of active tab" type="button">
-                        <img src="images/layers-2x.png" alt="" /> 
-                        Make Gif
-                    </button> 
-                    <button id="videoButton" class="icon" title="Record a .webm video file of active tab" type="button">
-                        <img src="images/video-2x.png" alt="" /> 
-                        Record Video
-                    </button>
-                    <button id="audioButton" class="icon" title="Record a audio file of active tab" type="button">
-                        <img src="images/microphone-2x.png" alt="" /> 
-                        Record Audio
-                    </button> 
-                    <button id="emailButton" class="icon" title="Populate fields with email content on active tab" type="button">
-                        <img src="images/envelope-closed-2x.png" alt="" /> 
-                        Email Autofill
-                    </button>
-                    <button id="cloneButton" class="icon" title="Clone existing bug from active tab" type="button">
-                        <img src="images/tags-2x.png" alt="" /> 
-                        Clone Bug
-                    </button>
-                </p>
+            <!-- Immediate actions that are relevant to the page -->
+            <section id="actionsSection">
+            <button id="cloneButton" class="icon" 
+                title="Clone existing bug from active tab" type="button">
+                <img src="images/tags-2x.png" alt="" /> 
+                Clone Bug
+            </button>
+            </section>
 
-                <hr />
+            <!-- Plugins to the extension -->
+            <section id="pluginsSection">
+                <h2 class="divider">buganizer</h2>
+                <section id="add-on-buganizer">
+                <form>
+                    <fieldset>
+                        <label for="bugTitle">Title</label><br />
+                        <input id="bugTitle" class="field" type="text" /><br />
+                        <br />
 
-                <fieldset>
-                    <label for="bugTitle">Title</label><br />
-                    <input id="bugTitle" class="field" type="text" /><br />
-                    <br />
+                        <label for="bugDescription">Description</label><br />
+                        <textarea id="bugDescription" class="field"></textarea>
+                    </fieldset>
 
-                    <label for="bugDescription">Description</label><br />
-                    <textarea id="bugDescription" class="field"></textarea>
-                </fieldset>
+                    <div class="tR">
+                        <button id="createButton" class="icon" 
+                            title="Create bug in new tab" type="submit">
+                            <img src="images/icon8.png" alt="" /> 
+                            Create Bug
+                        </button>
+                        :
+                        <button id="resetButton" class="icon" 
+                            title="Clear form details" type="reset">
+                            <img src="images/trash-2x.png" alt="" /> 
+                            Reset
+                        </button>
+                    </div>
+                </form>
+                </section>
+            </section>  <!-- END Plugins -->
 
-                <p class="tR">
-                    <button id="createButton" class="icon" title="Create bug in new tab" type="submit">
-                        <img src="images/icon8.png" alt="" /> 
-                        Create Bug
-                    </button>
-                    :
-                    <button id="resetButton" class="icon" title="Clear form details" type="reset">
-                        <img src="images/trash-2x.png" alt="" /> 
-                        Clear Details
-                    </button>
-                </p>
-
-            </form>
 		</div>
-
 	</body>
 
+    <!-- Core JS Scripts -->
 	<script src="js/third_party/jquery-2.1.1-simplified.min.js"></script>
 	<script src="js/config.js"></script>
 	<script src="js/popup.js"></script>
+
+    <!-- Add-ons and Actions JS Scripts -->
+	<script src="js/actions/email-autofill.js"></script>
+	<script src="js/plugins/buganizer.js"></script>
+
+    <!-- Initialize Popup -->
+    <script type="text/javascript">
+        popup.init();
+    </script>
 
 </html>
 

@@ -1,12 +1,14 @@
-/* Required: js/config.js */
+/* Required: jquery.js */
 
-$(function()
+popup = $(function()
 {
     // Variables & Constants
     var TIME_SAVE_DELAY = 250       // 250ms is average human reaction time
-        , backgroundConnection      // Port handle for connection to background.js
         , saveTimerHandle           // Timer handle for saving delay
+        , backgroundConnection      // Port handle for connection to background.js
         , $fields                   // Reference to input fields in the popup
+        , actions = []              // Array to hold extra actions
+        , plugins = []              // Array to hold extra plugins
     ;
 
     // Listener for messages from background
@@ -28,9 +30,6 @@ $(function()
         }
     });
 
-    // Initialize popup
-    init();
-
 
     //////////////////////////////////////////////////////////
     // FUNCTIONS
@@ -38,6 +37,54 @@ $(function()
     // Initialize the popup
     function init()
     {
+        // Go through actions and initalize them
+        if (actions && actions.length)
+        {
+            // Create header for actions
+            var $actions = $('#actionsSection');
+            $actions.append($(document.createElement('h2'))
+                .addClass('divider').text('actions'));
+
+            // For each action, add a button
+            for (var i = 0, l = actions.length, a = actions[i]; i < l; a = actions[++i])
+            {
+                $actions.append($(document.createElement('button'))
+                    .attr('id', a.id)
+                    .attr('title', a.description)
+                    .attr('type', 'button')
+                    .addClass('icon')
+                    .text(a.label)
+                    .prepend($(document.createElement('img'))
+                        .attr('alt', '')
+                        .attr('src', a.icon)
+                    )
+                );
+            }
+        }
+
+        // Go through plugins and initalize them
+        if (plugins && plugins.length)
+        {
+            var $plugins = $('#pluginsSection');
+
+            // For each action, add a button
+            for (var i = 0, l = plugins.length, p = plugins[i]; i < l; p = plugins[++i])
+            {
+                $plugins.append($(document.createElement('button'))
+                    .attr('id', action.id)
+                    .attr('title', action.description)
+                    .attr('type', 'button')
+                    .addClass('icon')
+                    .text(action.label)
+                    .prepend($(document.createElement('img'))
+                        .attr('alt', '')
+                        .attr('src', action.icon)
+                    )
+                );
+            }
+        }
+
+        /*
         // Setting variables
         $fields = $('input,textarea');
 
@@ -80,6 +127,7 @@ $(function()
 
         // Focus on title field
         $('#bugTitle').focus();
+        */
     }
 
     // Open options page
@@ -238,4 +286,34 @@ $(function()
         });
     }
 
+    // Expose functions and properties
+    return {
+        addAction: function(action) 
+        { 
+            if (action && action.init && action.id && action.icon && action.label && action.description) 
+            {
+                this.actions.push(action); 
+                return true;
+            } 
+            else 
+            {
+                throw "Invalid action object."
+                return false;
+            }
+        },
+        addPlugin: function(plugin) 
+        { 
+            if (plugin && plugin.init && plugin.id && plugin.title) 
+            {
+                this.plugins.push(plugin); 
+                return true;
+            } 
+            else 
+            {
+                throw "Invalid plugin object."
+                return false;
+            }
+        },
+        init: init,         // Expose init function
+    };
 });
