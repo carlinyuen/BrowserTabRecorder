@@ -1,3 +1,0 @@
-
-// Global Configuration Constants
-var ;

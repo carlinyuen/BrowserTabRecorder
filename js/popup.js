@@ -7,7 +7,6 @@ popup = $(function()
         , PATH_PLUGINS_PREFIX = './plugins/'
         , TIME_SAVE_DELAY = 250     // 250ms is average human reaction time
 
-        , saveTimerHandle           // Timer handle for saving delay
         , backgroundConnection      // Port handle for connection to background.js
         , currentTabURL             // Reference to current tab URL
 

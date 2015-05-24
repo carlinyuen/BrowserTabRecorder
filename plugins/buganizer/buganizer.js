@@ -5,7 +5,9 @@
 popup.addPlugin($(function()
 {
     var URL_BUG_API_CREATE = 'https://b2.corp.google.com/issues/new'   // Bug creation api
-    var $fields;    // Reference to input fields
+        , saveTimerHandle       // Timer handle for saving delay
+        , $fields               // Reference to input fields
+    ;
 
     // Initialize plugin, gets passed UI context (jQuery object) and the plugin path
     function init($context, pluginPath)
