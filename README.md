@@ -7,6 +7,12 @@ Hope this is useful to someone out there; would love any help optimizing and imp
 
 . Carlin
 
+## TODO
+ - Get video recording options in
+ - Get gif creation working
+ - Get audio recording working
+ - Implement proper plugin system
+ - Rebrand as Easy Recorder
 
 ## Version History
 v1.0.0

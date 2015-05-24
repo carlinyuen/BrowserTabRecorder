@@ -179,13 +179,13 @@ button img {
     margin: 8px 0;
 }
 
-.timeout {
+.range {
     overflow: hidden;
     display: block;
     padding: 0 8px 0 0;
     margin-bottom: 8px;
 }
-#timeout {
+.range input[type=range] {
     width: 100%;
 }
 
