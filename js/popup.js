@@ -44,14 +44,14 @@ popup = $(function()
         if (actions && actions.length)
         {
             // Create header for actions
-            var $actions = $('#actionsSection');
-            $actions.append($(document.createElement('h2'))
+            var $section = $('#actionsSection');
+            $section.append($(document.createElement('h2'))
                 .addClass('divider').text('actions'));
 
             // For each action, add a button
             for (var i = 0, l = actions.length, a = actions[i]; i < l; a = actions[++i])
             {
-                $actions.append($(document.createElement('button'))
+                $section.append($(document.createElement('button'))
                     .attr('id', a.id)
                     .attr('title', a.description)
                     .attr('type', 'button')
@@ -68,26 +68,22 @@ popup = $(function()
         // Go through plugins and initalize them
         if (plugins && plugins.length)
         {
-            var $plugins = $('#pluginsSection');
+            var $section = $('#pluginsSection');
 
             // For each action, add a button
-            for (var i = 0, l = plugins.length, p = plugins[i]; i < l; p = plugins[++i])
+            for (var i = 0, l = plugins.length, p = plugins[i], context; i < l; p = plugins[++i])
             {
-                $plugins.append($(document.createElement('button'))
-                    .attr('id', action.id)
-                    .attr('title', action.description)
-                    .attr('type', 'button')
-                    .addClass('icon')
-                    .text(action.label)
-                    .prepend($(document.createElement('img'))
-                        .attr('alt', '')
-                        .attr('src', action.icon)
-                    )
-                );
+                // Create context for the plugin and initialize with it
+                context = $(document.createElement('section')).attr('id', p.id);
+                p.init(context, PATH_PLUGINS_PREFIX + p.id + '/');
+
+                // Add to plugins section
+                $section.append($(document.createElement('h2'))
+                    .addClass('divider').text(p.title.toLowerCase())
+                ).append(context);
             }
         }
 
-        /*
         // Setting variables
         $fields = $('input,textarea');
 
@@ -127,10 +123,6 @@ popup = $(function()
                 $('#emailButton').prop('disabled', true);
             }
         });
-
-        // Focus on title field
-        $('#bugTitle').focus();
-        */
     }
 
     // Open options page
@@ -293,7 +285,11 @@ popup = $(function()
     return {
         addAction: function(action) 
         { 
-            if (action && action.init && action.id && action.icon && action.label && action.description) 
+            if (action && action.callback   // Callback when popup button is clicked
+                    && action.id            // ID to use for message passing and button
+                    && action.icon          // Button icon to use
+                    && action.label         // Button label to use
+                    && action.description)  // Button hover description
             {
                 this.actions.push(action); 
                 return true;
@@ -306,7 +302,9 @@ popup = $(function()
         },
         addPlugin: function(plugin) 
         { 
-            if (plugin && plugin.init && plugin.id && plugin.title) 
+            if (plugin && plugin.init   // Init function, gets passed UI context (jquery Object), and path for the plugin
+                    && plugin.id        // ID to use for plugin context and messages
+                    && plugin.title)    // Plugin header title
             {
                 this.plugins.push(plugin); 
                 return true;

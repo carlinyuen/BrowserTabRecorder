@@ -44,34 +44,7 @@
 
             <!-- Plugins to the extension -->
             <section id="pluginsSection">
-                <h2 class="divider">buganizer</h2>
-                <section id="add-on-buganizer">
-                <form>
-                    <fieldset>
-                        <label for="bugTitle">Title</label><br />
-                        <input id="bugTitle" class="field" type="text" /><br />
-                        <br />
-
-                        <label for="bugDescription">Description</label><br />
-                        <textarea id="bugDescription" class="field"></textarea>
-                    </fieldset>
-
-                    <div class="tR">
-                        <button id="createButton" class="icon" 
-                            title="Create bug in new tab" type="submit">
-                            <img src="images/icon8.png" alt="" /> 
-                            Create Bug
-                        </button>
-                        :
-                        <button id="resetButton" class="icon" 
-                            title="Clear form details" type="reset">
-                            <img src="images/trash-2x.png" alt="" /> 
-                            Reset
-                        </button>
-                    </div>
-                </form>
-                </section>
-            </section>  <!-- END Plugins -->
+            </section>
 
 		</div>
 	</body>
@@ -84,7 +57,7 @@
     <!-- Add-ons and Actions JS Scripts -->
 	<script src="actions/email_autofill/email_autofill.js"></script>
 	<script src="actions/clone_buganizer/clone_buganizer.js"></script>
-	<script src="plugins/buganizer.js"></script>
+	<script src="plugins/buganizer/buganizer.js"></script>
 
     <!-- Initialize Popup -->
     <script type="text/javascript">
