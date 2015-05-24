@@ -7,7 +7,10 @@ popup.addAction($(function()
     // Function to initiate bug cloning
     function cloneBug()
     {
-        // TODO
+        // Send request
+        return {
+            target: "content_script",
+        });
     }
 
     return {

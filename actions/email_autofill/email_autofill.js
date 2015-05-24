@@ -7,7 +7,17 @@ popup.addAction($(function()
     // Function to initiate email autofill
     function emailAutofill()
     {
-        // TODO
+        // Send current field data
+        var data = {
+            'bugTitle': null,
+            'bugDescription': null
+        };
+
+        // Send request
+        return {
+            target: "content_script",
+            fields: data,
+        });
     }
 
     return {
