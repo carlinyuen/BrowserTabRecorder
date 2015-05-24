@@ -3,9 +3,12 @@
 popup = $(function()
 {
     // Variables & Constants
-    var TIME_SAVE_DELAY = 250       // 250ms is average human reaction time
+    var PATH_ACTIONS_PREFIX = './actions/'
+        , PATH_PLUGINS_PREFIX = './plugins/'
+        , TIME_SAVE_DELAY = 250     // 250ms is average human reaction time
         , saveTimerHandle           // Timer handle for saving delay
         , backgroundConnection      // Port handle for connection to background.js
+
         , $fields                   // Reference to input fields in the popup
         , actions = []              // Array to hold extra actions
         , plugins = []              // Array to hold extra plugins
@@ -56,7 +59,7 @@ popup = $(function()
                     .text(a.label)
                     .prepend($(document.createElement('img'))
                         .attr('alt', '')
-                        .attr('src', a.icon)
+                        .attr('src', PATH_ACTIONS_PREFIX + a.id + '/' + a.icon)
                     )
                 );
             }

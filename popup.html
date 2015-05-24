@@ -40,11 +40,6 @@
 
             <!-- Immediate actions that are relevant to the page -->
             <section id="actionsSection">
-            <button id="cloneButton" class="icon" 
-                title="Clone existing bug from active tab" type="button">
-                <img src="images/tags-2x.png" alt="" /> 
-                Clone Bug
-            </button>
             </section>
 
             <!-- Plugins to the extension -->
@@ -87,8 +82,9 @@
 	<script src="js/popup.js"></script>
 
     <!-- Add-ons and Actions JS Scripts -->
-	<script src="js/actions/email-autofill.js"></script>
-	<script src="js/plugins/buganizer.js"></script>
+	<script src="actions/email_autofill/email_autofill.js"></script>
+	<script src="actions/clone_buganizer/clone_buganizer.js"></script>
+	<script src="plugins/buganizer.js"></script>
 
     <!-- Initialize Popup -->
     <script type="text/javascript">
