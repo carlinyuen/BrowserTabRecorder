@@ -16,6 +16,7 @@ popup.addAction($(function()
     return {
         id: "cloneBuganizer",
         description: "Clone existing Buganizer bug from active tab",
+        domains: /(buganizer|b).corp.google.com\/issues\/\d+/,
         icon: "./tags-2x.png",
         label: "Clone Bug",
         callback: cloneBug,

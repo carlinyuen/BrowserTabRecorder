@@ -6,8 +6,10 @@ popup = $(function()
     var PATH_ACTIONS_PREFIX = './actions/'
         , PATH_PLUGINS_PREFIX = './plugins/'
         , TIME_SAVE_DELAY = 250     // 250ms is average human reaction time
+
         , saveTimerHandle           // Timer handle for saving delay
         , backgroundConnection      // Port handle for connection to background.js
+        , currentTabURL             // Reference to current tab URL
 
         , actions = []              // Array to hold extra actions
         , actionCallbacks = {}      // Mapping of ids to callbacks
@@ -33,6 +35,13 @@ popup = $(function()
         }
     });
 
+    // Check current active tab's url to determine available actions
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
+    {
+        currentTabURL = tabs[0].url;
+        console.log("Active tab:", currentTabURL);
+    });
+
 
     //////////////////////////////////////////////////////////
     // FUNCTIONS
@@ -49,13 +58,13 @@ popup = $(function()
                 .addClass('divider').text('actions'));
 
             // For each action, add a button
-            for (var i = 0, l = actions.length, a = actions[i]; i < l; a = actions[++i])
+            for (var i = 0, l = actions.length, a = actions[i], button; i < l; a = actions[++i])
             {
                 // Add callback to callback map
                 actionCallbacks[a.id] = a.callback;
 
                 // Create button UI
-                $section.append($(document.createElement('button'))
+                button = $(document.createElement('button'))
                     .attr('id', a.id)
                     .attr('title', a.description)
                     .attr('type', 'button')
@@ -74,8 +83,15 @@ popup = $(function()
                             message.request = id;
                             backgroundConnection.postMessage(message);
                         }
-                    })
-                );
+                    });
+
+                // Check if button should be disabled
+                if (a.domains.test(currentTabURL)) {
+                    button.prop('disabled', true);
+                }
+                
+                // Add button
+                $section.append(button);
             }
         }
 
@@ -104,21 +120,6 @@ popup = $(function()
         $('#gifButton').click(captureGif);
         $('#videoButton').click(captureVideo);
         $('#audioButton').click(captureAudio);
-
-        // Check current active tab's url to determine available actions
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
-        {
-            var url = tabs[0].url;
-            console.log("Active tab:", url);
-
-            // Test domains
-            if (DOMAIN_BUGANIZER_REGEX.test(url)) {
-                $('#cloneButton').prop('disabled', true);
-            }
-            else if (DOMAIN_GMAIL_REGEX.test(url) || DOMAIN_GMAIL_REGEX.test(url)) {
-                $('#emailButton').prop('disabled', true);
-            }
-        });
     }
 
     // Open options page
@@ -152,6 +153,7 @@ popup = $(function()
         { 
             if (action && action.callback   // Callback when popup button is clicked
                     && action.id            // ID to use for message passing and button
+                    && action.domains       // URL regex for what sites action should work on
                     && action.icon          // Button icon to use
                     && action.label         // Button label to use
                     && action.description)  // Button hover description

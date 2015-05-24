@@ -23,6 +23,7 @@ popup.addAction($(function()
     return {
         id: "emailAutofill",
         description: "Populate fields with email content on active tab",
+        domains: /mail.google.com/,
         icon: "./envelope-closed-2x.png",
         label: "Email Autofill",
         callback: emailAutofill,
