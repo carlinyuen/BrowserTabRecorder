@@ -86,7 +86,7 @@ popup = $(function()
                     });
 
                 // Check if button should be disabled
-                if (a.domains.test(currentTabURL)) {
+                if (!(a.domains.test(currentTabURL))) {
                     button.prop('disabled', true);
                 }
                 
@@ -170,6 +170,7 @@ popup = $(function()
         addPlugin: function(plugin) 
         { 
             if (plugin && plugin.init   // Init function, gets passed UI context (jquery Object), and path for the plugin
+                    && plugin.update    // Update function
                     && plugin.id        // ID to use for plugin context and messages
                     && plugin.title)    // Plugin header title
             {

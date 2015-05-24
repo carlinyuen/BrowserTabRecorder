@@ -77,9 +77,13 @@ popup.addPlugin($(function()
 
         // Load latest details
         loadDetails();
-
     }
 
+    // Update plugin
+    function update()
+    {
+        loadDetails();
+    }
 
     // Create a new bug by using url parameters
     function createBug()
@@ -193,6 +197,7 @@ popup.addPlugin($(function()
         id: "buganizerPlugin",
         title: "Buganizer",
         init: init,
+        update: update,
     }
 })());
 
