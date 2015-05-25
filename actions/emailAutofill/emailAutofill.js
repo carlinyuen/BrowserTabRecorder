@@ -2,7 +2,7 @@
  * Easily autofill bug fields
  */
 
-popup.addAction($(function()
+popup.addAction((function($)
 {
     // Function to initiate email autofill
     function emailAutofill()
@@ -17,7 +17,7 @@ popup.addAction($(function()
         return {
             target: "content_script",
             fields: data,
-        });
+        };
     }
 
     return {
@@ -28,4 +28,4 @@ popup.addAction($(function()
         label: "Email Autofill",
         callback: emailAutofill,
     }
-})());
+})($));

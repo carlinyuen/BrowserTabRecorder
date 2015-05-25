@@ -1,6 +1,6 @@
 /* Required: jquery.js */
 
-popup = $(function()
+popup = (function($)
 {
     // Variables & Constants
     var PATH_ACTIONS_PREFIX = './actions/'
@@ -89,8 +89,8 @@ popup = $(function()
                     button.prop('disabled', true);
                 }
                 
-                // Add button
-                $section.append(button);
+                // Add button, and space
+                $section.append(button).append(' ');
             }
         }
 
@@ -157,7 +157,7 @@ popup = $(function()
                     && action.label         // Button label to use
                     && action.description)  // Button hover description
             {
-                this.actions.push(action); 
+                actions.push(action); 
                 return true;
             } 
             else 
@@ -173,7 +173,7 @@ popup = $(function()
                     && plugin.id        // ID to use for plugin context and messages
                     && plugin.title)    // Plugin header title
             {
-                this.plugins.push(plugin); 
+                plugins.push(plugin); 
                 return true;
             } 
             else 
@@ -184,4 +184,4 @@ popup = $(function()
         },
         init: init,         // Expose init function
     };
-});
+})($);

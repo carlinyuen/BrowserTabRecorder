@@ -2,7 +2,7 @@
  * Easily clone a bug from Buganizer
  */
 
-popup.addAction($(function()
+popup.addAction((function($)
 {
     // Function to initiate bug cloning
     function cloneBug()
@@ -10,7 +10,7 @@ popup.addAction($(function()
         // Send request
         return {
             target: "content_script",
-        });
+        };
     }
 
     return {
@@ -21,5 +21,5 @@ popup.addAction($(function()
         label: "Clone Bug",
         callback: cloneBug,
     }
-})());
+})($));
 

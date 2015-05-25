@@ -1,0 +1,5 @@
+
+// Initialize
+$(function() {
+    popup.init();
+});

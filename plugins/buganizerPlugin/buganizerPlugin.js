@@ -2,7 +2,7 @@
  * Create bugs for Buganizer easily
  */
 
-popup.addPlugin($(function()
+popup.addPlugin((function($)
 {
     var URL_BUG_API_CREATE = 'https://b2.corp.google.com/issues/new'   // Bug creation api
         , saveTimerHandle       // Timer handle for saving delay
@@ -36,8 +36,7 @@ popup.addPlugin($(function()
                 )
             ).append($(document.createElement('div'))
                 .addClass('tR')
-                .text(':')
-                .prepend($(document.createElement('button'))
+                .append($(document.createElement('button'))
                     .attr('id', 'createButton')
                     .attr('title', 'Create bug in new tab')
                     .attr('type', 'submit')
@@ -48,6 +47,7 @@ popup.addPlugin($(function()
                         .attr('src', pluginPath + './bug-2x.png')
                     )
                 )
+                .append(' : ')
                 .append($(document.createElement('button'))
                     .attr('id', 'resetButton')
                     .attr('title', 'Clear form details and reset')
@@ -201,6 +201,6 @@ popup.addPlugin($(function()
         init: init,
         update: update,
     }
-})());
+})($));
 
                 
