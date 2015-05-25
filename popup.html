@@ -1,15 +1,28 @@
 <html>
 	<head>
-		<title>Bug-Filer : Popup</title>
+		<title>Tab Recorder : Popup</title>
 		<meta charset="utf-8" />
+
+        <!-- Core CSS -->
 		<link rel="stylesheet" type="text/css" href="css/popup.css" />
+
+        <!-- We actually want all the JS to load first before we show the popup -->
+        <!-- Core JS Scripts -->
+        <script src="js/third_party/jquery-2.1.1-simplified.min.js"></script>
+        <script src="js/popup.js"></script>
+
+        <!-- Plugins and Actions JS Scripts -->
+        <script src="actions/emailAutofill/emailAutofill.js"></script>
+        <script src="actions/cloneBuganizer/cloneBuganizer.js"></script>
+        <script src="plugins/buganizerPlugin/buganizerPlugin.js"></script>
+
 	</head>
 
 	<body>
 		<div id="content">
 
             <h1><img src="images/icon24.png" alt="" /> 
-                Bug-Filer
+                Tab Recorder
                 <button id="optionsButton" title="Options" type="button"></button>
             </h1>
 
@@ -48,15 +61,6 @@
 
 		</div>
 	</body>
-
-    <!-- Core JS Scripts -->
-	<script src="js/third_party/jquery-2.1.1-simplified.min.js"></script>
-	<script src="js/popup.js"></script>
-
-    <!-- Add-ons and Actions JS Scripts -->
-	<script src="actions/emailAutofill/emailAutofill.js"></script>
-	<script src="actions/cloneBuganizer/cloneBuganizer.js"></script>
-	<script src="plugins/buganizerPlugin/buganizerPlugin.js"></script>
 
     <!-- Initialize Popup -->
 	<script src="js/initPopup.js"></script>

@@ -1,26 +1,26 @@
 {
 	"EXTENSION_NAME": {
-		"message": "Bug Filer"
+		"message": "Tab Recorder"
 		, "description": "Extension name for the Chrome webstore."
 	}
 
 	,"EXTENSION_SHORTNAME": {
-		"message": "BFF"
+		"message": "Tab Recorder"
 		, "description": "Extension short name for the Chrome webstore (< 12 chars)."
 	}
 
 	, "EXTENSION_TITLE": {
-		"message": "Bug Filer"
+		"message": "Tab Recorder for the Google Chrome Browser™"
 		, "description": "Extension short title."
 	}
 
 	, "EXTENSION_DESCRIPTION": {
-		"message": "File bugs super easy."
+		"message": "Record screenshot pictures, videos, animated gifs, or audio from your browser tab!"
 		, "description": "Extension description for the chrome webstore."
 	}
 
 	, "BROWSER_ACTION_TITLE": {
-		"message": "Bug Filer Actions"
+		"message": "Tab Recorder Actions"
 		, "description": "Title for browser action tooltip"
 	}
 

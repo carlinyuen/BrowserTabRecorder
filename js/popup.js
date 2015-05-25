@@ -5,7 +5,6 @@ popup = (function($)
     // Variables & Constants
     var PATH_ACTIONS_PREFIX = './actions/'
         , PATH_PLUGINS_PREFIX = './plugins/'
-        , TIME_SAVE_DELAY = 250     // 250ms is average human reaction time
 
         , backgroundConnection      // Port handle for connection to background.js
         , currentTabURL             // Reference to current tab URL
@@ -34,13 +33,6 @@ popup = (function($)
         }
     });
 
-    // Check current active tab's url to determine available actions
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
-    {
-        currentTabURL = tabs[0].url;
-        console.log("Active tab:", currentTabURL);
-    });
-
 
     //////////////////////////////////////////////////////////
     // FUNCTIONS
@@ -48,77 +40,84 @@ popup = (function($)
     // Initialize the popup
     function init()
     {
-        // Go through actions and initalize them
-        if (actions && actions.length)
+        // Check current active tab's url to determine available actions
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
         {
-            // Create header for actions
-            var $section = $('#actionsSection');
-            $section.append($(document.createElement('h2'))
-                .addClass('divider').text('actions'));
+            currentTabURL = tabs[0].url;
+            console.log("Active tab:", currentTabURL);
 
-            // For each action, add a button
-            for (var i = 0, l = actions.length, a = actions[i], button; i < l; a = actions[++i])
+            // Go through actions and initalize them
+            if (actions && actions.length)
             {
-                // Add callback to callback map
-                actionCallbacks[a.id] = a.callback;
-
-                // Create button UI
-                button = $(document.createElement('button'))
-                    .attr('id', a.id)
-                    .attr('title', a.description)
-                    .attr('type', 'button')
-                    .addClass('icon')
-                    .text(a.label)
-                    .prepend($(document.createElement('img'))
-                        .attr('alt', '')
-                        .attr('src', PATH_ACTIONS_PREFIX + a.id + '/' + a.icon)
-                    )
-                    .click(function (e)     // Fire off callback
-                    {
-                        var id = $(this).attr('id');
-                        var message = actionCallbacks[id]();
-                        if (message) 
-                        {
-                            message.request = id;
-                            backgroundConnection.postMessage(message);
-                        }
-                    });
-
-                // Check if button should be disabled
-                if (!(a.domains.test(currentTabURL))) {
-                    button.prop('disabled', true);
-                }
-                
-                // Add button, and space
-                $section.append(button).append(' ');
-            }
-        }
-
-        // Go through plugins and initalize them
-        if (plugins && plugins.length)
-        {
-            var $section = $('#pluginsSection');
-
-            // For each action, add a button
-            for (var i = 0, l = plugins.length, p = plugins[i], context; i < l; p = plugins[++i])
-            {
-                // Create context for the plugin and initialize with it
-                context = $(document.createElement('section')).attr('id', p.id);
-                p.init(context, PATH_PLUGINS_PREFIX + p.id + '/');
-
-                // Add to plugins section
+                // Create header for actions
+                var $section = $('#actionsSection');
                 $section.append($(document.createElement('h2'))
-                    .addClass('divider').text(p.title.toLowerCase())
-                ).append(context);
-            }
-        }
+                    .addClass('divider').text('actions'));
 
-        // Button handlers
-        $('#optionsButton').click(openOptionsPage);
-        $('#screenshotButton').click(takeScreenshot);
-        $('#gifButton').click(captureGif);
-        $('#videoButton').click(captureVideo);
-        $('#audioButton').click(captureAudio);
+                // For each action, add a button
+                for (var i = 0, l = actions.length, a = actions[i], button; i < l; a = actions[++i])
+                {
+                    // Add callback to callback map
+                    actionCallbacks[a.id] = a.callback;
+
+                    // Create button UI
+                    button = $(document.createElement('button'))
+                        .attr('id', a.id)
+                        .attr('title', a.description)
+                        .attr('type', 'button')
+                        .addClass('icon')
+                        .text(a.label)
+                        .prepend($(document.createElement('img'))
+                            .attr('alt', '')
+                            .attr('src', PATH_ACTIONS_PREFIX + a.id + '/' + a.icon)
+                        )
+                        .click(function (e)     // Fire off callback
+                        {
+                            var id = $(this).attr('id');
+                            var message = actionCallbacks[id]();
+                            if (message) 
+                            {
+                                message.request = id;
+                                backgroundConnection.postMessage(message);
+                            }
+                        });
+
+                    // Check if button should be disabled
+                    if (!(a.domains.test(currentTabURL))) {
+                        button.prop('disabled', true);
+                    }
+                    
+                    // Add button, and space
+                    $section.append(button).append(' ');
+                }
+            }
+
+            // Go through plugins and initalize them
+            if (plugins && plugins.length)
+            {
+                var $section = $('#pluginsSection');
+
+                // For each action, add a button
+                for (var i = 0, l = plugins.length, p = plugins[i], context; i < l; p = plugins[++i])
+                {
+                    // Create context for the plugin and initialize with it
+                    context = $(document.createElement('section')).attr('id', p.id);
+                    p.init(context, PATH_PLUGINS_PREFIX + p.id + '/');
+
+                    // Add to plugins section
+                    $section.append($(document.createElement('h2'))
+                        .addClass('divider').text(p.title.toLowerCase())
+                    ).append(context);
+                }
+            }
+
+            // Button handlers
+            $('#optionsButton').click(openOptionsPage);
+            $('#screenshotButton').click(takeScreenshot);
+            $('#gifButton').click(captureGif);
+            $('#videoButton').click(captureVideo);
+            $('#audioButton').click(captureAudio);
+        });   // END - chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
     }
 
     // Open options page
@@ -142,7 +141,7 @@ popup = (function($)
     }
 
     // Initiate audio capture of the active tab
-    function captureGif() {        
+    function captureAudio() {        
         backgroundConnection.postMessage({request: "captureTabAudio"});
     }
 
