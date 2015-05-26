@@ -5,6 +5,7 @@
 popup.addPlugin((function($)
 {
     var URL_BUG_API_CREATE = 'https://b2.corp.google.com/issues/new'   // Bug creation api
+        , KEY_STORAGE_BUGANIZER = "buganizerPlugin"
         , TIME_SAVE_DELAY = 250     // 250ms is average human reaction time
         , saveTimerHandle           // Timer handle for saving delay
         , $fields                   // Reference to input fields
@@ -98,45 +99,32 @@ popup.addPlugin((function($)
         };
         console.log('createBug:', params);
 
-        // Get defaults set from options
-        chrome.storage.local.get("defaults", function (data)
-        {
-            if (chrome.runtime.lastError) {	// Check for errors
-                console.log(chrome.runtime.lastError);
-            }
-            else if (Object.keys(data).length)  // If there are defaults
-            {
-                $.each(data, function (key, value) { 
-                    params[key] = value;        // Store into params too
-                });
-            }
-        
-            // Fire off bug creation using URL parameters
-            var url = [URL_BUG_API_CREATE, '?', $.param(params)].join('');
-            console.log(url);
-            chrome.tabs.create({ url: url });
-        });
+        // Fire off bug creation using URL parameters
+        var url = [URL_BUG_API_CREATE, '?', $.param(params)].join('');
+        console.log(url);
+        chrome.tabs.create({ url: url });
     }
 
     // Load details from last session
     function loadDetails()
     {
-        // Get form field ids to retrieve data for
-        var keys = [];
-        $fields.each(function (i, el) {
-            keys.push($(el).attr('id'));
-        });
-        console.log('loadDetails:', keys);
+        console.log('loadDetails()');
 
         // Get data from local storage
-        chrome.storage.local.get(keys, function (data) 
+        chrome.storage.local.get(KEY_STORAGE_BUGANIZER, function (data) 
         {
             if (chrome.runtime.lastError) {	// Check for errors
                 console.log(chrome.runtime.lastError);
-            } else if (keys) {	// Success
-                $.each(data, function (key, value) {
-                    $('#' + key).val(value);
-                });
+            } 
+            else    // Success
+            {
+                var details = data[KEY_STORAGE_BUGANIZER];
+                if (details)
+                {
+                    $.each(details, function (key, value) {
+                        $('#' + key).val(value);
+                    });
+                }
             }
         });
     }
@@ -152,15 +140,17 @@ popup.addPlugin((function($)
         saveTimerHandle = setTimeout(function()
         {
             // Collect data
-            var data = {};
+            var details = {};
             $fields.each(function (i, el) 
             {
                 var $el = $(el);
-                data[$el.attr('id')] = $el.val();
+                details[$el.attr('id')] = $el.val();
             });
-            console.log('saveDetails:', data);
+            console.log('saveDetails:', details);
 
             // Save to local storage
+            var data = {};
+            data[KEY_STORAGE_BUGANIZER] = details;
             chrome.storage.local.set(data, function() 
             {
                 if (chrome.runtime.lastError) {	// Check for errors
@@ -175,18 +165,14 @@ popup.addPlugin((function($)
     // Clear details and the form
     function clearDetails()
     {
-        // Clear form
-        var keys = [];
-        $fields.each(function (i, el) 
-        {
-            var $el = $(el);
-            $el.val('');
-            keys.push($el.attr('id'));
+        console.log('clearDetails()');
+
+        $fields.each(function (i, el) {
+            $(el).val('');
         });
-        console.log('clearDetails:', keys);
         
         // Delete from storage
-        chrome.storage.local.remove(keys, function() 
+        chrome.storage.local.remove(KEY_STORAGE_BUGANIZER, function() 
         {
             if (chrome.runtime.lastError) { // Check for errors
                 console.log(chrome.runtime.lastError);
@@ -197,7 +183,7 @@ popup.addPlugin((function($)
     }
 
     return {
-        id: "buganizerPlugin",
+        id: KEY_STORAGE_BUGANIZER,
         title: "Buganizer",
         init: init,
         update: update,
