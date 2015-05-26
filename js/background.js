@@ -47,16 +47,8 @@ chrome.extension.onConnect.addListener(function(port)
                 sendMessageToActiveTab(message);
                 break;
 
-            case "emailAutofill":
+            default:  // For actions & plugins, push to active tab
                 sendMessageToActiveTab(message);
-                break;
-
-            case "cloneBug":
-                sendMessageToActiveTab(message);
-                break;
-
-            default:
-                console.log("Unknown request received!");
                 break;
         }
     });

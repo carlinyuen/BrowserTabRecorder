@@ -74,11 +74,9 @@ popup = (function($)
                         .click(function (e)     // Fire off callback
                         {
                             var id = $(this).attr('id');
-                            var message = actionCallbacks[id]();
-                            if (message) 
-                            {
-                                message.request = id;
-                                backgroundConnection.postMessage(message);
+                            var data = actionCallbacks[id]();
+                            if (data) {     // If data is passed back to send
+                                sendBackgroundMessage(id, data);
                             }
                         });
 
@@ -113,10 +111,10 @@ popup = (function($)
 
             // Button handlers
             $('#optionsButton').click(openOptionsPage);
-            $('#screenshotButton').click(takeScreenshot);
-            $('#gifButton').click(captureGif);
-            $('#videoButton').click(captureVideo);
-            $('#audioButton').click(captureAudio);
+            $('#screenshotButton').click(requestButtonClickHandler); 
+            $('#gifButton').click(requestButtonClickHandler);     
+            $('#videoButton').click(requestButtonClickHandler);
+            $('#audioButton').click(requestButtonClickHandler);
         });   // END - chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
     }
 
@@ -124,27 +122,19 @@ popup = (function($)
     function openOptionsPage() {
         chrome.tabs.create({url: "options.html"});
     }
+
+    // Send a message to background page
+    function sendBackgroundMessage(requestID, data) 
+    {
+        console.log('sendBackgroundMessage:', requestID, data);
+        backgroundConnection.postMessage({request: requestID, data: data});
+    }
   
-    // Take screenshot of the active tab
-    function takeScreenshot() {
-        backgroundConnection.postMessage({request: "captureTabScreenshot"});
+    // Button click handler for buttons that have a data-request property.
+    function requestButtonClickHandler() {
+        sendBackgroundMessage($(this).attr('data-request'));
     }
-    
-    // Initiate gif capture of the active tab
-    function captureGif() {        
-        backgroundConnection.postMessage({request: "captureTabGif"});
-    }
-
-    // Initiate video capture of the active tab
-    function captureVideo() {        
-        backgroundConnection.postMessage({request: "captureTabVideo"});
-    }
-
-    // Initiate audio capture of the active tab
-    function captureAudio() {        
-        backgroundConnection.postMessage({request: "captureTabAudio"});
-    }
-
+   
     // Expose functions and properties
     return {
         addAction: function(action) 

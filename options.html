@@ -25,26 +25,29 @@
 
                 <h3 class="divider">general</h3>
                 <input id="downloadSetting" type="checkbox" value="autoDownload" />
-                <label for="downloadSetting" title="Automatically download after a picture, video, gif, or audio clip is recorded.">Automatically download after recording.</label>
+                <label for="downloadSetting" title="Automatically initiate download after a picture, video, gif, or audio clip is recorded.">Automatically initiate download after recording.</label>
 
                 <h3 class="divider">picture</h3>
-                <label for="pictureFormatSetting" class="fL" title="Picture format to record in.">Picture capture file format:</label>
-                <input id="pictureFormatSetting" type="combobox" />
+                <label for="pictureFormatSetting" class="inline" title="Picture format to record in.">Picture capture file format:</label>
+                <select id="pictureFormatSetting" class="inline">
+                    <option value="png" >.png</option>
+                    <option value="jpeg">.jpeg</option>
+                </select>
 
                 <h3 class="divider">video</h3>
                 <input id="aspectRatioSetting" type="checkbox" value="maintainAspectRatio" />
                 <label for="aspectRatioSetting" title="Maintain aspect ratio when recording video.">Maintain aspect ratio of tab in video recordings.</label>
 
-                <label for="videoMaxWidthSetting" class="fL" title="Max width and height for video recordings.">Max width &amp; height in pixels:</label>
-                <input id="videoMaxWidthSetting" type="number" />
+                <label for="videoMaxWidthSetting" class="inline" title="Max width and height for video recordings.">Max width &amp; height in pixels:</label>
+                <input id="videoMaxWidthSetting" class="inline" type="number" />
                 x
-                <input id="videoMaxHeightSetting" type="number" />
+                <input id="videoMaxHeightSetting" class="inline" type="number" />
 
                 <h3 class="divider">gif</h3>
                 <p>Note: GIFs use same dimension settings as video recordings.</p>
 
-                <label for="gifFrameSkipSetting" class="fL" title="GIF quality level: lower quality skips more frames, but produces smaller files.">GIF Quality (%):</label>
-                <span class="range"><input id="gifFrameSkipSetting" name="gifFrameSkipSetting" type="range" min="25" max="100" step="5"></span>
+                <label for="gifFrameSkipSetting" class="inline" title="GIF quality level: lower quality skips more frames, but produces smaller files.">GIF Quality (%):</label>
+                <span class="range"><input id="gifFrameSkipSetting" name="gifFrameSkipSetting" type="range" min="25" max="100" step="5" data-value="50"></span>
 
                 <!-- set up profiles -->
 
