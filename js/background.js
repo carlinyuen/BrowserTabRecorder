@@ -5,7 +5,9 @@
  *  js/audioRecorder.js
  */
 
-var MANIFEST = chrome.runtime.getManifest();     // Manifest reference
+// Constants
+var MANIFEST = chrome.runtime.getManifest()     // Manifest reference
+;
 console.log('Initializing Bug-Filer v' + MANIFEST.version, 
         chrome.i18n.getMessage('@@ui_locale'));
 
@@ -195,17 +197,37 @@ function captureTabVideo(senderTabId)
         return;
     }
 
-    // TODO: get options
+    // Get video options
+    chrome.storage.sync.get(KEY_STORAGE_SETTINGS, function (data) 
+    {
+        var settings;
+
+        // Sanity check
+        if (chrome.runtime.lastError) 
+        {
+            console.log(chrome.runtime.lastError);
+            settings = {};
+        } 
+        else {   // Success, update settings
+            settings = data[KEY_STORAGE_SETTINGS];
+        }
+        var videoSettings = {
+            mandatory: {
+                minWidth: settings['videoWidthSetting'] || DEFAULT_VIDEO_WIDTH,
+                minHeight: settings['videoHeightSetting'] || DEFAULT_VIDEO_HEIGHT,
+                maxWidth: settings['videoWidthSetting'] || DEFAULT_VIDEO_WIDTH,
+                maxHeight: settings['videoHeightSetting'] || DEFAULT_VIDEO_HEIGHT,
+                chromeMediaSource: 'tab'
+            }
+        };
+
+    });
 
     // Capture only video from the tab
     chrome.tabCapture.capture({
             audio: false,
             video: true,
-            videoConstraints: {
-                mandatory: {
-                    chromeMediaSource: 'tab'
-                }
-            }
+            videoConstraints: videoSettings
         }, 
         function (localMediaStream) 
         {

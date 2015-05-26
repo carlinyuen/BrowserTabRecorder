@@ -21,7 +21,7 @@
             <form>
 			    <section id="settingsSection">
                 <h2>Settings</h2>
-                <p>Note: settings are autosaved every time you modify them!</p>
+                <p>Settings are autosaved every time you modify them!</p>
 
                 <h3 class="divider">general</h3>
                 <input id="downloadSetting" type="checkbox" value="autoDownload" />
@@ -35,39 +35,22 @@
                 </select>
 
                 <h3 class="divider">video</h3>
-                <input id="aspectRatioSetting" type="checkbox" value="maintainAspectRatio" />
-                <label for="aspectRatioSetting" title="Maintain aspect ratio when recording video.">Maintain aspect ratio of tab in video recordings.</label>
-
-                <label for="videoMaxWidthSetting" class="inline" title="Max width and height for video recordings, video size will be resized to meet max dimensions if needed.">Max width &amp; height in pixels:</label>
-                <input id="videoMaxWidthSetting" class="inline" type="number" />
+                <label for="videoWidthSetting" class="inline" title="Max width and height for video recordings, video size will be resized to meet max dimensions if needed.">Video width &amp; height in pixels:</label>
+                <input id="videoWidthSetting" class="inline" type="number" />
                 x
-                <input id="videoMaxHeightSetting" class="inline" type="number" />
+                <input id="videoHeightSetting" class="inline" type="number" />
+                <br />
+
+                <input id="aspectRatioSetting" type="checkbox" value="maintainAspectRatio" />
+                <label for="aspectRatioSetting" title="Maintain aspect ratio when recording video. Video will be resized to fit within the described dimensions.">Maintain tab aspect ratio in video recordings.</label>
 
                 <h3 class="divider">gif</h3>
-                <p>Note: GIFs use same dimension settings as video recordings.</p>
+                <p>GIFs use same dimension settings as video recordings.</p>
 
                 <label for="gifFrameSkipSetting" title="GIF quality level: lower quality skips more frames, but produces smaller files.">GIF Quality 
                     <output name="gifFrameSkipSetting" for="gifFrameSkipSetting">[%]</output>:</label>
-                <span class="range"><input id="gifFrameSkipSetting" type="range" min="25" max="100" step="1" value="50"></span>
+                <span class="range"><input id="gifFrameSkipSetting" type="range" min="25" max="100" step="1"></span>
 
-                <!-- set up profiles -->
-
-                <!-- examples
-                <label for="defaultSeverity" class="fL" title="Default priority value to set">Default Priority</label>
-                <span class="timeout"><input id="timeout" name="timeout" type="range" min="250" max="1250" step="10"></span>
-
-                <label for="defaultPriority" class="fL" title="Default priority value to set">Default Priority</label>
-                <input id="defaultPriority" type="text" class="shortcut" value="Shortcut" />
-
-                <fieldset class="fR tR">
-                    <button type="reset" class="icon">
-                        <img src="images/third_party/reload-2x.png" alt="" /> Reset Defaults</button>
-                </fieldset>
-			    </section>
-                <br />
-
-                -->
-                <p><a class="backToTop" href="#">Back to Top</a></p>
             </form>
 
 		</div>
@@ -75,6 +58,7 @@
 	</body>
 
 	<script src="js/third_party/jquery-2.1.0.min.js"></script>
+	<script src="js/constants.js"></script>
 	<script src="js/options.js"></script>
 
 </html>

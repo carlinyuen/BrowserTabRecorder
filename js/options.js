@@ -2,9 +2,6 @@
 $(function()
 {
     // Variables
-    var KEY_STORAGE_SETTINGS = "settings"
-    ;
-
     init();
 
     // Initialize options
@@ -12,8 +9,20 @@ $(function()
     {
         console.log('init()');
 
+        setDefaults();
         attachListeners();
         reloadSettings();
+    }
+
+    // Set default settings
+    function setDefaults()
+    {
+        $('#downloadSetting').prop('checked', DEFAULT_AUTO_DOWNLOAD);
+        $('#pictureFormatSetting').val(DEFAULT_PICTURE_FORMAT);
+        $('#videoWidthSetting').val(DEFAULT_VIDEO_WIDTH);
+        $('#videoHeightSetting').val(DEFAULT_VIDEO_HEIGHT);
+        $('#aspectRatioSetting').prop('checked', DEFAULT_ASPECT_RATIO);
+        $('#gifFrameSkipSetting').val(DEFAULT_GIF_QUALITY);
     }
 
     // Attach listeners to UI elements
@@ -21,8 +30,15 @@ $(function()
     {
         console.log('attachListeners()');
 
-        // Track changes to checkboxes
-        $('input[type="checkbox"]').on('change', function() {
+        // Track changes to checkboxes and comboboxes
+        $('input[type="checkbox"], input[type="number"], input[type="date"], select')
+            .on('change', function() {
+            saveSettings();
+        });
+
+        // Track changes to regular input fields
+        $('input[type="text"], input[type="number"], input[type="date"], textarea')
+            .on('blur', function() {
             saveSettings();
         });
 
@@ -78,7 +94,7 @@ $(function()
 
         // Collect settings from inputs
         var settings = {};
-        $('input').each(function(index, element) 
+        $('input, select').each(function(index, element) 
         {
             if ($(element).attr('type') == 'checkbox') {
                 settings[element.id] = element.checked;
