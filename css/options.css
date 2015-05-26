@@ -94,15 +94,19 @@ input[type=text]
 , input[type=date]
 , input[type=date]
 , textarea {
-	font: normal 10pt/auto Verdana;
-	color: #444;
-	padding: 6px;
-	height: 2.45em;
-	background: #f8fbff;
+    font: normal 9pt/9pt Verdana;
+    color: #444;
+    padding: 2px 6px;
+    margin: 2px 0;
+    height: 18pt;	
+    background: #f8fbff;
 	overflow: auto;
     resize: none;
 	border: 1px solid #ddd;
 	border-radius: 3px;
+}
+input[type=number] {
+    width: 64px;
 }
 input[type=checkbox] {
     margin-left: 8px;
