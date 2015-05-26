@@ -47,10 +47,13 @@
                 <h3 class="divider">gif</h3>
                 <p>GIFs use same dimension settings as video recordings.</p>
 
-                <label for="gifFrameSkipSetting" title="GIF quality level: lower quality skips more frames, but produces smaller files.">GIF Quality 
-                    <output name="gifFrameSkipSetting" for="gifFrameSkipSetting">[%]</output>:</label>
-                <span class="range"><input id="gifFrameSkipSetting" type="range" min="25" max="100" step="1"></span>
+                <label for="gifQualitySetting" title="GIF quality level: lower quality has fewer colors, but has smaller file size.">GIF Quality 
+                    [<output name="gifQualitySetting" for="gifQualitySetting"></output>%]:</label>
+                <span class="range"><input id="gifQualitySetting" type="range" min="25" max="100" step="1"></span>
 
+                <label for="gifFrameRateSetting" title="GIF frame rate: .">GIF Frame Rate 
+                    [<output name="gifFrameRateSetting" for="gifFrameRateSetting"></output>fps]:</label>
+                <span class="range"><input id="gifFrameRateSetting" type="range" min="5" max="60" step="1"></span>
             </form>
 
 		</div>

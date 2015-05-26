@@ -22,7 +22,8 @@ $(function()
         $('#videoWidthSetting').val(DEFAULT_VIDEO_WIDTH);
         $('#videoHeightSetting').val(DEFAULT_VIDEO_HEIGHT);
         $('#aspectRatioSetting').prop('checked', DEFAULT_ASPECT_RATIO);
-        $('#gifFrameSkipSetting').val(DEFAULT_GIF_QUALITY);
+        $('#gifQualitySetting').val(DEFAULT_GIF_QUALITY);
+        $('#gifFrameRateSetting').val(DEFAULT_GIF_FRAME_RATE);
     }
 
     // Attach listeners to UI elements
@@ -82,7 +83,9 @@ $(function()
                 });
                 
                 // Update range outputs
-                updateRangeOutput($('#gifFrameSkipSetting')[0]);
+                $('input[type="range"]').each(function (index, element) {
+                    updateRangeOutput(element);
+                });
             }
         });
     }
@@ -122,7 +125,7 @@ $(function()
 
     // Update range input outputs
     function updateRangeOutput(range) {
-        $('output[name=' + range.id + ']').text('[' + range.value + '%]');
+        $('output[name=' + range.id + ']').text(range.value);
     }
 });
 
