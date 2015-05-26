@@ -181,31 +181,30 @@ button:disabled {
 }
 
 .range {
-    overflow: hidden;
     display: block;
-    padding: 0 8px 0 0;
-    margin-bottom: 8px;
+    padding: 2px 8px 2px;
 }
 .range input[type=range] {
     width: 100%;
 }
 
+/*
 input[type=range]::-webkit-slider-thumb {
   position: relative;
 }
-
-input[type=range]::-webkit-slider-thumb:after {
+input[type=range]:focus::-webkit-slider-thumb:after {
     position: absolute;
-    top: -35px;
+    top: -26px;
     left: 50%;
     transform: translateX(-50%);
     background: #eee;
-    border-radius: 5px;
+    border-radius: 6px;
     color: #555;
-    padding: 5px 10px;
-    border: 2px solid #555;
-    content: attr(data-value) "%";
+    padding: 4px 6px;
+    border: 1px solid #bbb;
+    content: attr(data-percent) "%";
 }
+*/
 
 .crouton {
 	width: 100%;

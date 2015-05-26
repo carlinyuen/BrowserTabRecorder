@@ -46,8 +46,9 @@
                 <h3 class="divider">gif</h3>
                 <p>Note: GIFs use same dimension settings as video recordings.</p>
 
-                <label for="gifFrameSkipSetting" class="inline" title="GIF quality level: lower quality skips more frames, but produces smaller files.">GIF Quality (%):</label>
-                <span class="range"><input id="gifFrameSkipSetting" name="gifFrameSkipSetting" type="range" min="25" max="100" step="5" data-value="50"></span>
+                <label for="gifFrameSkipSetting" title="GIF quality level: lower quality skips more frames, but produces smaller files.">GIF Quality 
+                    <output name="gifFrameSkipSetting" for="gifFrameSkipSetting">[%]</output>:</label>
+                <span class="range"><input id="gifFrameSkipSetting" type="range" min="25" max="100" step="1" value="50"></span>
 
                 <!-- set up profiles -->
 
