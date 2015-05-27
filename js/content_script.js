@@ -8,9 +8,9 @@ $(function()
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
         , TIME_AUTOHIDE_CONTAINER = 2000    // 2s
-        , ID_THUMBNAIL_CONTAINER = 'carlin-bug-filer'
-        , CLASS_THUMBNAIL = 'carlin-bug-filer-thumbnail'
-        , CLASS_CURSOR_TRACKER = 'carlin-bug-filer-cursor'
+        , ID_THUMBNAIL_CONTAINER = 'carlin-tab-recorder'
+        , CLASS_THUMBNAIL = 'carlin-tab-recorder-thumbnail'
+        , CLASS_CURSOR_TRACKER = 'carlin-tab-recorder-cursor'
         , CLASS_SHOW_CONTAINER = 'show'
         , CLASS_DOWNLOAD_TARGET = 'target'
         , CLASS_BUTTON_DOWNLOAD = 'downloadButton'
@@ -97,7 +97,7 @@ $(function()
         }
     });
 
-    // Initialize bug-filer
+    // Initialize Tab Recorder
     init();
 
 

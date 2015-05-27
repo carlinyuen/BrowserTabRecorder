@@ -1,5 +1,5 @@
 
-#carlin-bug-filer {
+#carlin-tab-recorder {
     position: fixed;
     bottom: -12px;
     right: 0;
@@ -12,10 +12,10 @@
     padding: 16px 0 12px 0;
     transition: max-height 500ms ease-in-out;
 }
-#carlin-bug-filer.show {
+#carlin-tab-recorder.show {
     max-height: 200px;
 }
-#carlin-bug-filer .tab {
+#carlin-tab-recorder .tab {
     position: absolute;
     top: 0;
     left: 50%;
@@ -25,7 +25,7 @@
     background: url('chrome-extension://__MSG_@@extension_id__/images/drawer-handle.png') top center no-repeat;
     cursor: pointer;
 }
-#carlin-bug-filer .background {
+#carlin-tab-recorder .background {
     position: absolute;
     top: 12px;
     left: 0;
@@ -36,7 +36,7 @@
     box-shadow: 0 2px 6px #000;
 }
 
-.carlin-bug-filer-thumbnail {
+.carlin-tab-recorder-thumbnail {
     position: relative;
     margin: 4px 6px 6px 0;
     bottom: 0;
@@ -49,10 +49,10 @@
     vertical-align: middle;
     transition: opacity 200ms ease-in-out;
 }
-.carlin-bug-filer-thumbnail:hover {
+.carlin-tab-recorder-thumbnail:hover {
     opacity: 1.0;
 }
-.carlin-bug-filer-thumbnail .border {
+.carlin-tab-recorder-thumbnail .border {
     position: absolute;
     top: 0;
     left: 0;
@@ -63,7 +63,7 @@
     opacity: 0.75;
     border-radius: 4px;
 }
-.carlin-bug-filer-thumbnail .container {
+.carlin-tab-recorder-thumbnail .container {
     position: absolute;
     top: 0;
     left: 0;
@@ -77,23 +77,23 @@
     background-repeat: no-repeat;
     background-size: cover;
 }
-.carlin-bug-filer-thumbnail .target {
+.carlin-tab-recorder-thumbnail .target {
     width: 100% !important;
     height: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
     background-color: #222;
 }
-.carlin-bug-filer-thumbnail .container img.target {
+.carlin-tab-recorder-thumbnail .container img.target {
     opacity: 0 !important;
 }
-.carlin-bug-filer-thumbnail .container img.target.gif {
+.carlin-tab-recorder-thumbnail .container img.target.gif {
     opacity: 1.0 !important;
 }
-.carlin-bug-filer-thumbnail .container video.target {
+.carlin-tab-recorder-thumbnail .container video.target {
 }
 
-.carlin-bug-filer-thumbnail button {
+.carlin-tab-recorder-thumbnail button {
     margin: 0 4px 0 0;
     padding: 0;
     width: 20px;
@@ -101,10 +101,10 @@
     vertical-align: middle;
     opacity: 0.8;
 }
-.carlin-bug-filer-thumbnail button:hover {
+.carlin-tab-recorder-thumbnail button:hover {
     opacity: 1.0;
 }
-.carlin-bug-filer-thumbnail .closeButton {
+.carlin-tab-recorder-thumbnail .closeButton {
     position: absolute;
     top: 0;
     right: 0;
@@ -113,7 +113,7 @@
     line-height: 0;
     margin: 2px 3px 0 0;
 }
-.carlin-bug-filer-thumbnail .recordButton {
+.carlin-tab-recorder-thumbnail .recordButton {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -124,13 +124,13 @@
     margin: 0;
     background: white url('chrome-extension://__MSG_@@extension_id__/images/media-record-8x.png') center center no-repeat;
 }
-.carlin-bug-filer-thumbnail .recordButton.recording {
+.carlin-tab-recorder-thumbnail .recordButton.recording {
     background: white url('chrome-extension://__MSG_@@extension_id__/images/media-stop-8x.png') center center no-repeat;
 }
-.carlin-bug-filer-thumbnail .recordButton.processing {
+.carlin-tab-recorder-thumbnail .recordButton.processing {
     background: white url('chrome-extension://__MSG_@@extension_id__/images/Preloader_10.gif') center center no-repeat;
 }
-.carlin-bug-filer-thumbnail .downloadButton {
+.carlin-tab-recorder-thumbnail .downloadButton {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -141,7 +141,7 @@
 }
 
 
-.carlin-bug-filer-cursor {
+.carlin-tab-recorder-cursor {
     width: 48px;    /* size of image */
     height: 48px;   /* size of image */
     position: absolute;
@@ -151,25 +151,25 @@
 }
 
 @media (min-width: 701px) and (max-width: 1000px) {
-    .carlin-bug-filer-thumbnail {
+    .carlin-tab-recorder-thumbnail {
         width: 24%;
     }
 }
 
 @media (min-width: 501px) and (max-width: 700px) {
-    .carlin-bug-filer-thumbnail {
+    .carlin-tab-recorder-thumbnail {
         width: 32%;
     }
 }
 
 @media (min-width: 301px) and (max-width: 500px) {
-    .carlin-bug-filer-thumbnail {
+    .carlin-tab-recorder-thumbnail {
         width: 47%;
     }
 }
 
 @media (max-width: 300px) {
-    .carlin-bug-filer-thumbnail {
+    .carlin-tab-recorder-thumbnail {
         width: 96%;
     }
 }
