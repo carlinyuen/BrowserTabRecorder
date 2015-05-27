@@ -221,44 +221,44 @@ function captureTabVideo(senderTabId)
             }
         };
 
-    });
-
-    // Capture only video from the tab
-    chrome.tabCapture.capture({
-            audio: false,
-            video: true,
-            videoConstraints: videoSettings
-        }, 
-        function (localMediaStream) 
-        {
-            console.log('tabCapture:', localMediaStream);
-
-            // Send to active tab if capture was successful
-            if (localMediaStream)
+        // Capture only video from the tab
+        chrome.tabCapture.capture({
+                audio: false,
+                video: true,
+                videoConstraints: videoSettings
+            }, 
+            function (localMediaStream) 
             {
-                // Store stream for reference
-                videoConnection = localMediaStream;
+                console.log('tabCapture:', localMediaStream);
 
-                // Start recording
-                if (!videoRecorder.start(videoConnection))
+                // Send to active tab if capture was successful
+                if (localMediaStream)
                 {
-                    console.log('ERROR: could not start video recorder');
+                    // Store stream for reference
+                    videoConnection = localMediaStream;
+
+                    // Start recording
+                    if (!videoRecorder.start(videoConnection))
+                    {
+                        console.log('ERROR: could not start video recorder');
+                        videoConnection = null;
+                    }
+                }
+                else    // Failed
+                {
+                    console.log("ERROR: could not capture video stream")
+                    console.log(chrome.runtime.lastError);
                     videoConnection = null;
                 }
-            }
-            else    // Failed
-            {
-                console.log("ERROR: could not capture video stream")
-                console.log(chrome.runtime.lastError);
-                videoConnection = null;
-            }
 
-            // Send to response
-            chrome.tabs.sendMessage(senderTabId, {
-                request: 'videoRecordingStarted',
-                stream: videoConnection
-            });
-        });
+                // Send to response
+                chrome.tabs.sendMessage(senderTabId, {
+                    request: 'videoRecordingStarted',
+                    stream: videoConnection
+                });
+            }
+        );
+    });
 }
 
 // Stop video capture and build compiled .webm video file
@@ -320,32 +320,50 @@ function convertVideoToGif(videoData, senderTabId)
         return;
     }
 
-    // Collect option
-    var options = {
-        gifWidth: (videoData.width || 640),
-        gifHeight: (videoData.height || 480),
-        numFrames: (videoData.length || 2) * 10,
-        video: [videoData.sourceURL],
-    };
-    console.log('options:', options);
+    // Get video options
+    chrome.storage.sync.get(KEY_STORAGE_SETTINGS, function (data) 
+    {
+        var settings;
 
-    // Using gifshot library to generate gif from video
-    gifshot.createGIF(options, 
-        function (obj) 
+        // Sanity check
+        if (chrome.runtime.lastError) 
         {
-            var src = null;
-            if (!obj.error) {
-                src = obj.image;    // Set src
-            } else {
-                console.log(obj.error);
-            }
+            console.log(chrome.runtime.lastError);
+            settings = {};
+        } 
+        else {   // Success, update settings
+            settings = data[KEY_STORAGE_SETTINGS];
+        }
 
-            // Send to active tab if senderTabId is not set
-            chrome.tabs.sendMessage(senderTabId, {
-                request: 'convertedGif',
-                sourceURL: src
+        // Collect option
+        var options = {
+            gifWidth: settings['videoWidthSetting'] || DEFAULT_VIDEO_WIDTH,
+            gifHeight: settings['videoHeightSetting'] || DEFAULT_VIDEO_HEIGHT,
+            video: [videoData.sourceURL],
+            interval: ,
+            numFrames: (videoData.length 2) * 10,
+            sampleInterval: 10 - (10 * (settings['gifQualitySetting'] / 100)),
+        };
+        console.log('options:', options);
+
+        // Using gifshot library to generate gif from video
+        gifshot.createGIF(options, 
+            function (obj) 
+            {
+                var src = null;
+                if (!obj.error) {
+                    src = obj.image;    // Set src
+                } else {
+                    console.log(obj.error);
+                }
+
+                // Send to active tab if senderTabId is not set
+                chrome.tabs.sendMessage(senderTabId, {
+                    request: 'convertedGif',
+                    sourceURL: src
+                });
             });
-        });
+    });
 }
 
 // Initiate download of something
