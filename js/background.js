@@ -213,10 +213,10 @@ function captureTabVideo(senderTabId)
         }
         var videoSettings = {
             mandatory: {
-                minWidth: settings['videoWidthSetting'] || DEFAULT_VIDEO_WIDTH,
-                minHeight: settings['videoHeightSetting'] || DEFAULT_VIDEO_HEIGHT,
-                maxWidth: settings['videoWidthSetting'] || DEFAULT_VIDEO_WIDTH,
-                maxHeight: settings['videoHeightSetting'] || DEFAULT_VIDEO_HEIGHT,
+                minWidth: settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH,
+                minHeight: settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT,
+                maxWidth: settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH,
+                maxHeight: settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT,
                 chromeMediaSource: 'tab'
             }
         };
@@ -320,7 +320,7 @@ function convertVideoToGif(videoData, senderTabId)
         return;
     }
 
-    // Get video options
+    // Get GIF options
     chrome.storage.sync.get(KEY_STORAGE_SETTINGS, function (data) 
     {
         var settings;
@@ -335,14 +335,22 @@ function convertVideoToGif(videoData, senderTabId)
             settings = data[KEY_STORAGE_SETTINGS];
         }
 
-        // Collect option
+        // Collect options
+        var frameRate = settings[KEY_STORAGE_GIF_FRAME_RATE] || DEFAULT_GIF_FRAME_RATE;
+        var quality = settings[KEY_STORAGE_GIF_QUALITY] || DEFAULT_GIF_QUALITY;
         var options = {
-            gifWidth: settings['videoWidthSetting'] || DEFAULT_VIDEO_WIDTH,
-            gifHeight: settings['videoHeightSetting'] || DEFAULT_VIDEO_HEIGHT,
+            gifWidth: settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH,
+            gifHeight: settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT,
             video: [videoData.sourceURL],
-            interval: ,
-            numFrames: (videoData.length 2) * 10,
-            sampleInterval: 10 - (10 * (settings['gifQualitySetting'] / 100)),
+            interval: 1 / frameRate,     
+            numFrames: (frameRate / DEFAULT_VIDEO_FRAME_RATE) * videoData.length,
+            sampleInterval: (GIF_QUALITY_RANGE + 1) - (GIF_QUALITY_RANGE * (quality / 100)),
+            progressCallback: function (progress) { 
+                console.log('GIF progress:', progress); 
+            },
+            completeCallback: function() {
+                console.log('GIF completed!');
+            },
         };
         console.log('options:', options);
 

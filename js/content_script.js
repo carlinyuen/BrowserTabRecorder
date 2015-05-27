@@ -25,78 +25,6 @@ $(function()
         , selectedThumbnail = null          // Track current live video thumbnail
     ;
 
-
-    /////////////////////////////////////////
-    // ACTIONS
-
-    // Listener for mouse movement to show cursor for recording
-    $(document).on('mousemove scroll', function (event) 
-    {
-        if (cursorTracker && recording) 
-        {
-            cursorTracker.css({
-                'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
-                'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
-            });
-        }
-    });
-
-    // Listener for messages from background
-    chrome.runtime.onMessage.addListener(function (message, sender, response) 
-    {
-        console.log('sender:', sender);
-        console.log('message:', message);
-
-        // Handle message
-        switch (message.request)
-        {
-            case "captureTabScreenshot":
-                createThumbnailContainer();
-                createScreenshotThumbnail(message.sourceURL);
-                break;
-
-            case "captureTabGif":
-                createThumbnailContainer();
-                createCursorTracker();
-                createGifThumbnail();
-                break;
-
-            case "captureTabVideo":
-                createThumbnailContainer();
-                createCursorTracker();
-                createVideoThumbnail();
-                break;
-
-            case "captureTabAudio":
-                // TODO:
-                break;
-
-            case "videoRecordingStarted":
-                videoRecordingStarted(message.stream);
-                break;
-
-            case "videoRecordingStopped":
-                videoRecordingStopped(message.sourceURL);
-                break;
-
-            case "convertedGif":
-                convertedGif(message.sourceURL);
-                break;
-
-            case "emailAutofill":
-                autofillFromEmail(message.fields);
-                break;
-
-            case "cloneBug":
-                cloneFromBuganizer();
-                break;
-
-            default: 
-                console.log("Unknown request received!");
-                break;
-        }
-    });
-
     // Initialize Tab Recorder
     init();
 
@@ -107,6 +35,74 @@ $(function()
     // Initialize the extension script
     function init() 
     {
+        // Listener for mouse movement to show cursor for recording
+        $(document).on('mousemove scroll', function (event) 
+        {
+            if (cursorTracker && recording) 
+            {
+                cursorTracker.css({
+                    'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
+                    'left': event.pageX - HEIGHT_CURSOR_IMAGE / 2,
+                });
+            }
+        });
+
+        // Listener for messages from background
+        chrome.runtime.onMessage.addListener(function (message, sender, response) 
+        {
+            console.log('sender:', sender);
+            console.log('message:', message);
+
+            // Handle message
+            switch (message.request)
+            {
+                case "captureTabScreenshot":
+                    createThumbnailContainer();
+                    createScreenshotThumbnail(message.sourceURL);
+                    break;
+
+                case "captureTabGif":
+                    createThumbnailContainer();
+                    createCursorTracker();
+                    createGifThumbnail();
+                    break;
+
+                case "captureTabVideo":
+                    createThumbnailContainer();
+                    createCursorTracker();
+                    createVideoThumbnail();
+                    break;
+
+                case "captureTabAudio":
+                    // TODO:
+                    break;
+
+                case "videoRecordingStarted":
+                    videoRecordingStarted(message.stream);
+                    break;
+
+                case "videoRecordingStopped":
+                    videoRecordingStopped(message.sourceURL);
+                    break;
+
+                case "convertedGif":
+                    convertedGif(message.sourceURL);
+                    break;
+
+                case "emailAutofill":
+                    autofillFromEmail(message.fields);
+                    break;
+
+                case "cloneBug":
+                    cloneFromBuganizer();
+                    break;
+
+                default: 
+                    console.log("Unknown request received!");
+                    break;
+            }
+        });
+
         checkRecordingState(function (status) 
         {
             if (status && status.stream) 

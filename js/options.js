@@ -17,13 +17,13 @@ $(function()
     // Set default settings
     function setDefaults()
     {
-        $('#downloadSetting').prop('checked', DEFAULT_AUTO_DOWNLOAD);
-        $('#pictureFormatSetting').val(DEFAULT_PICTURE_FORMAT);
-        $('#videoWidthSetting').val(DEFAULT_VIDEO_WIDTH);
-        $('#videoHeightSetting').val(DEFAULT_VIDEO_HEIGHT);
-        $('#aspectRatioSetting').prop('checked', DEFAULT_ASPECT_RATIO);
-        $('#gifQualitySetting').val(DEFAULT_GIF_QUALITY);
-        $('#gifFrameRateSetting').val(DEFAULT_GIF_FRAME_RATE);
+        $('#' + KEY_STORAGE_AUTO_DOWNLOAD).prop('checked', DEFAULT_AUTO_DOWNLOAD);
+        $('#' + KEY_STORAGE_PICTURE_FORMAT).val(DEFAULT_PICTURE_FORMAT);
+        $('#' + KEY_STORAGE_VIDEO_WIDTH).val(DEFAULT_VIDEO_WIDTH);
+        $('#' + KEY_STORAGE_VIDEO_HEIGHT).val(DEFAULT_VIDEO_HEIGHT);
+        $('#' + KEY_STORAGE_ASPECT_RATIO).prop('checked', DEFAULT_ASPECT_RATIO);
+        $('#' + KEY_STORAGE_GIF_QUALITY).val(DEFAULT_GIF_QUALITY);
+        $('#' + KEY_STORAGE_GIF_FRAME_RATE).val(DEFAULT_GIF_FRAME_RATE);
     }
 
     // Attach listeners to UI elements
