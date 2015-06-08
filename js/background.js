@@ -71,15 +71,15 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
 
         case "startGifRecording":
         case "startVideoRecording":
-            captureTabVideo(sender.tab.id);
+            captureTabVideo(sender.tab);
             break;
 
         case "stopVideoRecording":
-            stopVideoCapture(sender.tab.id);
+            stopVideoCapture(sender.tab);
             break;
 
         case "stopGifRecording":
-            stopVideoCapture(sender.tab.id, convertVideoToGif);
+            stopVideoCapture(sender.tab, convertVideoToGif);
             break;
 
         case "videoRecordingStatus":
@@ -90,7 +90,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             break;
 
         case "convertVideoToGif":
-            convertVideoToGif(message, sender.tab.id);
+            convertVideoToGif(message, sender.tab);
             break;
 
         case "updatePopup":     // Tell popup to update its fields
@@ -182,7 +182,7 @@ function captureTabScreenshot(data)
 }
 
 // Capture video stream of tab, will pass stream back to sendResponse()
-function captureTabVideo(senderTabId)
+function captureTabVideo(senderTab)
 {
     console.log("captureTabVideo");
 
@@ -190,7 +190,7 @@ function captureTabVideo(senderTabId)
     if (videoConnection) 
     {
         console.log('ERROR: video stream already exists, cannot capture two at a time!');
-        chrome.tabs.sendMessage(senderTabId, {
+        chrome.tabs.sendMessage(senderTab.id, {
             request: 'videoRecordingStarted',
             stream: null
         });
@@ -200,7 +200,7 @@ function captureTabVideo(senderTabId)
     // Get video options
     chrome.storage.sync.get(KEY_STORAGE_SETTINGS, function (data) 
     {
-        var settings;
+        var settings, width, height;
 
         // Sanity check
         if (chrome.runtime.lastError) 
@@ -211,14 +211,34 @@ function captureTabVideo(senderTabId)
         else {   // Success, update settings
             settings = data[KEY_STORAGE_SETTINGS];
         }
+
+        // Get video dimensions
+        console.log('Tab dimensions:', senderTab.width, senderTab.height);
+        width = settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH;
+        height = settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT;
+        console.log('Video dimensions:', width, height);
+
+        // Check if we need to match aspect ratio
+        if (settings[KEY_STORAGE_ASPECT_RATIO]) 
+        {
+            console.log('Adjusting aspect ratio...');
+            var fitSize = calculateAspectRatioFit(senderTab.width, senderTab.height, width, height);
+            width = Math.ceil(fitSize.width);
+            height = Math.ceil(fitSize.height);
+            console.log('New size:', width, height);
+        }
+
+        // Get video settings
         var videoSettings = {
             mandatory: {
-                minWidth: settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH,
-                minHeight: settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT,
-                maxWidth: settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH,
-                maxHeight: settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT,
+                minWidth: width,
+                minHeight: height,
+                maxWidth: width,
+                maxHeight: height,
+                minFrameRate: DEFAULT_VIDEO_FRAME_RATE,
+                maxFrameRate: DEFAULT_VIDEO_FRAME_RATE,
                 chromeMediaSource: 'tab'
-            }
+            },
         };
 
         // Capture only video from the tab
@@ -252,7 +272,7 @@ function captureTabVideo(senderTabId)
                 }
 
                 // Send to response
-                chrome.tabs.sendMessage(senderTabId, {
+                chrome.tabs.sendMessage(senderTab.id, {
                     request: 'videoRecordingStarted',
                     stream: videoConnection
                 });
@@ -263,7 +283,7 @@ function captureTabVideo(senderTabId)
 
 // Stop video capture and build compiled .webm video file
 //  If callback DNE, send video to active page, otherwise pass along video to callback
-function stopVideoCapture(senderTabId, callback)
+function stopVideoCapture(senderTab, callback)
 {
     console.log("stopVideoCapture");
 
@@ -271,7 +291,7 @@ function stopVideoCapture(senderTabId, callback)
     if (!videoConnection) 
     {
         videoConnection = null;
-        chrome.tabs.sendMessage(senderTabId, {
+        chrome.tabs.sendMessage(senderTab.id, {
             request: 'videoRecordingStopped',
             sourceURL: null,
         });
@@ -280,12 +300,18 @@ function stopVideoCapture(senderTabId, callback)
 
     // Stop video capture and save file
     var videoData = videoRecorder.stop();
-    videoConnection = null;
+    try {
+        videoConnection.stop();
+    } catch (exception) {
+        console.log(exception);
+    } finally {
+        videoConnection = null;
+    }
 
     // If output was bad, don't continue
     if (!videoData || !videoData.sourceURL) 
     {
-        chrome.tabs.sendMessage(senderTabId, {
+        chrome.tabs.sendMessage(senderTab.id, {
             request: 'videoRecordingStopped',
             sourceURL: null,
         });
@@ -294,11 +320,11 @@ function stopVideoCapture(senderTabId, callback)
 
     // If callback exists, pass parameters
     if (callback) {
-        callback(videoData, senderTabId);
+        callback(videoData, senderTab);
     } 
     else    // Pass video to active tab
     {
-        chrome.tabs.sendMessage(senderTabId, {
+        chrome.tabs.sendMessage(senderTab.id, {
             request: 'videoRecordingStopped',
             sourceURL: videoData.sourceURL,
         });
@@ -306,14 +332,14 @@ function stopVideoCapture(senderTabId, callback)
 }
 
 // Convert video file to gif
-function convertVideoToGif(videoData, senderTabId)
+function convertVideoToGif(videoData, senderTab)
 {
     console.log("convertVideoToGif:", videoData);
 
     // Santity check
     if (!videoData || !videoData.sourceURL) 
     {
-        chrome.tabs.sendMessage(senderTabId, {
+        chrome.tabs.sendMessage(senderTab.id, {
             request: 'convertedGif',
             sourceURL: null,
         });
@@ -337,13 +363,17 @@ function convertVideoToGif(videoData, senderTabId)
 
         // Collect options
         var frameRate = settings[KEY_STORAGE_GIF_FRAME_RATE] || DEFAULT_GIF_FRAME_RATE;
+        console.log('frame rate:', frameRate);
+
         var quality = settings[KEY_STORAGE_GIF_QUALITY] || DEFAULT_GIF_QUALITY;
+        console.log('quality:', quality);
+
         var options = {
             gifWidth: settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH,
             gifHeight: settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT,
             video: [videoData.sourceURL],
             interval: 1 / frameRate,     
-            numFrames: (frameRate / DEFAULT_VIDEO_FRAME_RATE) * videoData.length,
+            numFrames: Math.ceil((frameRate / DEFAULT_VIDEO_FRAME_RATE) * videoData.length * frameRate),
             sampleInterval: (GIF_QUALITY_RANGE + 1) - (GIF_QUALITY_RANGE * (quality / 100)),
             progressCallback: function (progress) { 
                 console.log('GIF progress:', progress); 
@@ -365,13 +395,32 @@ function convertVideoToGif(videoData, senderTabId)
                     console.log(obj.error);
                 }
 
-                // Send to active tab if senderTabId is not set
-                chrome.tabs.sendMessage(senderTabId, {
-                    request: 'convertedGif',
-                    sourceURL: src
-                });
+                // Send message to active tab
+                if (senderTab) {
+                    chrome.tabs.sendMessage(senderTab.id, {
+                        request: 'convertedGif',
+                        sourceURL: src
+                    });
+                }
             });
     });
+}
+
+/** Source: http://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio
+  * Conserve aspect ratio of the orignal region. Useful when shrinking/enlarging
+  * images to fit into a certain area.
+  *
+  * @param {Number} srcWidth Source area width
+  * @param {Number} srcHeight Source area height
+  * @param {Number} maxWidth Fittable area maximum available width
+  * @param {Number} maxHeight Fittable area maximum available height
+  * @return {Object} { width, heigth }
+  */
+function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) 
+{
+    var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+    console.log('Aspect ratio:', ratio);
+    return { width: srcWidth * ratio, height: srcHeight * ratio };
 }
 
 // Initiate download of something

@@ -100,6 +100,7 @@
     height: 20px;
     vertical-align: middle;
     opacity: 0.8;
+    cursor: pointer;
 }
 .carlin-tab-recorder-thumbnail button:hover {
     opacity: 1.0;

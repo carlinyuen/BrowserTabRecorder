@@ -7,8 +7,9 @@
 window.VideoRecorder = (function()
 {
     // Variables
-    var FRAME_RATE_RECORDING = 40       // Frames per second
-        , TIME_FRAME_DELAY = 1000 / FRAME_RATE_RECORDING
+    var RECORDING_FRAME_RATE = DEFAULT_VIDEO_FRAME_RATE || 60   // Frames per second
+        , RECORDING_QUALITY = DEFAULT_VIDEO_QUALITY || 1.0
+        , TIME_FRAME_DELAY = (1000 / RECORDING_FRAME_RATE).toFixed(1)
         , video = document.createElement('video')     // offscreen video
         , canvas = document.createElement('canvas') // offscreen canvas
         , rafId = null                  // Handle for animation request function
@@ -38,6 +39,9 @@ window.VideoRecorder = (function()
             video.height = video.clientHeight;
             canvas.width = video.width;
             canvas.height = video.height;
+
+            console.log('video:', video);
+            console.log('video dimensions:', video.width, video.height, video.clientWidth, video.clientHeight);
 
             // Begin recording
             record();
@@ -84,23 +88,26 @@ window.VideoRecorder = (function()
         /*
         function drawVideoFrame(time) 
         {
-            rafId = requestAnimationFrame(drawVideoFrame);
-
             // Draw video onto canvas, and read back canvas as webp
             ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             frames.push(canvas.toDataURL('image/webp', 1)); // image/jpeg is way faster :(
+            console.log('push frame');
+
+            rafId = requestAnimationFrame(drawVideoFrame);
         };
         rafId = requestAnimationFrame(drawVideoFrame);
-        */
-
+        //*/
+        
         // Frame redraw function
         rafId = setInterval(function() 
         {
             // Draw video onto canvas, and read back canvas as webp
+            //  Unfortunately, image/jpeg is way faster :(
             ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            frames.push(canvas.toDataURL('image/webp', 1)); // image/jpeg is way faster :(
+            frames.push(canvas.toDataURL('image/webp', RECORDING_QUALITY));
 
         }, TIME_FRAME_DELAY);
+        //*/
     };
 
     // Stop video recording and return source URL for compiled webm video
@@ -133,7 +140,8 @@ window.VideoRecorder = (function()
         }
 
         // Compile our final binary video blob and create a source URL to it
-        var videoBlob = Whammy.fromImageArray(frames, FRAME_RATE_RECORDING);
+        console.log('frame delay:', TIME_FRAME_DELAY);
+        var videoBlob = Whammy.fromImageArray(frames, TIME_FRAME_DELAY);
         recordedVideoURL = window.URL.createObjectURL(videoBlob);
         console.log('recordedVideoURL:', recordedVideoURL);
 

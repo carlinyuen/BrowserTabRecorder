@@ -14,9 +14,9 @@
 		"scripts": [ 
             "js/third_party/whammy.js"
             , "js/third_party/gifshot.min.js"
+            , "js/constants.js"
             , "js/audioRecorder.js"
             , "js/videoRecorder.js"
-            , "js/constants.js"
             , "js/background.js"
         ]
 	}

@@ -187,24 +187,16 @@ $(function()
             clearTimeout(thumbnailHideTimer);
         }
 
-        try
-        {
-            // Create video thumbnail and add to document
-            var thumb = createThumbnail('video')
-                .hide()
-                .appendTo(thumbnailContainer)
-                .slideDown('fast');
+        // Create video thumbnail and add to document
+        var thumb = createThumbnail('video')
+            .hide()
+            .appendTo(thumbnailContainer)
+            .slideDown('fast');
 
-            // If container is not showing yet, show it permanently
-            thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+        // If container is not showing yet, show it permanently
+        thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
 
-            return thumb;
-        }
-        catch (exception) {   // If there's errors, stop recording
-            console.log(exception);
-        }
-
-        return null;
+        return thumb;
     }
 
     // Create a container for the video
@@ -217,24 +209,16 @@ $(function()
             clearTimeout(thumbnailHideTimer);
         }
 
-        try
-        {
-            // Create video thumbnail and add to document
-            var thumb = createThumbnail('gif')
-                .hide()
-                .appendTo(thumbnailContainer)
-                .slideDown('fast');
+        // Create video thumbnail and add to document
+        var thumb = createThumbnail('gif')
+            .hide()
+            .appendTo(thumbnailContainer)
+            .slideDown('fast');
 
-            // If container is not showing yet, show it permanently
-            thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+        // If container is not showing yet, show it permanently
+        thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
 
-            return thumb;
-        }
-        catch (exception) {   // If there's errors, stop recording
-            console.log(exception);
-        }
-
-        return null;
+        return thumb;
     }
 
     // Start video recording
@@ -435,8 +419,9 @@ $(function()
         selectedThumbnail.find('video')
             .replaceWith($(document.createElement('img'))
                 .addClass('gif')
-                .attr('src', sourceURL)
             );
+        selectedThumbnail.find('img.gif')
+            .attr('src', sourceURL);
         selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
             .off('click')
             .click(function (event) 
