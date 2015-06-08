@@ -417,6 +417,23 @@ $(function()
 
         // Switch out video with img pointed to gif
         selectedThumbnail.find('.' + CLASS_DOWNLOAD_TARGET).attr('src', sourceURL);
+        selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
+            .off('click')
+            .click(function (event) 
+            {
+                var $target = $(this).parent().find('.' + CLASS_DOWNLOAD_TARGET);
+
+                // Sanity Check
+                if (!$target.length) 
+                {
+                    console.log('ERROR: no target download found!');
+                    alert("Couldn't find target download!");
+                    return;
+                }
+
+                alert('To download the GIF, right click and select Save Image...');
+            });
+
 
         // Clear reference
         selectedThumbnail = null;
