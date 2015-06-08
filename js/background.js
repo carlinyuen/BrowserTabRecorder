@@ -374,7 +374,8 @@ function convertVideoToGif(videoData, senderTab)
             video: [videoData.sourceURL],
             interval: 1 / frameRate,     
             numFrames: Math.ceil((frameRate / DEFAULT_VIDEO_FRAME_RATE) * videoData.length * frameRate),
-            sampleInterval: (GIF_QUALITY_RANGE + 1) - (GIF_QUALITY_RANGE * (quality / 100)),
+            sampleInterval: Math.ceil((GIF_QUALITY_RANGE + 1) - (GIF_QUALITY_RANGE * (quality / 100))),
+            numWorkers: 3,
             progressCallback: function (progress) { 
                 console.log('GIF progress:', progress); 
             },

@@ -275,6 +275,9 @@ $(function()
     {
         console.log('stopVideoRecording');
 
+        // Hide cursor tracker
+        cursorTracker.fadeOut('fast');
+
         // Change recording button to processing icon
         if (selectedThumbnail)
         {
@@ -304,9 +307,6 @@ $(function()
             selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
                 .fadeIn('fast');
         }
-
-        // Hide cursor tracker
-        cursorTracker.fadeOut('fast');
 
         // Set recording state to false
         recording = false;
@@ -351,7 +351,7 @@ $(function()
         var thumb = selectedThumbnail;
         createLocalObjectURL(sourceURL, function (url) 
         {
-            thumb.find('video')
+            thumb.find('.' + CLASS_DOWNLOAD_TARGET)
                 .attr('src', url)                   
                 .on('loadedmetadata', function() {
                     $(this).hover(function(event) {
@@ -367,7 +367,7 @@ $(function()
                     console.log('WARNING: preview not available due to content security policy, but can still download.');
 
                     // Show video icon image instead
-                    thumb.find('video').fadeOut('fast', function (event) {
+                    thumb.find('.' + CLASS_DOWNLOAD_TARGET).fadeOut('fast', function (event) {
                         $(this).remove();
                     });
                     thumb.css({
@@ -416,22 +416,7 @@ $(function()
         }
 
         // Switch out video with img pointed to gif
-        selectedThumbnail.find('video')
-            .replaceWith($(document.createElement('img'))
-                .addClass('gif')
-            );
-        selectedThumbnail.find('img.gif')
-            .attr('src', sourceURL);
-        selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
-            .off('click')
-            .click(function (event) 
-            {
-                chrome.runtime.sendMessage({
-                    request: 'downloadContent',
-                    filename: 'screencapture - ' + $(this).attr('date') + '.gif',
-                    contentURL: $(this).parent().find('img.gif').attr('src'),
-                });
-            });
+        selectedThumbnail.find('.' + CLASS_DOWNLOAD_TARGET).attr('src', sourceURL);
 
         // Clear reference
         selectedThumbnail = null;
