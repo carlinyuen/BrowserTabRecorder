@@ -1,8 +1,8 @@
-/* Plugin for EasyBugFiler
+/* Plugin for Tab Recorder
  * Create bugs for Buganizer easily
  */
 
-popup.addPlugin((function($)
+BACKGROUND_PLUGINS.buganizerPlugin = ((function($)
 {
     var URL_BUG_API_CREATE = 'https://b2.corp.google.com/issues/new'   // Bug creation api
         , KEY_STORAGE_BUGANIZER = "buganizerPlugin"
@@ -11,11 +11,11 @@ popup.addPlugin((function($)
         , $fields                   // Reference to input fields
     ;
 
-    // Initialize plugin, gets passed UI context (jQuery object) and the plugin path
-    function init($context, pluginPath)
+    // Sets up plugin on popup, gets passed UI context for popup (jQuery object) and the plugin path
+    function setupPopup($popupContext, pluginPath)
     {
         // Create UI
-        $context.append($(document.createElement('form'))
+        $popupContext.append($(document.createElement('form'))
             .append($(document.createElement('fieldset'))
                 .append($(document.createElement('label'))
                     .attr('for', 'bugTitle')
@@ -65,17 +65,17 @@ popup.addPlugin((function($)
         );
 
         // Attach handlers
-        $context.find('#createButton').click(createBug);
-        $context.find('#resetButton').click(clearDetails);
+        $popupContext.find('#createButton').click(createBug);
+        $popupContext.find('#resetButton').click(clearDetails);
         
         // Setting variables
-        $fields = $context.find('input,textarea');
+        $fields = $popupContext.find('input,textarea');
 
         // Key listeners to fields to save details
         $fields.on("keyup paste cut", saveDetails);
 
         // Prevent form submit
-        $context.find('form').submit(function(event) {
+        $popupContext.find('form').submit(function(event) {
             event.preventDefault();
         });
 
@@ -184,10 +184,16 @@ popup.addPlugin((function($)
 
     return {
         id: KEY_STORAGE_BUGANIZER,
-        title: "Buganizer",
-        init: init,
-        update: update,
-    }
+        popup: {
+            title: "Buganizer",
+            init: setupPopup,
+            update: update,
+        },
+        content_scripts: [
+            "./bugStatus.css",
+            "./imagePreview.js",
+            "./videoPreview.js",
+        ],
+    };
 })($));
 
-                

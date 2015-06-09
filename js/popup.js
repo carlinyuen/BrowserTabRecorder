@@ -3,15 +3,11 @@
 popup = (function($)
 {
     // Variables & Constants
-    var PATH_ACTIONS_PREFIX = './actions/'
-        , PATH_PLUGINS_PREFIX = './plugins/'
-
-        , backgroundConnection      // Port handle for connection to background.js
+    var backgroundConnection      // Port handle for connection to background.js
         , currentTabURL             // Reference to current tab URL
-
-        , actions = []              // Array to hold extra actions
+        , actions = {}              // Map to hold actions
         , actionCallbacks = {}      // Mapping of ids to callbacks
-        , plugins = []              // Array to hold extra plugins
+        , plugins = {}              // Map to hold plugins
     ;
 
     // Listener for messages from background
@@ -25,6 +21,10 @@ popup = (function($)
         {
             case "update":  // Update fields
                 loadDetails();
+                break;
+
+            case "plugins": // List of plugins
+                loadPlugins(message.plugins);
                 break;
 
             default: 
@@ -46,68 +46,10 @@ popup = (function($)
             currentTabURL = tabs[0].url;
             console.log("Active tab:", currentTabURL);
 
-            // Go through actions and initalize them
-            if (actions && actions.length)
-            {
-                // Create header for actions
-                var $section = $('#actionsSection');
-                $section.append($(document.createElement('h2'))
-                    .addClass('divider').text('actions'));
-
-                // For each action, add a button
-                for (var i = 0, l = actions.length, a = actions[i], button; i < l; a = actions[++i])
-                {
-                    // Add callback to callback map
-                    actionCallbacks[a.id] = a.callback;
-
-                    // Create button UI
-                    button = $(document.createElement('button'))
-                        .attr('id', a.id)
-                        .attr('title', a.description)
-                        .attr('type', 'button')
-                        .addClass('icon')
-                        .text(a.label)
-                        .prepend($(document.createElement('img'))
-                            .attr('alt', '')
-                            .attr('src', PATH_ACTIONS_PREFIX + a.id + '/' + a.icon)
-                        )
-                        .click(function (e)     // Fire off callback
-                        {
-                            var id = $(this).attr('id');
-                            var data = actionCallbacks[id]();
-                            if (data) {     // If data is passed back to send
-                                sendBackgroundMessage(id, data);
-                            }
-                        });
-
-                    // Check if button should be disabled
-                    if (!(a.domains.test(currentTabURL))) {
-                        button.prop('disabled', true);
-                    }
-                    
-                    // Add button, and space
-                    $section.append(button).append(' ');
-                }
-            }
-
-            // Go through plugins and initalize them
-            if (plugins && plugins.length)
-            {
-                var $section = $('#pluginsSection');
-
-                // For each action, add a button
-                for (var i = 0, l = plugins.length, p = plugins[i], context; i < l; p = plugins[++i])
-                {
-                    // Create context for the plugin and initialize with it
-                    context = $(document.createElement('section')).attr('id', p.id);
-                    p.init(context, PATH_PLUGINS_PREFIX + p.id + '/');
-
-                    // Add to plugins section
-                    $section.append($(document.createElement('h2'))
-                        .addClass('divider').text(p.title.toLowerCase())
-                    ).append(context);
-                }
-            }
+            // Get list of plugins
+            backgroundConnection.postMessage({
+                request: 'getPlugins',
+            });
 
             // Button handlers
             $('#optionsButton').click(openOptionsPage);
@@ -116,6 +58,115 @@ popup = (function($)
             $('#videoButton').click(requestButtonClickHandler);
             $('#audioButton').click(requestButtonClickHandler);
         });   // END - chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
+    }
+
+    // Process and add a plugin
+    function addPlugin(plugin) 
+    { 
+        console.log("addPlugin:", plugin);
+
+        if (plugin && plugin.id)    // ID to use for plugin context and messages
+        {
+            // Check for popup action
+            if (plugin.action 
+                && plugin.action.callback      // Callback when popup button is clicked
+                && plugin.action.domains       // URL regex for what sites action should work on
+                && plugin.action.icon          // Button icon to use
+                && plugin.action.label         // Button label to use
+                && plugin.action.description) { // Button hover description
+                actions[plugin.id] = plugin.action;
+            } else {
+                console.log("Invalid popup action object.");
+            }
+
+            // Check popup plugin
+            if (plugin.popup     
+                && plugin.popup.init    // Popup setup, gets passed popup UI context (jquery Object) and path to plugin
+                && plugin.popup.update  // Update function
+                && plugin.popup.title) { // Plugin header title
+                plugins[plugin.id] = plugin.popup; 
+            } else {
+                console.log("Invalid popup plugin object.");
+            }
+
+            return true;
+        }
+        else {
+            console.log("Invalid plugin object.");
+            return false;
+        }
+    }
+
+    // Load plugins
+    function loadPlugins(unprocessedPlugins)
+    {
+        // Go through and add the unprocessed plugins
+        $.each(unprocessedPlugins, function(index, value) {
+            addPlugin(value);
+        });
+
+        // Go through actions and initalize them
+        if (!$.isEmptyObject(actions))
+        {
+            // Create header for actions
+            var $section = $('#actionsSection');
+            $section.append($(document.createElement('h2'))
+                .addClass('divider').text('actions'));
+
+            // For each action, add a button
+            $.each(actions, function(id, act)
+            {
+                // Add callback to callback map
+                actionCallbacks[id] = act.callback;
+
+                // Create button UI
+                var button = $(document.createElement('button'))
+                    .attr('id', id)
+                    .attr('title', act.description)
+                    .attr('type', 'button')
+                    .addClass('icon')
+                    .text(act.label)
+                    .prepend($(document.createElement('img'))
+                        .attr('alt', '')
+                        .attr('src', PATH_PLUGINS_PREFIX + act.id + '/' + act.icon)
+                    )
+                    .click(function (e)     // Fire off callback
+                    {
+                        var id = $(this).attr('id');
+                        var data = actionCallbacks[id]();
+                        if (data) {     // If data is passed back to send
+                            sendBackgroundMessage(id, data);
+                        }
+                    });
+
+                // Check if button should be disabled
+                if (!(act.domains.test(currentTabURL))) {
+                    button.prop('disabled', true);
+                }
+                
+                // Add button, and space
+                $section.append(button).append(' ');
+            });
+        }
+
+        // Go through plugins and initalize them
+        if (!$.isEmptyObject(plugins))
+        {
+            var $section = $('#pluginsSection');
+
+            // For each action, add a button
+            $.each(plugins, function(id, plug)
+            {
+                // Create context for the plugin and initialize with it
+                var context = $(document.createElement('section')).attr('id', id);
+                plug.init(context, PATH_PLUGINS_PREFIX + id + '/');
+
+                // Add to plugins section
+                $section.append($(document.createElement('h2'))
+                    .addClass('divider').text(plug.title.toLowerCase())
+                ).append(context);
+            });
+        }
     }
 
     // Open options page
@@ -137,40 +188,7 @@ popup = (function($)
    
     // Expose functions and properties
     return {
-        addAction: function(action) 
-        { 
-            if (action && action.callback   // Callback when popup button is clicked
-                    && action.id            // ID to use for message passing and button
-                    && action.domains       // URL regex for what sites action should work on
-                    && action.icon          // Button icon to use
-                    && action.label         // Button label to use
-                    && action.description)  // Button hover description
-            {
-                actions.push(action); 
-                return true;
-            } 
-            else 
-            {
-                throw "Invalid action object."
-                return false;
-            }
-        },
-        addPlugin: function(plugin) 
-        { 
-            if (plugin && plugin.init   // Init function, gets passed UI context (jquery Object), and path for the plugin
-                    && plugin.update    // Update function
-                    && plugin.id        // ID to use for plugin context and messages
-                    && plugin.title)    // Plugin header title
-            {
-                plugins.push(plugin); 
-                return true;
-            } 
-            else 
-            {
-                throw "Invalid plugin object."
-                return false;
-            }
-        },
+        addPlugin: addPlugin,
         init: init,         // Expose init function
     };
 })($);

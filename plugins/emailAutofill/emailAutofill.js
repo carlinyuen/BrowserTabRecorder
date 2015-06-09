@@ -1,8 +1,8 @@
-/* Action for EasyBugFiler
+/* Action for Tab Recorder
  * Easily autofill bug fields
  */
 
-popup.addAction((function($)
+BACKGROUND_PLUGINS.emailAutofill = ((function($)
 {
     // Function to initiate email autofill
     function emailAutofill()
@@ -22,10 +22,12 @@ popup.addAction((function($)
 
     return {
         id: "emailAutofill",
-        description: "Populate fields with email content on active tab",
-        domains: /mail.google.com/, // TODO inbox
-        icon: "./envelope-closed-2x.png",
-        label: "Email Autofill",
-        callback: emailAutofill,
-    }
+        action: {
+            description: "Populate fields with email content on active tab",
+            domains: /mail.google.com/, // TODO inbox
+            icon: "./envelope-closed-2x.png",
+            label: "Email Autofill",
+            callback: emailAutofill,
+        },
+    };
 })($));

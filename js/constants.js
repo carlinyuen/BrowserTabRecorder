@@ -1,4 +1,6 @@
-var KEY_STORAGE_SETTINGS = "settings"
+var PATH_PLUGINS_PREFIX = './plugins/'
+    , BACKGROUND_PLUGINS = {}
+    , KEY_STORAGE_SETTINGS = "settings"
     , KEY_STORAGE_AUTO_DOWNLOAD = "downloadSetting"
     , KEY_STORAGE_PICTURE_FORMAT = "pictureFormatSetting"
     , KEY_STORAGE_VIDEO_WIDTH = "videoWidthSetting"

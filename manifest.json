@@ -12,11 +12,15 @@
 	, "default_locale": "en"
 	, "background": {
 		"scripts": [ 
-            "js/third_party/whammy.js"
+			"js/third_party/jquery-2.1.0.min.js"
+            , "js/third_party/whammy.js"
             , "js/third_party/gifshot.min.js"
             , "js/constants.js"
             , "js/audioRecorder.js"
             , "js/videoRecorder.js"
+            , "plugins/buganizerPlugin/buganizerPlugin.js"
+            , "plugins/emailAutofill/emailAutofill.js"
+            , "plugins/cloneBuganizer/cloneBuganizer.js"
             , "js/background.js"
         ]
 	}
@@ -40,14 +44,15 @@
 	}]
 	, "permissions": [
         "activeTab"
+        , "tabs"
         , "storage"
 		, "unlimitedStorage"
         , "tabCapture"
+        , "<all_urls>"
         , "file:///*"
 	]
     , "web_accessible_resources": [
         "images/*"
-        , "actions/*"
         , "plugins/*"
     ]
 }
