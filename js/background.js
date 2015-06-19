@@ -171,6 +171,27 @@ function captureTabScreenshot(data)
         {
             data.sourceURL = dataSourceURL;
             sendMessageToActiveTab(data);
+                
+            // Check settings
+            chrome.storage.sync.get(KEY_STORAGE_SETTINGS, function (data) 
+            {
+                var settings;
+
+                // Sanity check
+                if (chrome.runtime.lastError) 
+                {
+                    console.log(chrome.runtime.lastError);
+                    settings = {};
+                } 
+                else {   // Success, update settings
+                    settings = data[KEY_STORAGE_SETTINGS];
+                }
+
+                // If auto download
+                if (settings[KEY_STORAGE_AUTO_DOWNLOAD]) {
+                    initiateDownload('screenshot - ' + formatDate(new Date()) + '.png', src);
+                }
+            }
         } 
         else    // Failed
         {
@@ -318,8 +339,30 @@ function stopVideoCapture(senderTab, callback)
     }
 
     // If callback exists, pass parameters
-    if (callback) {
+    if (callback) 
+    {
         callback(videoData, senderTab);
+
+        // Check settings
+        chrome.storage.sync.get(KEY_STORAGE_SETTINGS, function (data) 
+        {
+            var settings;
+
+            // Sanity check
+            if (chrome.runtime.lastError) 
+            {
+                console.log(chrome.runtime.lastError);
+                settings = {};
+            } 
+            else {   // Success, update settings
+                settings = data[KEY_STORAGE_SETTINGS];
+            }
+
+            // If auto download
+            if (settings[KEY_STORAGE_AUTO_DOWNLOAD]) {
+                initiateDownload('screencapture - ' + formatDate(new Date()) + '.webm', src);
+            }
+        }
     } 
     else    // Pass video to active tab
     {
@@ -395,6 +438,11 @@ function convertVideoToGif(videoData, senderTab)
                     console.log(obj.error);
                 }
 
+                // If auto download
+                if (settings[KEY_STORAGE_AUTO_DOWNLOAD]) {
+                    initiateDownload('screencapture - ' + formatDate(new Date()) + '.gif', src);
+                }
+
                 // Send message to active tab
                 if (senderTab) {
                     chrome.tabs.sendMessage(senderTab.id, {
@@ -404,6 +452,18 @@ function convertVideoToGif(videoData, senderTab)
                 }
             });
     });
+}
+
+// Convert date to a format that is good for downloading
+function formatDate(date)
+{
+    return date.getFullYear() 
+        + '.' + ('0' + (date.getMonth() + 1)).slice(-2)  
+        + '.' + ('0' + date.getDate()).slice(-2)  
+        + '-' + ('0' + date.getHours()).slice(-2)  
+        + "_" + ('0' + date.getMinutes()).slice(-2) 
+        + '_' + ('0' + date.getSeconds()).slice(-2) 
+    ;
 }
 
 /** Source: http://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio

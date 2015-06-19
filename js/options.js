@@ -18,7 +18,7 @@ $(function()
     function setDefaults()
     {
         $('#' + KEY_STORAGE_AUTO_DOWNLOAD).prop('checked', DEFAULT_AUTO_DOWNLOAD);
-        $('#' + KEY_STORAGE_PICTURE_FORMAT).val(DEFAULT_PICTURE_FORMAT);
+        //$('#' + KEY_STORAGE_PICTURE_FORMAT).val(DEFAULT_PICTURE_FORMAT);
         $('#' + KEY_STORAGE_VIDEO_WIDTH).val(DEFAULT_VIDEO_WIDTH);
         $('#' + KEY_STORAGE_VIDEO_HEIGHT).val(DEFAULT_VIDEO_HEIGHT);
         $('#' + KEY_STORAGE_ASPECT_RATIO).prop('checked', DEFAULT_ASPECT_RATIO);
