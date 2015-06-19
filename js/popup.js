@@ -1,13 +1,12 @@
 /* Required: jquery.js */
 
-popup = (function($)
+(function()
 {
     // Variables & Constants
     var backgroundConnection      // Port handle for connection to background.js
         , currentTabURL             // Reference to current tab URL
         , actions = {}              // Map to hold actions
         , actionCallbacks = {}      // Mapping of ids to callbacks
-        , plugins = {}              // Map to hold plugins
     ;
 
     // Listener for messages from background
@@ -21,10 +20,6 @@ popup = (function($)
         {
             case "update":  // Update fields
                 loadDetails();
-                break;
-
-            case "plugins": // List of plugins
-                loadPlugins(message.plugins);
                 break;
 
             default: 
@@ -46,17 +41,15 @@ popup = (function($)
             currentTabURL = tabs[0].url;
             console.log("Active tab:", currentTabURL);
 
-            // Get list of plugins
-            backgroundConnection.postMessage({
-                request: 'getPlugins',
-            });
-
             // Button handlers
             $('#optionsButton').click(openOptionsPage);
             $('#screenshotButton').click(requestButtonClickHandler); 
             $('#gifButton').click(requestButtonClickHandler);     
             $('#videoButton').click(requestButtonClickHandler);
             $('#audioButton').click(requestButtonClickHandler);
+
+            // Load plugins
+            loadPlugins(TR_PLUGINS || {});
         });   // END - chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
     }
 
@@ -191,4 +184,4 @@ popup = (function($)
         addPlugin: addPlugin,
         init: init,         // Expose init function
     };
-})($);
+})();
