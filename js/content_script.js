@@ -35,6 +35,8 @@ $(function()
     // Initialize the extension script
     function init() 
     {
+        console.log('Init Tab Recorder');
+
         // Listener for mouse movement to show cursor for recording
         $(document).on('mousemove scroll', function (event) 
         {

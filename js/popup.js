@@ -3,8 +3,10 @@
 (function()
 {
     // Variables & Constants
-    var backgroundConnection      // Port handle for connection to background.js
+    var TR_PLUGINS = TR_PLUGINS || {}
+        , backgroundConnection      // Port handle for connection to background.js
         , currentTabURL             // Reference to current tab URL
+        , plugins = {}              // Map to hold plugins
         , actions = {}              // Map to hold actions
         , actionCallbacks = {}      // Mapping of ids to callbacks
     ;
@@ -28,6 +30,9 @@
         }
     });
 
+    // Initialize popoup
+    init();
+
 
     //////////////////////////////////////////////////////////
     // FUNCTIONS
@@ -49,7 +54,7 @@
             $('#audioButton').click(requestButtonClickHandler);
 
             // Load plugins
-            loadPlugins(TR_PLUGINS || {});
+            loadPlugins(TR_PLUGINS);
         });   // END - chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
     }
 

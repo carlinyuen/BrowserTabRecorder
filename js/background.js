@@ -20,17 +20,6 @@ var popupConnection = null              // Handle for port connection to popup
 //////////////////////////////////////////////////////////
 // ACTIONS
 
-// Load plugins if we have any
-backgroundPlugins = Object.keys(BACKGROUND_PLUGINS);
-if (backgroundPlugins.length) 
-{
-    console.log('Background Plugins Loaded:', backgroundPlugins.length);
-    for (var i = 0, l = backgroundPlugins.length; i < l; ++i) {
-        backgroundPlugins[i] = BACKGROUND_PLUGINS[backgroundPlugins[i]];
-    }
-    console.log('Loading complete:', backgroundPlugins);
-}
-
 // Listen for events from popup
 chrome.extension.onConnect.addListener(function(port) 
 {
@@ -57,13 +46,6 @@ chrome.extension.onConnect.addListener(function(port)
 
             case "captureTabAudio":
                 sendMessageToActiveTab(message);
-                break;
-
-            case "getPlugins":
-                popupConnection.postMessage({
-                    request: "plugins",
-                    plugins: JSON.stringify(backgroundPlugins),
-                });
                 break;
 
             default:  // For actions & plugins, push to active tab
