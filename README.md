@@ -11,13 +11,13 @@ Hope this is useful to someone out there; would love any help optimizing and imp
  - Get video recording working across refreshes
  - Get audio recording working
  - Get auto-download working
- - Get email autofill working
- - Get clone bug working
- - Build image and video preview in buganizer plugin
- - import from Groups forum
- - upload to screenshot.googleplex
- - include tab url
- - grey out resolved bugs
+ - Fix GIF cutoff
+ - Email autofill
+ - Import from Groups forum
+ - Clone bug
+ - Buganizer plugin
+     - image and video preview
+     - grey out resolved bugs
 
 ## Version History
 v1.0.0
