@@ -89,16 +89,8 @@ $(function()
                     convertedGif(message.sourceURL);
                     break;
 
-                case "emailAutofill":
-                    autofillFromEmail(message.fields);
-                    break;
-
-                case "cloneBug":
-                    cloneFromBuganizer();
-                    break;
-
-                default: 
-                    console.log("Unknown request received!");
+                default:    // Try plugins
+                    messagePlugin(message);
                     break;
             }
         });
@@ -113,6 +105,18 @@ $(function()
                 videoRecordingStarted(status.stream);
             }
         });
+    }
+
+    // Try to send a message to plugins
+    function messagePlugin(message)
+    {
+        if (TB_PLUGINS) // Check that plugins are loaded
+        {
+            var plugin = TB_PLUGINS[message.request];
+            if (plugin) {
+                plugin.content_script(message);
+            }
+        }
     }
 
     // Check recording state of background page, callback param is video stream
@@ -642,65 +646,6 @@ $(function()
 
         // Return the result
         return result;
-    }
-
-    // Autofill bug fields in popup from email
-    //  param fields is a object with fields to store data into
-    function autofillFromEmail(fields)
-    {
-        var domain = window.location.host
-            , error = false;
-
-        // Check that we are on some email client
-        if (DOMAIN_GMAIL_REGEX.test(domain)) 
-        {
-            // TODO collect data from email and append to fields
-
-        } 
-        else if (DOMAIN_INBOX_REGEX.test(domain)) 
-        {
-            // TODO collect data from email and append to fields
-        }
-        else    // Error
-        {
-            error = true;
-            console.log('ERROR: Not currently on email page!');
-            alert('Not currently on an email page!');
-        }
-
-        // Save data to local storage
-        chrome.storage.local.set(fields, function() 
-        {
-            if (chrome.runtime.lastError) 
-            {
-                console.log(chrome.runtime.lastError);
-                alert('Could not collect autofill data from email.');
-            } 
-            else {	// Success, update popup
-                chrome.runtime.sendMessage({request: "updatePopup"});
-            }
-        });
-    }
-
-    // Clone a bug from Google's Buganizer
-    function cloneFromBuganizer()
-    {
-        // Check that we are on Buganizer
-        if (DOMAIN_BUGANIZER_REGEX.test(window.location.host)) 
-        {
-            // TODO get data from the various fields
-            var params = {};
-            
-            // Fire off bug creation using URL parameters
-            var url = [URL_BUG_API_CREATE, '?', $.param(params)].join('');
-            console.log(url);
-            chrome.tabs.create({ url: url });
-        } 
-        else    // Error
-        {
-            console.log('ERROR: Not currently on Buganizer page!');
-            alert('Not currently on a Buganizer issue page!');
-        }
     }
 
 });

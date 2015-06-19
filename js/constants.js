@@ -1,5 +1,4 @@
 var PATH_PLUGINS_PREFIX = './plugins/'
-    , BACKGROUND_PLUGINS = {}
     , KEY_STORAGE_SETTINGS = "settings"
     , KEY_STORAGE_AUTO_DOWNLOAD = "downloadSetting"
     , KEY_STORAGE_PICTURE_FORMAT = "pictureFormatSetting"

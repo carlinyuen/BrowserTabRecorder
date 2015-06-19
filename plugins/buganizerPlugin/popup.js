@@ -2,7 +2,8 @@
  * Create bugs for Buganizer easily
  */
 
-BACKGROUND_PLUGINS.buganizerPlugin = ((function($)
+var TR_PLUGINS = TR_PLUGINS || {};
+TR_PLUGINS.buganizerPlugin = (function()
 {
     var URL_BUG_API_CREATE = 'https://b2.corp.google.com/issues/new'   // Bug creation api
         , KEY_STORAGE_BUGANIZER = "buganizerPlugin"
@@ -10,6 +11,15 @@ BACKGROUND_PLUGINS.buganizerPlugin = ((function($)
         , saveTimerHandle           // Timer handle for saving delay
         , $fields                   // Reference to input fields
     ;
+
+    return {
+        id: KEY_STORAGE_BUGANIZER,
+        popup: {
+            title: "Buganizer",
+            init: setupPopup,
+            update: update,
+        },
+    };
 
     // Sets up plugin on popup, gets passed UI context for popup (jQuery object) and the plugin path
     function setupPopup($popupContext, pluginPath)
@@ -182,18 +192,5 @@ BACKGROUND_PLUGINS.buganizerPlugin = ((function($)
         });
     }
 
-    return {
-        id: KEY_STORAGE_BUGANIZER,
-        popup: {
-            title: "Buganizer",
-            init: setupPopup,
-            update: update,
-        },
-        content_scripts: [
-            "./bugStatus.css",
-            "./imagePreview.js",
-            "./videoPreview.js",
-        ],
-    };
-})($));
+})();
 

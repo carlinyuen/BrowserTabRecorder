@@ -1,18 +1,10 @@
-/* Action for Tab Recorder
+/* Plugin for Tab Recorder
  * Easily clone a bug from Buganizer
  */
 
-BACKGROUND_PLUGINS.cloneBuganizer = ((function($)
+var TR_PLUGINS = TR_PLUGINS || {};
+TR_PLUGINS.cloneBuganizer = (function()
 {
-    // Function to initiate bug cloning
-    function cloneBug()
-    {
-        // Send request
-        return {
-            target: "content_script",
-        };
-    }
-
     return {
         id: "cloneBuganizer",
         action: {
@@ -23,5 +15,15 @@ BACKGROUND_PLUGINS.cloneBuganizer = ((function($)
             callback: cloneBug,
         },
     };
-})($));
+
+    // Function to initiate bug cloning
+    function cloneBug()
+    {
+        // Send request
+        return {
+            target: "content_script",
+        };
+    }
+
+})();
 

@@ -18,9 +18,6 @@
             , "js/constants.js"
             , "js/audioRecorder.js"
             , "js/videoRecorder.js"
-            , "plugins/buganizerPlugin/buganizerPlugin.js"
-            , "plugins/emailAutofill/emailAutofill.js"
-            , "plugins/cloneBuganizer/cloneBuganizer.js"
             , "js/background.js"
         ]
 	}
