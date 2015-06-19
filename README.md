@@ -10,7 +10,6 @@ Hope this is useful to someone out there; would love any help optimizing and imp
 ## TODO
  - Get video recording working across refreshes
  - Get audio recording working
- - Get auto-download working
  - Fix GIF cutoff
  - Email autofill
  - Import from Groups forum
@@ -25,7 +24,7 @@ v1.0.0
  - Can take screenshots of the tab.
  - Can take screencapture video of the tab.
  - Can take screencapture gif of the tab.
- - Options page for gif and video capture.
+ - Options page for gif and video capture, auto-download.
 
 ## License
 MIT

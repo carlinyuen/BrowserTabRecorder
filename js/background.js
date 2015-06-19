@@ -189,9 +189,9 @@ function captureTabScreenshot(data)
 
                 // If auto download
                 if (settings[KEY_STORAGE_AUTO_DOWNLOAD]) {
-                    initiateDownload('screenshot - ' + formatDate(new Date()) + '.png', src);
+                    initiateDownload('screenshot - ' + formatDate(new Date()) + '.png', dataSourceURL);
                 }
-            }
+            });
         } 
         else    // Failed
         {
@@ -339,10 +339,16 @@ function stopVideoCapture(senderTab, callback)
     }
 
     // If callback exists, pass parameters
-    if (callback) 
-    {
+    if (callback) {
         callback(videoData, senderTab);
-
+    } 
+    else    // Pass video to active tab
+    {
+        chrome.tabs.sendMessage(senderTab.id, {
+            request: 'videoRecordingStopped',
+            sourceURL: videoData.sourceURL,
+        });
+        
         // Check settings
         chrome.storage.sync.get(KEY_STORAGE_SETTINGS, function (data) 
         {
@@ -360,15 +366,8 @@ function stopVideoCapture(senderTab, callback)
 
             // If auto download
             if (settings[KEY_STORAGE_AUTO_DOWNLOAD]) {
-                initiateDownload('screencapture - ' + formatDate(new Date()) + '.webm', src);
+                initiateDownload('screencapture - ' + formatDate(new Date()) + '.webm', videoData.sourceURL);
             }
-        }
-    } 
-    else    // Pass video to active tab
-    {
-        chrome.tabs.sendMessage(senderTab.id, {
-            request: 'videoRecordingStopped',
-            sourceURL: videoData.sourceURL,
         });
     }
 }
@@ -438,17 +437,17 @@ function convertVideoToGif(videoData, senderTab)
                     console.log(obj.error);
                 }
 
-                // If auto download
-                if (settings[KEY_STORAGE_AUTO_DOWNLOAD]) {
-                    initiateDownload('screencapture - ' + formatDate(new Date()) + '.gif', src);
-                }
-
                 // Send message to active tab
                 if (senderTab) {
                     chrome.tabs.sendMessage(senderTab.id, {
                         request: 'convertedGif',
                         sourceURL: src
                     });
+                }
+                
+                // If auto download
+                if (settings[KEY_STORAGE_AUTO_DOWNLOAD]) {
+                    initiateDownload('screencapture - ' + formatDate(new Date()) + '.gif', src);
                 }
             });
     });
