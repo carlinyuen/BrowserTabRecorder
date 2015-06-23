@@ -76,7 +76,8 @@ $(function()
                     break;
 
                 case "captureTabAudio":
-                    // TODO:
+                    createThumbnailContainer();
+                    createAudioThumbnail();
                     break;
 
                 case "videoRecordingStarted":
@@ -97,6 +98,7 @@ $(function()
             }
         });
 
+        // Check if we were previously recording a video / audio that hasn't stopped yet.
         checkRecordingState(function (status) 
         {
             if (status && status.stream) 
@@ -104,6 +106,7 @@ $(function()
                 createThumbnailContainer();
                 createCursorTracker();
                 selectedThumbnail = createVideoThumbnail();
+                // TODO: Check for audio too
                 videoRecordingStarted(status.stream);
             }
         });
@@ -195,6 +198,28 @@ $(function()
 
         // Create video thumbnail and add to document
         var thumb = createThumbnail('video')
+            .hide()
+            .appendTo(thumbnailContainer)
+            .slideDown('fast');
+
+        // If container is not showing yet, show it permanently
+        thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
+
+        return thumb;
+    }
+
+    // Create a container for the video
+    function createAudioThumbnail()
+    {
+        console.log('createAudioThumbnail()');
+
+        // Clear autohide timer, we want user to see they need to hit record
+        if (thumbnailHideTimer) {
+            clearTimeout(thumbnailHideTimer);
+        }
+
+        // Create audio thumbnail and add to document
+        var thumb = createThumbnail('audio')
             .hide()
             .appendTo(thumbnailContainer)
             .slideDown('fast');
@@ -523,7 +548,7 @@ $(function()
         x.send();
     }
 
-    // Creates a thumbnail div from recording source (image / video), and returns it
+    // Creates a thumbnail div for different types of content (image / video / audio), and returns it
     function createThumbnail(type, sourceURL)
     {
         // Create base thumbnail div
@@ -558,6 +583,26 @@ $(function()
                             startVideoRecording($(this));
                         } else {   // Already recording, stop recording
                             stopVideoRecording($(this));
+                        }
+                    })
+                );
+                break;
+
+            case "audio":
+                container.append($(document.createElement('audio'))
+                    .attr('title', 'audiocapture - ' + formatDate(new Date()) + '.wav')
+                    .addClass(CLASS_DOWNLOAD_TARGET)
+                    .attr('autoplay', true)
+                ).append($(document.createElement('button'))    // Add record button
+                    .addClass(CLASS_BUTTON_RECORD)
+                    .click(function (event) 
+                    {
+                        if (!recording) {    // Not yet recording, start recording
+                            startAudioRecording($(this));
+                            // TODO: Implement
+                        } else {   // Already recording, stop recording
+                            stopAudioRecording($(this));
+                            // TODO: Implement
                         }
                     })
                 );
@@ -630,6 +675,12 @@ $(function()
                         console.log('closing currently recording video!');
                         stopVideoRecording();
                     }
+                }
+
+                // Clean up object url memory
+                var url = $this.find('.' + CLASS_DOWNLOAD_TARGET).attr('src');
+                if (url) {
+                    window.URL.revokeObjectURL(url);
                 }
                 
                 // Remove element

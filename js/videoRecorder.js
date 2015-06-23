@@ -122,6 +122,7 @@ window.VideoRecorder = (function()
 
         // Clean up stream
         try {
+            window.URL.revokeObjectURL(video.src);
             stream.stop();
         } catch (exception) {
             console.log(exception);

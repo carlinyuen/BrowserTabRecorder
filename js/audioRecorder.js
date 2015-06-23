@@ -4,18 +4,19 @@
 //  Source: http://typedarray.org/from-microphone-to-wav-with-getusermedia-and-web-audio/
 window.AudioRecorder = (function()
 {
-    // variables
-    var leftchannel = [];
-    var rightchannel = [];
-    var recorder = null;
-    var recording = false;
-    var recordingLength = 0;
-    var volume = null;
-    var audioInput = null;
-    var sampleRate = null;
-    var audioContext = null;
-    var context = null;
-    var outputString;
+    // Variables
+    var leftchannel = []
+        , rightchannel = []
+        , recorder = null
+        , recording = false
+        , recordingLength = 0
+        , volume = null
+        , audioInput = null
+        , sampleRate = null
+        , audioContext = null
+        , context = null
+        , recordedAudioURL = null
+    ;
 
     // Setup the audio recorder, LocalMediaStream parameter from a getUserMedia()
     //  call is required
@@ -126,15 +127,7 @@ window.AudioRecorder = (function()
 
         // our final binary blob
         var blob = new Blob ( [ view ], { type : 'audio/wav' } );
-
-        // let's save it locally
-        var url = window.URL.createObjectURL(blob);
-        var link = window.document.createElement('a');
-        link.href = url;
-        link.download = 'output.wav';
-        var click = document.createEvent("Event");
-        click.initEvent("click", true, true);
-        link.dispatchEvent(click);
+        recordedAudioURL = window.URL.createObjectURL(blob);
     }
 
     function interleave(leftChannel, rightChannel)
@@ -171,6 +164,22 @@ window.AudioRecorder = (function()
         for (var i = 0; i < lng; i++){
             view.setUint8(offset + i, string.charCodeAt(i));
         }
+    }
+
+    // Download last recorded audio
+    function download()
+    {
+        console.log("AudioRecorder : download()");
+
+        // Create download link
+        var link = window.document.createElement('a');
+        link.href = recordedAudioURL;
+        link.download = 'audio.wav';
+
+        // Fire off fake click to trigger download
+        var click = document.createEvent("Event");
+        click.initEvent("click", true, true);
+        link.dispatchEvent(click);
     }
 
     // Exposing functions
