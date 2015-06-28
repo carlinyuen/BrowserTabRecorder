@@ -2,7 +2,6 @@
  *  js/third_party/whammy.js
  *  js/third_party/gifshot.min.js
  *  js/videoRecorder.js
- *  js/audioRecorder.js
  */
 
 // Constants
@@ -41,10 +40,6 @@ chrome.extension.onConnect.addListener(function(port)
                 break;
 
             case "captureTabVideo":
-                sendMessageToActiveTab(message);
-                break;
-
-            case "captureTabAudio":
                 sendMessageToActiveTab(message);
                 break;
 
