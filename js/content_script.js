@@ -5,6 +5,7 @@ $(function()
     // Variables & Constants
     var IMAGE_CURSOR = chrome.extension.getURL("images/cursor.png")
         , IMAGE_ICON_VIDEO = chrome.extension.getURL("images/video-8x.png")
+        , IMAGE_ICON_AUDIO = chrome.extension.getURL("images/audio-8x.png")
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
         , TIME_AUTOHIDE_CONTAINER = 2000    // 2s
@@ -21,7 +22,8 @@ $(function()
         , cursorTracker = null              // Reference to cursor tracker element
         , thumbnailContainer = null         // Reference to thumbnail container
         , thumbnailHideTimer = null         // Timer handle for autohiding container
-        , recording = false                 // Recording state
+        , recordingAudio = false            // Recording audio state
+        , recordingVideo = false            // Recording video state
         , selectedThumbnail = null          // Track current live video thumbnail
     ;
 
@@ -40,7 +42,7 @@ $(function()
         // Listener for mouse movement to show cursor for recording
         $(document).on('mousemove scroll', function (event) 
         {
-            if (cursorTracker && recording) 
+            if (cursorTracker && recordingVideo) 
             {
                 cursorTracker.css({
                     'top': event.pageY - WIDTH_CURSOR_IMAGE / 2,
@@ -104,10 +106,18 @@ $(function()
             if (status && status.stream) 
             {
                 createThumbnailContainer();
-                createCursorTracker();
-                selectedThumbnail = createVideoThumbnail();
-                // TODO: Check for audio too
-                videoRecordingStarted(status.stream);
+
+                if (status.type == "video")
+                {
+                    createCursorTracker();
+                    selectedThumbnail = createVideoThumbnail();
+                    videoRecordingStarted(status.stream);
+                }
+                else if (status.type == "audio")
+                {
+                    selectedThumbnail = createAudioThumbnail();
+                    audioRecordingStarted(status.stream);
+                }
             }
         });
     }
@@ -131,6 +141,389 @@ $(function()
             request: "videoRecordingStatus"
         }, callback);
     }
+
+
+    ///////////////////////////////////////////////////////
+    // AUDIO RECORDING
+
+    // Start audio recording
+    function startAudioRecording($target)
+    {
+        console.log('startAudioRecording:', $target);
+
+        // Track which audio thumbnail is being recorded
+        if ($target) {
+            selectedThumbnail = $target.parents('.' + CLASS_THUMBNAIL);
+        }
+        
+        // Tell background page to start recording
+        chrome.runtime.sendMessage({ request: 'startAudioRecording' });
+    }
+
+    // Audio recording started
+    function audioRecordingStarted(stream)
+    {
+        console.log('audioRecordingStarted:', stream);
+
+        // Sanity check
+        if (stream) 
+        {
+            // If selectedThumbnail exists, change record button
+            if (selectedThumbnail) 
+            {
+                selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
+                    .addClass(CLASS_CURRENTLY_RECORDING);
+            }
+
+            // Set recording to true
+            recordingAudio = true;
+        }
+        else    // Error
+        {
+            console.log('ERROR: invalid audio stream or already recording another tab!');
+            alert('Unable to capture tab audio feed or already recording another tab!');
+        }
+    }
+
+    // Audio recording started
+    function audioRecordingStarted(stream)
+    {
+        console.log('audioRecordingStarted:', stream);
+
+        // Sanity check
+        if (stream) 
+        {
+            // If selectedThumbnail exists, change record button
+            if (selectedThumbnail) 
+            {
+                selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
+                    .addClass(CLASS_CURRENTLY_RECORDING);
+            }
+
+            // Hide container
+            thumbnailContainer.removeClass('show');
+
+            // Show cursor tracker
+            cursorTracker.fadeIn('fast');
+            
+            // Set recording to true
+            recordingAudio = true;
+        }
+        else    // Error
+        {
+            console.log('ERROR: invalid audio stream or already recording another tab!');
+            alert('Unable to capture tab audio feed or already recording another tab!');
+        }
+    }
+
+    // Stop audio recording
+    function stopAudioRecording()
+    {
+        console.log('stopAudioRecording');
+
+        // Hide cursor tracker
+        cursorTracker.fadeOut('fast');
+
+        // Change recording button to processing icon
+        if (selectedThumbnail)
+        {
+            selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
+                .removeClass(CLASS_CURRENTLY_RECORDING)
+                .addClass(CLASS_CURRENTLY_PROCESSING);
+        }
+
+        // Adjust request based on gif vs audio
+        var request = (selectedThumbnail.find('img.gif').length) 
+            ? 'stopGifRecording' : 'stopAudioRecording'
+
+        // Tell background page to stop recording
+        chrome.runtime.sendMessage({ request: request });
+    }
+
+    // Audio recording stopped
+    function audioRecordingStopped(sourceURL)
+    {
+        console.log('audioRecordingStopped:', sourceURL);
+
+        // UI changes for stopped recording
+        recordingStoppedInterfaceUpdate();
+
+        // Set recording state to false
+        recordingAudio = false;
+
+        // Sanity check
+        if (!sourceURL)
+        {
+            console.log('Error recording audio file from audio feed!');
+            alert('Error recording audio file from audio feed!');
+
+            // Clear reference to selected audio thumbnail
+            selectedThumbnail = null;
+            return;
+        }
+
+        // Check that audio thumbnail exists still
+        if (!selectedThumbnail)
+        {
+            console.log('Could not find audio element on page. Attempting to download!');
+            alert('Could not find audio element on page. Attempting to download!');
+
+            // Try to download
+            chrome.runtime.sendMessage({
+                request: 'downloadContent',
+                filename: 'screencapture - ' + formatDate(new Date()) + '.webm',
+                contentURL: sourceURL,
+            });
+
+            return;
+        }
+
+        // Generate local url and set audio element source to webm file
+        var thumb = selectedThumbnail;
+        createLocalObjectURL(sourceURL, function (url) 
+        {
+            thumb.find('.' + CLASS_DOWNLOAD_TARGET)
+                .attr('src', url)                   
+                .on('loadedmetadata', function() {
+                    $(this).hover(function(event) {
+                        $(this).attr('controls', true); // Show controls
+                    }, function (event) {
+                        $(this).attr('controls', false); // Hide controls
+                    });
+                })
+                .on('error', function() 
+                {
+                    // Tell user preview not available, but can download
+                    alert('Preview not available, but you can still download the audio!');
+                    console.log('WARNING: preview not available due to content security policy, but can still download.');
+
+                    // Show audio icon image instead
+                    thumb.find('.' + CLASS_DOWNLOAD_TARGET).fadeOut('fast', function (event) {
+                        $(this).remove();
+                    });
+                    thumb.css({
+                        'background': 'url(' + IMAGE_ICON_AUDIO + ') center center no-repeat'
+                    });
+                });
+        });
+    
+        // Clear reference
+        selectedThumbnail = null;
+    }
+
+
+    ///////////////////////////////////////////////////////
+    // VIDEO RECORDING
+
+    // Start video recording
+    function startVideoRecording($target)
+    {
+        console.log('startVideoRecording:', $target);
+
+        // Track which video thumbnail is being recorded
+        if ($target) {
+            selectedThumbnail = $target.parents('.' + CLASS_THUMBNAIL);
+        }
+        
+        // Adjust request based on gif vs video
+        var request = (selectedThumbnail.find('img.gif').length) 
+            ? 'startGifRecording' : 'startVideoRecording'
+
+        // Tell background page to start recording
+        chrome.runtime.sendMessage({ request: request });
+    }
+
+    // Video recording started
+    function videoRecordingStarted(stream)
+    {
+        console.log('videoRecordingStarted:', stream);
+
+        // Sanity check
+        if (stream) 
+        {
+            // If selectedThumbnail exists, change record button
+            if (selectedThumbnail) 
+            {
+                selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
+                    .addClass(CLASS_CURRENTLY_RECORDING);
+            }
+
+            // Hide container
+            thumbnailContainer.removeClass('show');
+
+            // Show cursor tracker
+            cursorTracker.fadeIn('fast');
+            
+            // Set recording to true
+            recordingVideo = true;
+        }
+        else    // Error
+        {
+            console.log('ERROR: invalid video stream or already recording another tab!');
+            alert('Unable to capture tab video feed or already recording another tab!');
+        }
+    }
+
+    // Stop video recording
+    function stopVideoRecording()
+    {
+        console.log('stopVideoRecording');
+
+        // Hide cursor tracker
+        cursorTracker.fadeOut('fast');
+
+        // Change recording button to processing icon
+        if (selectedThumbnail)
+        {
+            selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
+                .removeClass(CLASS_CURRENTLY_RECORDING)
+                .addClass(CLASS_CURRENTLY_PROCESSING);
+        }
+
+        // Adjust request based on gif vs video
+        var request = (selectedThumbnail.find('img.gif').length) 
+            ? 'stopGifRecording' : 'stopVideoRecording'
+
+        // Tell background page to stop recording
+        chrome.runtime.sendMessage({ request: request });
+    }
+
+    // Video recording stopped
+    function videoRecordingStopped(sourceURL)
+    {
+        console.log('videoRecordingStopped:', sourceURL);
+
+        // UI changes for stopped recording
+        recordingStoppedInterfaceUpdate();
+
+        // Set recording state to false
+        recordingVideo = false;
+
+        // Sanity check
+        if (!sourceURL)
+        {
+            console.log('Error recording video file from video feed!');
+            alert('Error recording video file from video feed!');
+
+            // Clear reference to selected video thumbnail
+            selectedThumbnail = null;
+            return;
+        }
+
+        // Check that video thumbnail exists still
+        if (!selectedThumbnail)
+        {
+            console.log('Could not find video element on page. Attempting to download!');
+            alert('Could not find video element on page. Attempting to download!');
+
+            // Try to download
+            chrome.runtime.sendMessage({
+                request: 'downloadContent',
+                filename: 'screencapture - ' + formatDate(new Date()) + '.webm',
+                contentURL: sourceURL,
+            });
+
+            return;
+        }
+
+        // Generate local url and set video element source to webm file
+        var thumb = selectedThumbnail;
+        createLocalObjectURL(sourceURL, function (url) 
+        {
+            thumb.find('.' + CLASS_DOWNLOAD_TARGET)
+                .attr('src', url)                   
+                .on('loadedmetadata', function() {
+                    $(this).hover(function(event) {
+                        $(this).attr('controls', true); // Show controls
+                    }, function (event) {
+                        $(this).attr('controls', false); // Hide controls
+                    });
+                })
+                .on('error', function() 
+                {
+                    // Tell user preview not available, but can download
+                    alert('Preview not available, but you can still download the video!');
+                    console.log('WARNING: preview not available due to content security policy, but can still download.');
+
+                    // Show video icon image instead
+                    thumb.find('.' + CLASS_DOWNLOAD_TARGET).fadeOut('fast', function (event) {
+                        $(this).remove();
+                    });
+                    thumb.css({
+                        'background': 'url(' + IMAGE_ICON_VIDEO + ') center center no-repeat'
+                    });
+                });
+        });
+    
+        // Clear reference
+        selectedThumbnail = null;
+    }
+
+    // Update thumbnail with converted gif from video
+    function convertedGif(sourceURL)
+    {
+        console.log('convertedGif:', sourceURL);
+
+        // UI changes for stopped recording
+        recordingStoppedInterfaceUpdate();
+
+        // Set recording state to false
+        recordingVideo = false;
+
+        // Sanity check
+        if (!sourceURL)
+        {
+            console.log('Error converting video to gif!');
+            alert('Error converting video to gif!');
+
+            // Clear reference to selected video thumbnail
+            selectedThumbnail = null;
+            return;
+        }
+
+        // Check that video thumbnail exists still
+        if (!selectedThumbnail) 
+        {
+            console.log('Could not find video element on page. Attempting to download!');
+            alert('Could not find video element on page. Attempting to download!');
+
+            // Try to download
+            chrome.runtime.sendMessage({
+                request: 'downloadContent',
+                filename: 'screencapture - ' + formatDate(new Date()) + '.gif',
+                contentURL: sourceURL,
+            });
+
+            return;
+        }
+
+        // Switch out video with img pointed to gif
+        selectedThumbnail.find('.' + CLASS_DOWNLOAD_TARGET).attr('src', sourceURL);
+        selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
+            .off('click')
+            .click(function (event) 
+            {
+                var $target = $(this).parent().find('.' + CLASS_DOWNLOAD_TARGET);
+
+                // Sanity Check
+                if (!$target.length) 
+                {
+                    console.log('ERROR: no target download found!');
+                    alert("Couldn't find target download!");
+                    return;
+                }
+
+                alert('To download the GIF, right click and select Save Image...');
+            });
+
+
+        // Clear reference
+        selectedThumbnail = null;
+    }
+
+    
+    ////////////////////////////////////////////////
+    // UI METHODS
 
     // Create thumbnail container if it doesn't exist
     function createThumbnailContainer()
@@ -252,79 +645,6 @@ $(function()
         return thumb;
     }
 
-    // Start video recording
-    function startVideoRecording($target)
-    {
-        console.log('startVideoRecording:', $target);
-
-        // Track which video thumbnail is being recorded
-        if ($target) {
-            selectedThumbnail = $target.parents('.' + CLASS_THUMBNAIL);
-        }
-        
-        // Adjust request based on gif vs video
-        var request = (selectedThumbnail.find('img.gif').length) 
-            ? 'startGifRecording' : 'startVideoRecording'
-
-        // Tell background page to start recording
-        chrome.runtime.sendMessage({ request: request });
-    }
-
-    // Video recording started
-    function videoRecordingStarted(stream)
-    {
-        console.log('videoRecordingStarted:', stream);
-
-        // Sanity check
-        if (stream) 
-        {
-            // If selectedThumbnail exists, change record button
-            if (selectedThumbnail) 
-            {
-                selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
-                    .addClass(CLASS_CURRENTLY_RECORDING);
-            }
-
-            // Hide container
-            thumbnailContainer.removeClass('show');
-
-            // Show cursor tracker
-            cursorTracker.fadeIn('fast');
-            
-            // Set recording to true
-            recording = true;
-        }
-        else    // Error
-        {
-            console.log('ERROR: invalid video stream or already recording another tab!');
-            alert('Unable to capture tab video feed or already recording another tab!');
-        }
-    }
-
-    // Stop video recording
-    function stopVideoRecording()
-    {
-        console.log('stopVideoRecording');
-
-        // Hide cursor tracker
-        cursorTracker.fadeOut('fast');
-
-        // Change recording button to processing icon
-        if (selectedThumbnail)
-        {
-            selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
-                .removeClass(CLASS_CURRENTLY_RECORDING)
-                .addClass(CLASS_CURRENTLY_PROCESSING);
-        }
-
-        // Adjust request based on gif vs video
-        var request = (selectedThumbnail.find('img.gif').length) 
-            ? 'stopGifRecording' : 'stopVideoRecording'
-
-        // Tell background page to stop recording
-        chrome.runtime.sendMessage({ request: request });
-    }
-
     // UI changes to indicate recording is over
     function recordingStoppedInterfaceUpdate()
     {
@@ -338,136 +658,6 @@ $(function()
             selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
                 .fadeIn('fast');
         }
-
-        // Set recording state to false
-        recording = false;
-    }
-
-    // Video recording stopped
-    function videoRecordingStopped(sourceURL)
-    {
-        console.log('videoRecordingStopped:', sourceURL);
-
-        // UI changes for stopped recording
-        recordingStoppedInterfaceUpdate();
-
-        // Sanity check
-        if (!sourceURL)
-        {
-            console.log('Error recording video file from video feed!');
-            alert('Error recording video file from video feed!');
-
-            // Clear reference to selected video thumbnail
-            selectedThumbnail = null;
-            return;
-        }
-
-        // Check that video thumbnail exists still
-        if (!selectedThumbnail)
-        {
-            console.log('Could not find video element on page. Attempting to download!');
-            alert('Could not find video element on page. Attempting to download!');
-
-            // Try to download
-            chrome.runtime.sendMessage({
-                request: 'downloadContent',
-                filename: 'screencapture - ' + formatDate(new Date()) + '.webm',
-                contentURL: sourceURL,
-            });
-
-            return;
-        }
-
-        // Generate local url and set video element source to webm file
-        var thumb = selectedThumbnail;
-        createLocalObjectURL(sourceURL, function (url) 
-        {
-            thumb.find('.' + CLASS_DOWNLOAD_TARGET)
-                .attr('src', url)                   
-                .on('loadedmetadata', function() {
-                    $(this).hover(function(event) {
-                        $(this).attr('controls', true); // Show controls
-                    }, function (event) {
-                        $(this).attr('controls', false); // Hide controls
-                    });
-                })
-                .on('error', function() 
-                {
-                    // Tell user preview not available, but can download
-                    alert('Preview not available, but you can still download the video!');
-                    console.log('WARNING: preview not available due to content security policy, but can still download.');
-
-                    // Show video icon image instead
-                    thumb.find('.' + CLASS_DOWNLOAD_TARGET).fadeOut('fast', function (event) {
-                        $(this).remove();
-                    });
-                    thumb.css({
-                        'background': 'url(' + IMAGE_ICON_VIDEO + ') center center no-repeat'
-                    });
-                });
-        });
-    
-        // Clear reference
-        selectedThumbnail = null;
-    }
-
-    // Update thumbnail with converted gif from video
-    function convertedGif(sourceURL)
-    {
-        console.log('convertedGif:', sourceURL);
-
-        // UI changes for stopped recording
-        recordingStoppedInterfaceUpdate();
-
-        // Sanity check
-        if (!sourceURL)
-        {
-            console.log('Error converting video to gif!');
-            alert('Error converting video to gif!');
-
-            // Clear reference to selected video thumbnail
-            selectedThumbnail = null;
-            return;
-        }
-
-        // Check that video thumbnail exists still
-        if (!selectedThumbnail) 
-        {
-            console.log('Could not find video element on page. Attempting to download!');
-            alert('Could not find video element on page. Attempting to download!');
-
-            // Try to download
-            chrome.runtime.sendMessage({
-                request: 'downloadContent',
-                filename: 'screencapture - ' + formatDate(new Date()) + '.gif',
-                contentURL: sourceURL,
-            });
-
-            return;
-        }
-
-        // Switch out video with img pointed to gif
-        selectedThumbnail.find('.' + CLASS_DOWNLOAD_TARGET).attr('src', sourceURL);
-        selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
-            .off('click')
-            .click(function (event) 
-            {
-                var $target = $(this).parent().find('.' + CLASS_DOWNLOAD_TARGET);
-
-                // Sanity Check
-                if (!$target.length) 
-                {
-                    console.log('ERROR: no target download found!');
-                    alert("Couldn't find target download!");
-                    return;
-                }
-
-                alert('To download the GIF, right click and select Save Image...');
-            });
-
-
-        // Clear reference
-        selectedThumbnail = null;
     }
 
     // Create screenshot container element
@@ -579,7 +769,7 @@ $(function()
                     .addClass(CLASS_BUTTON_RECORD)
                     .click(function (event) 
                     {
-                        if (!recording) {    // Not yet recording, start recording
+                        if (!recordingVideo) {    // Not yet recording, start recording
                             startVideoRecording($(this));
                         } else {   // Already recording, stop recording
                             stopVideoRecording($(this));
@@ -592,17 +782,14 @@ $(function()
                 container.append($(document.createElement('audio'))
                     .attr('title', 'audiocapture - ' + formatDate(new Date()) + '.wav')
                     .addClass(CLASS_DOWNLOAD_TARGET)
-                    .attr('autoplay', true)
                 ).append($(document.createElement('button'))    // Add record button
                     .addClass(CLASS_BUTTON_RECORD)
                     .click(function (event) 
                     {
-                        if (!recording) {    // Not yet recording, start recording
+                        if (!recordingAudio) {    // Not yet recording, start recording
                             startAudioRecording($(this));
-                            // TODO: Implement
                         } else {   // Already recording, stop recording
                             stopAudioRecording($(this));
-                            // TODO: Implement
                         }
                     })
                 );
@@ -617,7 +804,7 @@ $(function()
                     .addClass(CLASS_BUTTON_RECORD)
                     .click(function (event) 
                     {
-                        if (!recording) {    // Not yet recording, start recording
+                        if (!recordingVideo) {    // Not yet recording, start recording
                             startVideoRecording($(this));
                         } else {   // Already recording, stop recording
                             stopVideoRecording($(this));
@@ -667,13 +854,17 @@ $(function()
 
                 var $this = $(this);
 
-                // Stop video recording if needed
-                if (recording) 
+                // Stop video / audio recording if needed
+                if (recordingVideo || recordingAudio) 
                 {
                     if ($this.sibling('.recordButton').hasClass(CLASS_CURRENTLY_RECORDING))
                     {
-                        console.log('closing currently recording video!');
-                        stopVideoRecording();
+                        console.log('stopping recording!');
+                        if (recordingVideo) {
+                            stopVideoRecording();
+                        } else {
+                            stopAudioRecording();
+                        }
                     }
                 }
 
