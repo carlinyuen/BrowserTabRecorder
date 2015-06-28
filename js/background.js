@@ -12,6 +12,7 @@ console.log('Initializing Bug-Filer v' + MANIFEST.version,
 // Variables
 var popupConnection = null              // Handle for port connection to popup
     , videoConnection = null            // Handle for video capture stream
+    , recordedTabID = null              // Tracking recorded tab
     , videoRecorder = VideoRecorder     // Reference to video recording object
 ;
 
@@ -41,6 +42,14 @@ chrome.extension.onConnect.addListener(function(port)
 
             case "captureTabVideo":
                 sendMessageToActiveTab(message);
+                break;
+
+            case "videoRecordingStatus":
+                popupConnection.postMessage({
+                    request: "recordingStatus",
+                    stream: videoConnection,
+                    tabID: recordedTabID,
+                });
                 break;
 
             default:  // For actions & plugins, push to active tab
@@ -80,6 +89,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse)
             sendResponse({
                 request: "recordingStatus",
                 stream: videoConnection,
+                tabID: recordedTabID,
             });
             break;
 
@@ -273,7 +283,10 @@ function captureTabVideo(senderTab)
                     videoConnection = localMediaStream;
 
                     // Start recording
-                    if (!videoRecorder.start(videoConnection))
+                    if (videoRecorder.start(videoConnection)) {
+                        recordedTabID = senderTab.id;
+                    }
+                    else    // Error starting recording
                     {
                         console.log('ERROR: could not start video recorder');
                         videoConnection = null;
@@ -321,6 +334,7 @@ function stopVideoCapture(senderTab, callback)
         console.log(exception);
     } finally {
         videoConnection = null;
+        recordedTabID = null;
     }
 
     // If output was bad, don't continue

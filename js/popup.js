@@ -5,6 +5,8 @@
     // Variables & Constants
     var TR_PLUGINS = TR_PLUGINS || {}
         , backgroundConnection      // Port handle for connection to background.js
+        , currentRecordedTabID      // Reference to currently recording tab ID
+        , currentTabID              // Reference to current tab ID
         , currentTabURL             // Reference to current tab URL
         , plugins = {}              // Map to hold plugins
         , actions = {}              // Map to hold actions
@@ -22,6 +24,10 @@
         {
             case "update":  // Update fields
                 loadDetails();
+                break;
+
+            case "recordingStatus":  // Recording state
+                checkRecordingState(message);
                 break;
 
             default: 
@@ -43,6 +49,7 @@
         // Check current active tab's url to determine available actions
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
         {
+            currentTabID = tabs[0].id;
             currentTabURL = tabs[0].url;
             console.log("Active tab:", currentTabURL);
 
@@ -52,9 +59,42 @@
             $('#gifButton').click(requestButtonClickHandler);     
             $('#videoButton').click(requestButtonClickHandler);
 
+            // Check recording state
+            backgroundConnection.postMessage({request: "videoRecordingStatus"});
+
             // Load plugins
             loadPlugins(TR_PLUGINS);
         });   // END - chrome.tabs.query({active: true, currentWindow: true}, function(tabs) 
+    }
+
+    // Check recording state and update UI as necessary
+    function checkRecordingState(status)
+    {
+        if (status.stream) 
+        {
+            // Record currently recorded tab ID
+            currentRecordedTabID = status.tabID;
+
+            // Disable buttons
+            $('#gifButton, #videoButton').prop('disabled', true);
+
+            // Check if it's this tab or another tab
+            if (currentTabID == status.tabID) 
+            {
+                // Note that a recording is already underway
+                $('#recordingStatus').text('(currently recording this tab)');
+            }
+            else    // Another tab
+            {
+                // Note that a recording is already underway
+                $('#recordingStatus').html('(already recording <a href="#" id="recordedTabLink" title="Jump to current tab being recorded">another tab</a>)');
+                $('#recordedTabLink').click(function (event) {
+                    chrome.tabs.update(currentRecordedTabID, {
+                        selected: true, 
+                    });
+                });
+            }
+        }
     }
 
     // Process and add a plugin
