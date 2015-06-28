@@ -51,7 +51,6 @@
             $('#screenshotButton').click(requestButtonClickHandler); 
             $('#gifButton').click(requestButtonClickHandler);     
             $('#videoButton').click(requestButtonClickHandler);
-            $('#audioButton').click(requestButtonClickHandler);
 
             // Load plugins
             loadPlugins(TR_PLUGINS);
