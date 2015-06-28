@@ -99,13 +99,9 @@ $(function()
             if (status && status.stream) 
             {
                 createThumbnailContainer();
-
-                if (status.type == "video")
-                {
-                    createCursorTracker();
-                    selectedThumbnail = createVideoThumbnail();
-                    videoRecordingStarted(status.stream);
-                }
+                createCursorTracker();
+                selectedThumbnail = createVideoThumbnail();
+                videoRecordingStarted(status.stream);
             }
         });
     }
