@@ -82,7 +82,13 @@
             if (currentTabID == status.tabID) 
             {
                 // Note that a recording is already underway
-                $('#recordingStatus').text('(currently recording this tab)');
+                $('#recordingStatus').text('(currently recording this tab [<a href="#" id="stopRecordingLink" title="Stop current recording">stop recording</a>])');
+                $('#stopRecordingLink').click(function (event) {
+                    backgroundConnection.postMessage({
+                        request: "stopVideoRecording",
+                        tabID: status.tabID,
+                    });
+                });
             }
             else    // Another tab
             {

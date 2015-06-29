@@ -8,12 +8,7 @@ Hope this is useful to someone out there; would love any help optimizing and imp
 . Carlin
 
 ## TODO
- - Get video recording working across refreshes
- - Get audio recording working
  - Fix GIF cutoff
- - Email autofill
- - Import from Groups forum
- - Clone bug
  - Buganizer plugin
      - image and video preview
      - grey out resolved bugs
@@ -24,6 +19,7 @@ v1.0.0
  - Can take screenshots of the tab.
  - Can take screencapture video of the tab.
  - Can take screencapture gif of the tab.
+ - Works across page jumps / refreshes
  - Options page for gif and video capture, auto-download.
 
 ## License

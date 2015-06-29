@@ -8,6 +8,9 @@ $(function()
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
         , TIME_AUTOHIDE_CONTAINER = 2000    // 2s
+        , THUMBNAIL_TARGET_GIF = 'gif'
+        , THUMBNAIL_TARGET_IMAGE = 'img'
+        , THUMBNAIL_TARGET_VIDEO = 'video'
         , ID_THUMBNAIL_CONTAINER = 'carlin-tab-recorder'
         , CLASS_THUMBNAIL = 'carlin-tab-recorder-thumbnail'
         , CLASS_CURSOR_TRACKER = 'carlin-tab-recorder-cursor'
@@ -16,6 +19,7 @@ $(function()
         , CLASS_BUTTON_DOWNLOAD = 'downloadButton'
         , CLASS_BUTTON_RECORD = 'recordButton'
         , CLASS_BUTTON_CLOSE = 'closeButton'
+        , CLASS_BUTTON_GIF = 'createGifButton'
         , CLASS_CURRENTLY_RECORDING = 'recording'
         , CLASS_CURRENTLY_PROCESSING = 'processing'
         , cursorTracker = null              // Reference to cursor tracker element
@@ -187,13 +191,8 @@ $(function()
         // Hide cursor tracker
         cursorTracker.fadeOut('fast');
 
-        // Change recording button to processing icon
-        if (selectedThumbnail)
-        {
-            selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
-                .removeClass(CLASS_CURRENTLY_RECORDING)
-                .addClass(CLASS_CURRENTLY_PROCESSING);
-        }
+        // Switch from recording to processing
+        processingStartedInterfaceUpdate();
 
         // Adjust request based on gif vs video
         var request = (selectedThumbnail.find('img.gif').length) 
@@ -245,6 +244,30 @@ $(function()
         var thumb = selectedThumbnail;
         createLocalObjectURL(sourceURL, function (url) 
         {
+            // Add GIF generator button
+            thumb.append($(document.createElement('button'))
+                .attr('title', 'Create a GIF from this video')
+                .addClass(CLASS_BUTTON_GIF)
+                .hide()     // Hide it first, show it after recording is done
+                .click(function (event) 
+                {
+                    var video = $(this).parent().find(THUMBNAIL_TARGET_VIDEO).get(0);
+
+                    // Sanity Check
+                    if (!video)
+                    {
+                        console.log('ERROR: no video found!');
+                        alert("Couldn't find video!");
+                        return;
+                    }
+
+                    // Send video data to background for conversion
+                    convertVideoToGif(video);
+                })
+                .fadeIn('fast')
+            );
+
+            // Load up video controls and failure case (cross domain)
             thumb.find('.' + CLASS_DOWNLOAD_TARGET)
                 .attr('src', url)                   
                 .on('loadedmetadata', function() {
@@ -272,6 +295,23 @@ $(function()
     
         // Clear reference
         selectedThumbnail = null;
+    }
+
+    // Create a gif from pre-existing video
+    function convertVideoToGif(video)
+    {
+        // Create Gif thumbnail and set selected
+        selectedThumbnail = createGifThumbnail();
+        
+        // Switch from recording to processing
+        processingStartedInterfaceUpdate();
+
+        // Tell background to convert this video
+        chrome.runtime.sendMessage({
+            request: "convertVideoToGif",
+            sourceURL: video.src,
+            length: video.duration,
+        });
     }
 
     // Update thumbnail with converted gif from video
@@ -405,7 +445,7 @@ $(function()
         }
 
         // Create video thumbnail and add to document
-        var thumb = createThumbnail('video')
+        var thumb = createThumbnail(THUMBNAIL_TARGET_VIDEO)
             .hide()
             .appendTo(thumbnailContainer)
             .slideDown('fast');
@@ -427,7 +467,7 @@ $(function()
         }
 
         // Create video thumbnail and add to document
-        var thumb = createThumbnail('gif')
+        var thumb = createThumbnail(THUMBNAIL_TARGET_GIF)
             .hide()
             .appendTo(thumbnailContainer)
             .slideDown('fast');
@@ -436,6 +476,19 @@ $(function()
         thumbnailContainer.addClass(CLASS_SHOW_CONTAINER);
 
         return thumb;
+    }
+
+    // UI changes to switch from recording to processing
+    function processingStartedInterfaceUpdate()
+    {
+        // Change recording button to processing icon
+        if (selectedThumbnail)
+        {
+            selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
+                .removeClass(CLASS_CURRENTLY_RECORDING)
+                .addClass(CLASS_CURRENTLY_PROCESSING)
+                .off('click');
+        }
     }
 
     // UI changes to indicate recording is over
@@ -459,7 +512,7 @@ $(function()
         console.log('createScreenshotThumbnail:', srcURL);
 
         // Create image thumbnail container
-        var thumb = createThumbnail('image', srcURL)
+        var thumb = createThumbnail(THUMBNAIL_TARGET_IMAGE, srcURL)
             .hide()
             .appendTo(thumbnailContainer)
             .slideDown('fast')
@@ -543,9 +596,9 @@ $(function()
         // Add special elements based on content type
         switch (type)
         {
-            case "image":
+            case THUMBNAIL_TARGET_IMAGE:
                 container.css({ 'background-image': 'url(' + sourceURL + ')' })
-                    .append($(document.createElement('img'))
+                    .append($(document.createElement(THUMBNAIL_TARGET_IMAGE))
                         .attr('title', 'screenshot - ' + formatDate(new Date()) + '.png')
                         .addClass(CLASS_DOWNLOAD_TARGET)
                         .addClass('screenshot')
@@ -553,8 +606,8 @@ $(function()
                     );
                 break;
 
-            case "video":
-                container.append($(document.createElement('video'))
+            case THUMBNAIL_TARGET_VIDEO:
+                container.append($(document.createElement(THUMBNAIL_TARGET_VIDEO))
                     .attr('title', 'screencapture - ' + formatDate(new Date()) + '.webm')
                     .addClass(CLASS_DOWNLOAD_TARGET)
                     .attr('autoplay', true)
@@ -571,11 +624,11 @@ $(function()
                 );
                 break;
 
-            case "gif":
-                container.append($(document.createElement('img'))
+            case THUMBNAIL_TARGET_GIF:
+                container.append($(document.createElement(THUMBNAIL_TARGET_IMAGE))
                     .attr('title', 'screencapture - ' + formatDate(new Date()) + '.gif')
                     .addClass(CLASS_DOWNLOAD_TARGET)
-                    .addClass('gif')
+                    .addClass(THUMBNAIL_TARGET_GIF)
                 ).append($(document.createElement('button'))    // Add record button
                     .addClass(CLASS_BUTTON_RECORD)
                     .click(function (event) 
@@ -594,6 +647,7 @@ $(function()
 
         // Add a download button
         result.append($(document.createElement('button'))
+            .attr('title', 'Download this item')
             .addClass(CLASS_BUTTON_DOWNLOAD)
             .hide()     // Hide it first, show it after recording is done
             .click(function (event) 
@@ -619,6 +673,7 @@ $(function()
 
         // Add a close button
         result.append($(document.createElement('button'))
+            .attr('title', 'Delete this item')
             .addClass(CLASS_BUTTON_CLOSE)
             .text('X')
             .click(function (event) 
@@ -640,11 +695,8 @@ $(function()
                     }
                 }
 
-                // Clean up object url memory
+                // Get URL of target object to clean up later
                 var url = $this.find('.' + CLASS_DOWNLOAD_TARGET).attr('src');
-                if (url) {
-                    window.URL.revokeObjectURL(url);
-                }
                 
                 // Remove element
                 $this.parent().slideUp('fast', function() 
@@ -657,6 +709,11 @@ $(function()
                         thumbnailContainer.removeClass(CLASS_SHOW_CONTAINER).detach();
                     }
                 });
+
+                // Clean up object url memory
+                if (url) {
+                    window.URL.revokeObjectURL(url);
+                }
             })
         );
 

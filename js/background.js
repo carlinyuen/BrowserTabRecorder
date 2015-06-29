@@ -44,6 +44,10 @@ chrome.extension.onConnect.addListener(function(port)
                 sendMessageToActiveTab(message);
                 break;
 
+            case "stopVideoRecording":
+                stopVideoCapture(message.tabID);
+                break;
+
             case "videoRecordingStatus":
                 popupConnection.postMessage({
                     request: "recordingStatus",
@@ -283,8 +287,15 @@ function captureTabVideo(senderTab)
                     videoConnection = localMediaStream;
 
                     // Start recording
-                    if (videoRecorder.start(videoConnection)) {
-                        recordedTabID = senderTab.id;
+                    if (videoRecorder.start(videoConnection)) 
+                    {
+                        recordedTabID = senderTab.id;   // Track recorded tab id
+                        chrome.browserAction.setBadgeText({
+                            text: "REC",
+                        });
+                        chrome.browserAction.setBadgeBackgroundColor({
+                            color: "#F00",
+                        });
                     }
                     else    // Error starting recording
                     {
@@ -315,6 +326,15 @@ function stopVideoCapture(senderTab, callback)
 {
     console.log("stopVideoCapture");
 
+    // Clear recording state
+    recordedTabID = null;
+    chrome.browserAction.setBadgeText({
+        text: "",
+    });
+    chrome.browserAction.setBadgeBackgroundColor({
+        color: "#F00",
+    });
+
     // Sanity check
     if (!videoConnection) 
     {
@@ -334,7 +354,6 @@ function stopVideoCapture(senderTab, callback)
         console.log(exception);
     } finally {
         videoConnection = null;
-        recordedTabID = null;
     }
 
     // If output was bad, don't continue
@@ -428,9 +447,6 @@ function convertVideoToGif(videoData, senderTab)
             numWorkers: 3,
             progressCallback: function (progress) { 
                 console.log('GIF progress:', progress); 
-            },
-            completeCallback: function() {
-                console.log('GIF completed!');
             },
         };
         console.log('options:', options);
