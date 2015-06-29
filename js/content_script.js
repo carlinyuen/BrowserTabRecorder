@@ -8,9 +8,11 @@ $(function()
         , WIDTH_CURSOR_IMAGE = 48
         , HEIGHT_CURSOR_IMAGE = 48
         , TIME_AUTOHIDE_CONTAINER = 2000    // 2s
+        , TIME_ANIMATE_PROGRESS_BAR = 200    // 0.2s
         , THUMBNAIL_TARGET_GIF = 'gif'
         , THUMBNAIL_TARGET_IMAGE = 'img'
         , THUMBNAIL_TARGET_VIDEO = 'video'
+        , THUMBNAIL_PROGRESS_BAR = 'progress'
         , ID_THUMBNAIL_CONTAINER = 'carlin-tab-recorder'
         , CLASS_THUMBNAIL = 'carlin-tab-recorder-thumbnail'
         , CLASS_CURSOR_TRACKER = 'carlin-tab-recorder-cursor'
@@ -89,6 +91,10 @@ $(function()
 
                 case "convertedGif":
                     convertedGif(message.sourceURL);
+                    break;
+
+                case "gifProgress":
+                    updateGifProgress(message.progress);
                     break;
 
                 default:    // Try plugins
@@ -314,6 +320,17 @@ $(function()
         });
     }
 
+    // Update UI with progress while generating GIF
+    //  progress parameter should be a double from 0 to 1
+    function updateGifProgress(progress)
+    {
+        if (selectedThumbnail) {
+            selectedThumbnail.find(THUMBNAIL_PROGRESS_BAR).animate({
+                'width': Math.ceil(progress * 100) + '%',
+            }, TIME_ANIMATE_PROGRESS_BAR);
+        }
+    }
+
     // Update thumbnail with converted gif from video
     function convertedGif(sourceURL)
     {
@@ -487,7 +504,11 @@ $(function()
             selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
                 .removeClass(CLASS_CURRENTLY_RECORDING)
                 .addClass(CLASS_CURRENTLY_PROCESSING)
-                .off('click');
+                .off('click')
+                .appendChild($(document.createElement(THUMBNAIL_PROGRESS_BAR))
+                    .attr('max', 1)
+                    .attr('value', 0)
+                );
         }
     }
 

@@ -150,6 +150,9 @@
     background: #5bc0de url('chrome-extension://__MSG_@@extension_id__/images/layers-2x.png') center center no-repeat;
     margin: 0 3px 4px 0;
 }
+.carlin-tab-recorder-thumbnail progress {
+
+}
 
 .carlin-tab-recorder-cursor {
     width: 48px;    /* size of image */

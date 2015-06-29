@@ -367,7 +367,12 @@ function stopVideoCapture(senderTab, callback)
     }
 
     // If callback exists, pass parameters
-    if (callback) {
+    if (callback) 
+    {
+        // Note that video should be removed
+        videoData['onComplete'] = function() {
+            window.URL.revokeObjectURL(videoData.sourceURL);
+        };
         callback(videoData, senderTab);
     } 
     else    // Pass video to active tab
@@ -431,22 +436,35 @@ function convertVideoToGif(videoData, senderTab)
         }
 
         // Collect options
+        var onComplete = videoData['onComplete'];
         var frameRate = settings[KEY_STORAGE_GIF_FRAME_RATE] || DEFAULT_GIF_FRAME_RATE;
-        console.log('frame rate:', frameRate);
-
         var quality = settings[KEY_STORAGE_GIF_QUALITY] || DEFAULT_GIF_QUALITY;
+        console.log('frame rate:', frameRate);
         console.log('quality:', quality);
+
+        // Need to calculate numFrames ahead of time: gifshot always records gifs from
+        //  videos at a 0.1s interval per frame, so need to recalculate to match intended
+        //  frame rate based off the user defined settings
 
         var options = {
             gifWidth: settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH,
             gifHeight: settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT,
             video: [videoData.sourceURL],
-            interval: 1 / frameRate,     
-            numFrames: Math.ceil((frameRate / DEFAULT_VIDEO_FRAME_RATE) * videoData.length * frameRate),
+            interval: 0.01,
+            //interval: 1 / frameRate,
+            //numFrames: Math.ceil((frameRate / DEFAULT_VIDEO_FRAME_RATE) * videoData.length * frameRate),
+            numFrames: 100,
             sampleInterval: Math.ceil((GIF_QUALITY_RANGE + 1) - (GIF_QUALITY_RANGE * (quality / 100))),
             numWorkers: 3,
-            progressCallback: function (progress) { 
+            progressCallback: function (progress) 
+            { 
                 console.log('GIF progress:', progress); 
+
+                // Send progress report back to recorded tab
+                chrome.tabs.sendMessage(recordedTabID, {
+                    request: 'gifProgress',
+                    progress: progress,
+                });
             },
         };
         console.log('options:', options);
@@ -456,8 +474,13 @@ function convertVideoToGif(videoData, senderTab)
             function (obj) 
             {
                 var src = null;
-                if (!obj.error) {
+                if (!obj.error) 
+                {
                     src = obj.image;    // Set src
+
+                    if (onComplete) {   // Call onComplete function if exists
+                        onComplete();
+                    }
                 } else {
                     console.log(obj.error);
                 }
