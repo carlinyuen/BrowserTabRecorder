@@ -1,0 +1,15 @@
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Mac file caches
+.DS_Store
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Vim swap files
+.*.swp
