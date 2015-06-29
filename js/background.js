@@ -437,23 +437,26 @@ function convertVideoToGif(videoData, senderTab)
 
         // Collect options
         var onComplete = videoData['onComplete'];
-        var frameRate = settings[KEY_STORAGE_GIF_FRAME_RATE] || DEFAULT_GIF_FRAME_RATE;
         var quality = settings[KEY_STORAGE_GIF_QUALITY] || DEFAULT_GIF_QUALITY;
-        console.log('frame rate:', frameRate);
         console.log('quality:', quality);
 
-        // Need to calculate numFrames ahead of time: gifshot always records gifs from
-        //  videos at a 0.1s interval per frame, so need to recalculate to match intended
-        //  frame rate based off the user defined settings
+        // Don't allow greater frame rate than video, makes no sense anyway
+        var frameRate = Math.min(DEFAULT_VIDEO_FRAME_RATE,
+            (settings[KEY_STORAGE_GIF_FRAME_RATE] || DEFAULT_GIF_FRAME_RATE));
+        console.log('frame rate:', frameRate);
+
+        // Need to calculate numFrames ahead of time: numFrames == how long we want the
+        //  GIF to be, however, if we change the frame interval, this doesn't change
+        //  how long the GIF is. GIF length in seconds == numFrames * 0.1 (gifshot default).
+        //  So we want to take total length of original video in frames.
+        var numFrames = Math.ceil((videoData.length / 0.1);
 
         var options = {
             gifWidth: settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH,
             gifHeight: settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT,
             video: [videoData.sourceURL],
-            interval: 0.01,
-            //interval: 1 / frameRate,
-            //numFrames: Math.ceil((frameRate / DEFAULT_VIDEO_FRAME_RATE) * videoData.length * frameRate),
-            numFrames: 100,
+            interval: 1 / frameRate,
+            numFrames: numFrames,
             sampleInterval: Math.ceil((GIF_QUALITY_RANGE + 1) - (GIF_QUALITY_RANGE * (quality / 100))),
             numWorkers: 3,
             progressCallback: function (progress) 
