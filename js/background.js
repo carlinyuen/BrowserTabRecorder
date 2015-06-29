@@ -199,7 +199,7 @@ function captureTabScreenshot(data)
                     settings = {};
                 } 
                 else {   // Success, update settings
-                    settings = data[KEY_STORAGE_SETTINGS];
+                    settings = data[KEY_STORAGE_SETTINGS] || {};
                 }
 
                 // If auto download
@@ -244,7 +244,7 @@ function captureTabVideo(senderTab)
             settings = {};
         } 
         else {   // Success, update settings
-            settings = data[KEY_STORAGE_SETTINGS];
+            settings = data[KEY_STORAGE_SETTINGS] || {};
         }
 
         // Get video dimensions
@@ -400,7 +400,7 @@ function stopVideoCapture(senderTab, callback)
                 settings = {};
             } 
             else {   // Success, update settings
-                settings = data[KEY_STORAGE_SETTINGS];
+                settings = data[KEY_STORAGE_SETTINGS] || {};
             }
 
             // If auto download
@@ -438,7 +438,7 @@ function convertVideoToGif(videoData, senderTab)
             settings = {};
         } 
         else {   // Success, update settings
-            settings = data[KEY_STORAGE_SETTINGS];
+            settings = data[KEY_STORAGE_SETTINGS] || {};
         }
 
         // Collect options
