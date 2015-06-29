@@ -123,6 +123,7 @@
     right: 0;
     bottom: 0;
     margin: 0;
+    border: 1px solid #ddd;
     background: white url('chrome-extension://__MSG_@@extension_id__/images/media-record-8x.png') center center no-repeat;
 }
 .ctab-recorder-thumbnail .recordButton.recording {

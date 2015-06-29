@@ -389,7 +389,9 @@ $(function()
             $(this).remove();
         });
 
-        // Replace download button action due to weird bug, crashing when downloading
+        // TODO: Fix this
+        // Replace download button action due to weird bug, extension crashes when trying
+        //  to initiate a download
         selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
             .off('click')
             .click(function (event) 
@@ -404,7 +406,7 @@ $(function()
                     return;
                 }
 
-                alert('To download the GIF, right click and select Save Image...');
+                alert('To download the GIF, right click and select Save Image.');
             });
 
 
