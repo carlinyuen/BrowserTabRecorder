@@ -18,4 +18,6 @@ var PATH_PLUGINS_PREFIX = './plugins/'
     , DEFAULT_GIF_FRAME_RATE = 15
     , DEFAULT_JPEG_QUALITY = 75
     , GIF_QUALITY_RANGE = 19
+    , APP_ID_PRODUCTION = ''
+    , DEBUG = (chrome.i18n.getMessage('@@extension_id') !== APP_ID_PRODUCTION)
 ;

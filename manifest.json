@@ -34,6 +34,7 @@
         , "css": [ "css/content_script.css" ]
 		, "js": [
 			"js/third_party/jquery-2.1.0.min.js"
+            , "js/constants.js"
 			, "js/content_script.js"
 		]
 		, "run_at": "document_idle"

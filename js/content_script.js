@@ -1,4 +1,6 @@
-/* Required: js/config.js */
+/* Required: 
+ * js/third_party/jquery-2.1.0.min.js
+ * js/constants.js */
 
 $(function()
 {
@@ -13,9 +15,10 @@ $(function()
         , THUMBNAIL_TARGET_IMAGE = 'img'
         , THUMBNAIL_TARGET_VIDEO = 'video'
         , THUMBNAIL_PROGRESS_BAR = 'progress'
-        , ID_THUMBNAIL_CONTAINER = 'carlin-tab-recorder'
-        , CLASS_THUMBNAIL = 'carlin-tab-recorder-thumbnail'
-        , CLASS_CURSOR_TRACKER = 'carlin-tab-recorder-cursor'
+        , ID_THUMBNAIL_CONTAINER = 'ctab-recorder'
+        , CLASS_THUMBNAIL = 'ctab-recorder-thumbnail'
+        , CLASS_THUMBNAIL_CONTENT = 'container'
+        , CLASS_CURSOR_TRACKER = 'ctab-recorder-cursor'
         , CLASS_SHOW_CONTAINER = 'show'
         , CLASS_DOWNLOAD_TARGET = 'target'
         , CLASS_BUTTON_DOWNLOAD = 'downloadButton'
@@ -37,11 +40,18 @@ $(function()
 
     /////////////////////////////////////////
     // FUNCTIONS
-    
+ 
+	// Custom log function
+	function debugLog() {
+		if (DEBUG && console) {
+			console.log.apply(console, arguments);
+		}
+	}
+   
     // Initialize the extension script
     function init() 
     {
-        console.log('Init Tab Recorder');
+        debugLog('Init Tab Recorder');
 
         // Listener for mouse movement to show cursor for recording
         $(document).on('mousemove scroll', function (event) 
@@ -58,8 +68,8 @@ $(function()
         // Listener for messages from background
         chrome.runtime.onMessage.addListener(function (message, sender, response) 
         {
-            console.log('sender:', sender);
-            console.log('message:', message);
+            debugLog('sender:', sender);
+            debugLog('message:', message);
 
             // Handle message
             switch (message.request)
@@ -143,7 +153,7 @@ $(function()
     // Start video recording
     function startVideoRecording($target)
     {
-        console.log('startVideoRecording:', $target);
+        debugLog('startVideoRecording:', $target);
 
         // Track which video thumbnail is being recorded
         if ($target) {
@@ -161,7 +171,7 @@ $(function()
     // Video recording started
     function videoRecordingStarted(stream)
     {
-        console.log('videoRecordingStarted:', stream);
+        debugLog('videoRecordingStarted:', stream);
 
         // Sanity check
         if (stream) 
@@ -192,13 +202,7 @@ $(function()
     // Stop video recording
     function stopVideoRecording()
     {
-        console.log('stopVideoRecording');
-
-        // Hide cursor tracker
-        cursorTracker.fadeOut('fast');
-
-        // Switch from recording to processing
-        processingStartedInterfaceUpdate();
+        debugLog('stopVideoRecording');
 
         // Adjust request based on gif vs video
         var request = (selectedThumbnail.find('img.gif').length) 
@@ -206,12 +210,18 @@ $(function()
 
         // Tell background page to stop recording
         chrome.runtime.sendMessage({ request: request });
+
+        // Hide cursor tracker
+        cursorTracker.fadeOut('fast');
+
+        // Switch from recording to processing
+        processingStartedInterfaceUpdate();
     }
 
     // Video recording stopped
     function videoRecordingStopped(sourceURL)
     {
-        console.log('videoRecordingStopped:', sourceURL);
+        debugLog('videoRecordingStopped:', sourceURL);
 
         // UI changes for stopped recording
         recordingStoppedInterfaceUpdate();
@@ -308,9 +318,6 @@ $(function()
     {
         // Create Gif thumbnail and set selected
         selectedThumbnail = createGifThumbnail();
-        
-        // Switch from recording to processing
-        processingStartedInterfaceUpdate();
 
         // Tell background to convert this video
         chrome.runtime.sendMessage({
@@ -318,6 +325,9 @@ $(function()
             sourceURL: video.src,
             length: video.duration,
         });
+        
+        // Switch from recording to processing
+        processingStartedInterfaceUpdate();
     }
 
     // Update UI with progress while generating GIF
@@ -325,16 +335,18 @@ $(function()
     function updateGifProgress(progress)
     {
         if (selectedThumbnail) {
-            selectedThumbnail.find(THUMBNAIL_PROGRESS_BAR).animate({
-                'width': Math.ceil(progress * 100) + '%',
-            }, TIME_ANIMATE_PROGRESS_BAR);
+            if (progress < 1) {     // Determinate loading
+                selectedThumbnail.find(THUMBNAIL_PROGRESS_BAR).val(progress);
+            } else {    // Set indeterminate while it is processing
+                selectedThumbnail.find(THUMBNAIL_PROGRESS_BAR).removeAttr('value');
+            }
         }
     }
 
     // Update thumbnail with converted gif from video
     function convertedGif(sourceURL)
     {
-        console.log('convertedGif:', sourceURL);
+        debugLog('convertedGif:', sourceURL);
 
         // UI changes for stopped recording
         recordingStoppedInterfaceUpdate();
@@ -371,6 +383,13 @@ $(function()
 
         // Switch out video with img pointed to gif
         selectedThumbnail.find('.' + CLASS_DOWNLOAD_TARGET).attr('src', sourceURL);
+
+        // Get rid of progress bar
+        selectedThumbnail.find(THUMBNAIL_PROGRESS_BAR).fadeOut('fast', function() {
+            $(this).remove();
+        });
+
+        // Replace download button action due to weird bug, crashing when downloading
         selectedThumbnail.find('.' + CLASS_BUTTON_DOWNLOAD)
             .off('click')
             .click(function (event) 
@@ -454,7 +473,7 @@ $(function()
     // Create a container for the video
     function createVideoThumbnail()
     {
-        console.log('createVideoThumbnail()');
+        debugLog('createVideoThumbnail()');
 
         // Clear autohide timer, we want user to see they need to hit record
         if (thumbnailHideTimer) {
@@ -476,7 +495,7 @@ $(function()
     // Create a container for the video
     function createGifThumbnail()
     {
-        console.log('createGifThumbnail()');
+        debugLog('createGifThumbnail()');
 
         // Clear autohide timer, we want user to see they need to hit record
         if (thumbnailHideTimer) {
@@ -504,11 +523,12 @@ $(function()
             selectedThumbnail.find('.' + CLASS_BUTTON_RECORD)
                 .removeClass(CLASS_CURRENTLY_RECORDING)
                 .addClass(CLASS_CURRENTLY_PROCESSING)
-                .off('click')
-                .appendChild($(document.createElement(THUMBNAIL_PROGRESS_BAR))
+                .off('click');
+            selectedThumbnail.find('.' + CLASS_THUMBNAIL_CONTENT).append(
+                $(document.createElement(THUMBNAIL_PROGRESS_BAR))
                     .attr('max', 1)
                     .attr('value', 0)
-                );
+            );
         }
     }
 
@@ -530,7 +550,7 @@ $(function()
     // Create screenshot container element
     function createScreenshotThumbnail(srcURL)
     {
-        console.log('createScreenshotThumbnail:', srcURL);
+        debugLog('createScreenshotThumbnail:', srcURL);
 
         // Create image thumbnail container
         var thumb = createThumbnail(THUMBNAIL_TARGET_IMAGE, srcURL)
@@ -588,7 +608,7 @@ $(function()
     //  Mostly for us to get the videos across
     function createLocalObjectURL(sourceURL, callback)
     {
-        console.log('createLocalObjectURL:', sourceURL);
+        debugLog('createLocalObjectURL:', sourceURL);
 
         // Generate xhr and get url for resource
         //  Source: https://developer.chrome.com/apps/app_external
@@ -598,7 +618,7 @@ $(function()
         x.onload = function() 
         {
             var url = window.URL.createObjectURL(x.response);
-            console.log('localObjectURL:', url);
+            debugLog('localObjectURL:', url);
 
             callback(url);  // Callback must exist
         };
@@ -611,7 +631,7 @@ $(function()
         // Create base thumbnail div
         var result = $(document.createElement('div')).addClass(CLASS_THUMBNAIL)
             .append($(document.createElement('div')).addClass('border'));
-        var container = $(document.createElement('div')).addClass('container')
+        var container = $(document.createElement('div')).addClass(CLASS_THUMBNAIL_CONTENT)
             .appendTo(result);
 
         // Add special elements based on content type
@@ -711,7 +731,7 @@ $(function()
                 {
                     if ($this.sibling('.recordButton').hasClass(CLASS_CURRENTLY_RECORDING))
                     {
-                        console.log('stopping recording!');
+                        debugLog('stopping recording!');
                         stopVideoRecording();
                     }
                 }

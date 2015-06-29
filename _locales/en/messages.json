@@ -15,7 +15,7 @@
 	}
 
 	, "EXTENSION_DESCRIPTION": {
-		"message": "Record screenshot pictures, videos, animated gifs, or audio from your browser tab!"
+		"message": "Record screenshot pictures, videos, and even animated gifs from your browser tab!"
 		, "description": "Extension description for the chrome webstore."
 	}
 

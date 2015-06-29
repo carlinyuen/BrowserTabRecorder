@@ -1,5 +1,5 @@
 
-#carlin-tab-recorder {
+#ctab-recorder {
     position: fixed;
     bottom: -12px;
     right: 0;
@@ -12,10 +12,10 @@
     padding: 16px 0 12px 0;
     transition: max-height 500ms ease-in-out;
 }
-#carlin-tab-recorder.show {
+#ctab-recorder.show {
     max-height: 200px;
 }
-#carlin-tab-recorder .tab {
+#ctab-recorder .tab {
     position: absolute;
     top: 0;
     left: 50%;
@@ -25,7 +25,7 @@
     background: url('chrome-extension://__MSG_@@extension_id__/images/drawer-handle.png') top center no-repeat;
     cursor: pointer;
 }
-#carlin-tab-recorder .background {
+#ctab-recorder .background {
     position: absolute;
     top: 12px;
     left: 0;
@@ -36,7 +36,7 @@
     box-shadow: 0 2px 6px #000;
 }
 
-.carlin-tab-recorder-thumbnail {
+.ctab-recorder-thumbnail {
     position: relative;
     margin: 4px 6px 6px 0;
     bottom: 0;
@@ -49,10 +49,10 @@
     vertical-align: middle;
     transition: opacity 200ms ease-in-out;
 }
-.carlin-tab-recorder-thumbnail:hover {
+.ctab-recorder-thumbnail:hover {
     opacity: 1.0;
 }
-.carlin-tab-recorder-thumbnail .border {
+.ctab-recorder-thumbnail .border {
     position: absolute;
     top: 0;
     left: 0;
@@ -63,7 +63,7 @@
     opacity: 0.75;
     border-radius: 4px;
 }
-.carlin-tab-recorder-thumbnail .container {
+.ctab-recorder-thumbnail .container {
     position: absolute;
     top: 0;
     left: 0;
@@ -77,23 +77,23 @@
     background-repeat: no-repeat;
     background-size: cover;
 }
-.carlin-tab-recorder-thumbnail .target {
+.ctab-recorder-thumbnail .target {
     width: 100% !important;
     height: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
     background-color: #222;
 }
-.carlin-tab-recorder-thumbnail .container img.target {
+.ctab-recorder-thumbnail .container img.target {
     opacity: 0 !important;
 }
-.carlin-tab-recorder-thumbnail .container img.target.gif {
+.ctab-recorder-thumbnail .container img.target.gif {
     opacity: 1.0 !important;
 }
-.carlin-tab-recorder-thumbnail .container video.target {
+.ctab-recorder-thumbnail .container video.target {
 }
 
-.carlin-tab-recorder-thumbnail button {
+.ctab-recorder-thumbnail button {
     margin: 0 4px 0 0;
     padding: 0;
     width: 20px;
@@ -102,10 +102,10 @@
     opacity: 0.8;
     cursor: pointer;
 }
-.carlin-tab-recorder-thumbnail button:hover {
+.ctab-recorder-thumbnail button:hover {
     opacity: 1.0;
 }
-.carlin-tab-recorder-thumbnail .closeButton {
+.ctab-recorder-thumbnail .closeButton {
     position: absolute;
     top: 0;
     right: 0;
@@ -114,7 +114,7 @@
     line-height: 0;
     margin: 2px 3px 0 0;
 }
-.carlin-tab-recorder-thumbnail .recordButton {
+.ctab-recorder-thumbnail .recordButton {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -125,14 +125,14 @@
     margin: 0;
     background: white url('chrome-extension://__MSG_@@extension_id__/images/media-record-8x.png') center center no-repeat;
 }
-.carlin-tab-recorder-thumbnail .recordButton.recording {
+.ctab-recorder-thumbnail .recordButton.recording {
     background: white url('chrome-extension://__MSG_@@extension_id__/images/media-stop-8x.png') center center no-repeat;
 }
-.carlin-tab-recorder-thumbnail .recordButton.processing {
+.ctab-recorder-thumbnail .recordButton.processing {
     background: white url('chrome-extension://__MSG_@@extension_id__/images/Preloader_10.gif') center center no-repeat;
     cursor: default;
 }
-.carlin-tab-recorder-thumbnail .downloadButton {
+.ctab-recorder-thumbnail .downloadButton {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -141,7 +141,7 @@
     background: #5bc0de url('chrome-extension://__MSG_@@extension_id__/images/data-transfer-download-2x.png') center center no-repeat;
     margin: 0 3px 4px 0;
 }
-.carlin-tab-recorder-thumbnail .createGifButton {
+.ctab-recorder-thumbnail .createGifButton {
     position: absolute;
     right: 23px;
     bottom: 0;
@@ -150,11 +150,17 @@
     background: #5bc0de url('chrome-extension://__MSG_@@extension_id__/images/layers-2x.png') center center no-repeat;
     margin: 0 3px 4px 0;
 }
-.carlin-tab-recorder-thumbnail progress {
-
+.ctab-recorder-thumbnail progress {
+    width: auto;
+    position: absolute;
+    top: -6px;
+    left: -2px;
+    right: -2px;
+    padding: 0;
+    margin: 0;
 }
 
-.carlin-tab-recorder-cursor {
+.ctab-recorder-cursor {
     width: 48px;    /* size of image */
     height: 48px;   /* size of image */
     position: absolute;
@@ -164,25 +170,25 @@
 }
 
 @media (min-width: 701px) and (max-width: 1000px) {
-    .carlin-tab-recorder-thumbnail {
+    .ctab-recorder-thumbnail {
         width: 24%;
     }
 }
 
 @media (min-width: 501px) and (max-width: 700px) {
-    .carlin-tab-recorder-thumbnail {
+    .ctab-recorder-thumbnail {
         width: 32%;
     }
 }
 
 @media (min-width: 301px) and (max-width: 500px) {
-    .carlin-tab-recorder-thumbnail {
+    .ctab-recorder-thumbnail {
         width: 47%;
     }
 }
 
 @media (max-width: 300px) {
-    .carlin-tab-recorder-thumbnail {
+    .ctab-recorder-thumbnail {
         width: 96%;
     }
 }

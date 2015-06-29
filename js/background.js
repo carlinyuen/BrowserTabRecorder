@@ -1,6 +1,7 @@
 /* Required: 
  *  js/third_party/whammy.js
  *  js/third_party/gifshot.min.js
+ *  js/constants.js
  *  js/videoRecorder.js
  */
 
@@ -8,6 +9,13 @@
 var MANIFEST = chrome.runtime.getManifest();     // Manifest reference
 console.log('Initializing Bug-Filer v' + MANIFEST.version, 
         chrome.i18n.getMessage('@@ui_locale'));
+ 
+// Custom log function
+function debugLog() {
+    if (DEBUG && console) {
+        console.log.apply(console, arguments);
+    }
+}
 
 // Variables
 var popupConnection = null              // Handle for port connection to popup
@@ -157,9 +165,7 @@ function sendMessageToActiveTab(message)
     console.log('sendMessageToActiveTab:', message);
 
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, message, function(response) {
-            console.log('response:', response);
-        });
+        chrome.tabs.sendMessage(tabs[0].id, message);
     });
 }
 
@@ -242,19 +248,19 @@ function captureTabVideo(senderTab)
         }
 
         // Get video dimensions
-        console.log('Tab dimensions:', senderTab.width, senderTab.height);
+        debugLog('Tab dimensions:', senderTab.width, senderTab.height);
         width = settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH;
         height = settings[KEY_STORAGE_VIDEO_HEIGHT] || DEFAULT_VIDEO_HEIGHT;
-        console.log('Video dimensions:', width, height);
+        debugLog('Video dimensions:', width, height);
 
         // Check if we need to match aspect ratio
         if (settings[KEY_STORAGE_ASPECT_RATIO]) 
         {
-            console.log('Adjusting aspect ratio...');
+            debugLog('Adjusting aspect ratio...');
             var fitSize = calculateAspectRatioFit(senderTab.width, senderTab.height, width, height);
             width = Math.ceil(fitSize.width);
             height = Math.ceil(fitSize.height);
-            console.log('New size:', width, height);
+            debugLog('New size:', width, height);
         }
 
         // Get video settings
@@ -278,7 +284,7 @@ function captureTabVideo(senderTab)
             }, 
             function (localMediaStream) 
             {
-                console.log('tabCapture:', localMediaStream);
+                debugLog('tabCapture:', localMediaStream);
 
                 // Send to active tab if capture was successful
                 if (localMediaStream)
@@ -438,18 +444,18 @@ function convertVideoToGif(videoData, senderTab)
         // Collect options
         var onComplete = videoData['onComplete'];
         var quality = settings[KEY_STORAGE_GIF_QUALITY] || DEFAULT_GIF_QUALITY;
-        console.log('quality:', quality);
+        debugLog('quality:', quality);
 
         // Don't allow greater frame rate than video, makes no sense anyway
         var frameRate = Math.min(DEFAULT_VIDEO_FRAME_RATE,
             (settings[KEY_STORAGE_GIF_FRAME_RATE] || DEFAULT_GIF_FRAME_RATE));
-        console.log('frame rate:', frameRate);
+        debugLog('frame rate:', frameRate);
 
         // Need to calculate numFrames ahead of time: numFrames == how long we want the
         //  GIF to be, however, if we change the frame interval, this doesn't change
         //  how long the GIF is. GIF length in seconds == numFrames * 0.1 (gifshot default).
         //  So we want to take total length of original video in frames.
-        var numFrames = Math.ceil((videoData.length / 0.1);
+        var numFrames = Math.ceil(videoData.length / 0.1);
 
         var options = {
             gifWidth: settings[KEY_STORAGE_VIDEO_WIDTH] || DEFAULT_VIDEO_WIDTH,
@@ -461,10 +467,10 @@ function convertVideoToGif(videoData, senderTab)
             numWorkers: 3,
             progressCallback: function (progress) 
             { 
-                console.log('GIF progress:', progress); 
+                debugLog('GIF progress:', progress); 
 
                 // Send progress report back to recorded tab
-                chrome.tabs.sendMessage(recordedTabID, {
+                chrome.tabs.sendMessage(senderTab.id, {
                     request: 'gifProgress',
                     progress: progress,
                 });
@@ -529,7 +535,7 @@ function formatDate(date)
 function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) 
 {
     var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
-    console.log('Aspect ratio:', ratio);
+    debugLog('Aspect ratio:', ratio);
     return { width: srcWidth * ratio, height: srcHeight * ratio };
 }
 
