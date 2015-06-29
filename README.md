@@ -13,6 +13,9 @@ Hope this is useful to someone out there; would love any help optimizing and imp
 
 
 ## Version History
+v1.0.1
+ - Minor fix for feedback / feature requeset links in options
+
 v1.0.0
  - First build!
  - Can take screenshots of the tab.
